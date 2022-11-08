@@ -58,17 +58,7 @@ class Input_file_parser():
         input_file.close()
 
         instance.precompute_all_pairs_shortest_paths()
-
-        for hotel in instance.get_list_of_hotels():
-            print(instance.get_nearest_hotel(hotel).get_id())
-            print(instance.get_nearest_customer(hotel).get_id())
- 
-
-
-
-                
-
-
+     
         return instance
 
     def _parse_hotels(self, input_file, instance, total_hotels, debug = False):

@@ -130,14 +130,14 @@ class Instance:
             quit()
 
         if vertex_a_index < self._hotel_max_index:
-            vertex_a_obj = self.get_hotel(vertex_a_index)
+            vertex_a_obj = self.get_hotel_per_index(vertex_a_index)
         else:
-            vertex_a_obj = self.get_customer(vertex_a_index)
+            vertex_a_obj = self.get_customer_per_index(vertex_a_index)
 
         if vertex_b_index < self._hotel_max_index:
-            vertex_b_obj = self.get_hotel(vertex_b_index)
+            vertex_b_obj = self.get_hotel_per_index(vertex_b_index)
         else:
-            vertex_b_obj = self.get_customer(vertex_b_index)
+            vertex_b_obj = self.get_customer_per_index(vertex_b_index)
 
         edge = Edge(vertex_a_obj, vertex_b_obj, weight)
 
@@ -156,10 +156,10 @@ class Instance:
     def get_number_of_customers(self):
         return self._customer_max_index + 1
 
-    def get_hotel(self, index):
+    def get_hotel_per_index(self, index):
         return self._hotels[index]
 
-    def get_customer(self, index):
+    def get_customer_per_index(self, index):
         return self._customers[index]
 
     def get_list_of_hotels(self):
@@ -232,7 +232,7 @@ class Instance:
                     paths_customers[index][index_b] = paths[index_b]
 
         
-            if debug or True:
+            if debug:
                 if self._index_is_hotel(index):
                     print("We created DS for Hotel with index: " + str(index))
                 else:
@@ -273,7 +273,7 @@ class Instance:
             self._paths_hotels = paths_hotels
             self._paths_customers = paths_customers
 
-    def distance(self, vertex_a, vertex_b):
+    def get_distance(self, vertex_a, vertex_b):
         """
         Precondition: precompute_all_pairs_shortest_paths must be called first.
         """
@@ -289,7 +289,7 @@ class Instance:
         """
 
         nearest_id = self._nearest_customers[vertex_a.get_id()][position]
-        return self.get_customer(nearest_id)
+        return self.get_customer_per_index(nearest_id)
 
     def get_nearest_hotel(self, vertex_a, position = 0):
         """
@@ -297,7 +297,11 @@ class Instance:
         """
 
         nearest_id = self._nearest_hotels[vertex_a.get_id()][position]
-        return self.get_hotel(nearest_id)
+        return self.get_hotel_per_index(nearest_id)
+
+    def obj_is_hotel(self, obj):
+        index = obj.get_id()
+        return self._index_is_hotel(index)
 
     def _index_is_hotel(self, index):
         if index < self._hotel_max_index:
@@ -307,8 +311,8 @@ class Instance:
 
     def _get_object_from_index(self, index):
         if self._index_is_hotel(index):
-            return self.get_hotel(vertex_b_index)
+            return self.get_hotel_per_index(vertex_b_index)
         else:
-            return self.get_customer(vertex_b_index)
+            return self.get_customer_per_index(vertex_b_index)
 
 
