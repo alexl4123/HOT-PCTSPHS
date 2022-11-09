@@ -34,7 +34,18 @@ class Solution:
 
         self._prize = 0
         self._trip_lengths = [0]
+        self._max_trip_length = 0    
+
         self._trips_size = 1
+
+        self._objective_value = 0
+
+        self._hotel_fees = 0
+
+        self._penalties = 0
+        for customer in instance.get_list_of_customers():
+            self._penalties = self._penalties + customer.get_penalty()
+
         # TODO -> Compute the evaluation function!
         
     def change_from_delta(self, delta):
@@ -59,21 +70,45 @@ class Solution:
                 old_right_trip = self._trips[trip_index]
                 old_right_trip_val = self._trip_lengths[trip_index]
 
+                old_trip_val = old_left_trip_val + old_right_trip_val
+
                 # ----- Recompute delta values (and constaint values) ----- 
-                self._trips_size = self._trips_size - 1
 
-                rm_d1 = self._instance.get_distance(old_left_trip[len(old_left_trip) - 1], obj)
-                rm_d2 = self._instance.get_distance(obj, old_right_trip[1])
+                if len(old_left_trip) == 0 and len(old_right_trip) == 0:
+                    rm_d1 = self._instance.get_distance(self._hotels[trip_index - 1], obj)
+                    rm_d2 = self._instance.get_distance(obj, self._hotels[trip_index + 1])
 
-                rm_a1 = self._instance.get_distance(old_left_trip[len(old_left_trip) - 1], old_right_trip[1])
+                    rm_a1 = self._instance.get_distance(self._hotels[trip_index - 1], self._hotels[trip_index + 1])
+                elif len(old_left_trip) > 0 and len(old_right_trip) == 0:
+                    rm_d1 = self._instance.get_distance(old_left_trip[len(old_left_trip) - 1], obj)
+                    rm_d2 = self._instance.get_distance(obj, self._hotels[trip_index + 1])
+
+                    rm_a1 = self._instance.get_distance(old_left_trip[len(old_left_trip) - 1],  self._hotels[trip_index + 1])
+                elif len(old_left_trip) == 0 and len(old_right_trip) > 0:   
+                    rm_d1 = self._instance.get_distance(self._hotels[trip_index - 1], obj)
+                    rm_d2 = self._instance.get_distance(obj, old_right_trip[1])
+
+                    rm_a1 = self._instance.get_distance(self._hotels[trip_index - 1], old_right_trip[0])
+                elif len(old_left_trip) > 0 and len(old_right_trip) > 0:
+                    rm_d1 = self._instance.get_distance(old_left_trip[len(old_left_trip) - 1], obj)
+                    rm_d2 = self._instance.get_distance(obj, old_right_trip[0])
+
+                    rm_a1 = self._instance.get_distance(old_left_trip[len(old_left_trip) - 1], old_right_trip[0])
 
                 # ----- Remove hotel and combine lists ----- 
                 self._hotels.pop(trip_index)
                 
                 new_trip = old_left_trip + old_right_trip # Concatenate lists
 
-                new_trip_val = old_left_trip_val + old_right_trip_val
-                self._trip_lengths[trip_index - 1] = new_trip_val - rm_d1 - rm_d2 + rm_a1
+                self._trips_size = self._trips_size - 1
+           
+                self._hotel_fees = self._hotel_fees - obj.get_fee() 
+                self._objective_value = self._objective_value - rm_d1 - rm_d2 + rm_a1 - obj.get_fee()
+                self._trip_lengths[trip_index - 1] = old_trip_val - rm_d1 - rm_d2 + rm_a1
+            
+                if (old_trip_val - rm_d1 - rm_d2 + rm_a1) > self._max_trip_length:
+                    self._max_trip_length = old_trip_val - rm_d1 - rm_d2 + rm_a1
+
                 self._trips[trip_index - 1] = new_trip
 
                 self._trip_lengths.pop(trip_index)
@@ -86,7 +121,8 @@ class Solution:
 
                 if trip_position_index < len(trip):
                     item = trip[trip_position_index]
-                    self._prize = self._prize - item.get_prize()
+
+                    old_trip_value = self._trip_lengths[trip_index]
 
                     if trip_position_index > 0:
                         rm_d1 = self._instance.get_distance(trip[trip_position_index - 1], obj)
@@ -109,12 +145,28 @@ class Solution:
                         rm_a1 = self._instance.get_distance(trip[trip_position_index - 1], self._hotels[trip_index])
 
 
-                    self._trip_lengths[trip_index] = self._trip_lengths[trip_index] - rm_d1 - rm_d2 + rm_a1
+                    self._prize = self._prize - item.get_prize()
+                    self._penalties = self._penalties + obj.get_penalty()
+
+                    self._objective_value = self._objective_value - rm_d1 - rm_d2 + rm_a1 + obj.get_penalty()
+                    self._trip_lengths[trip_index] = old_trip_value - rm_d1 - rm_d2 + rm_a1
+
+                    if (old_trip_value - rm_d1 - rm_d2 + rm_a1) > self._max_trip_length:
+                        self._max_trip_length = old_trip_value - rm_d1 - rm_d2 + rm_a1
+
+
             
                     trip.pop(trip_position_index)
 
                 else:
                     print("Cannot remove, due to index out of bounds for obj: " + str(obj.get_id()))
+
+
+        # ------------------------------------------------------------------------------------
+        # ------------------------------------------------------------------------------------
+        # ----------------------------- ADDS -------------------------------------------------
+        # ------------------------------------------------------------------------------------
+        # ------------------------------------------------------------------------------------
 
         adds = delta.get_adds()
         for add in adds: # add:(obj=customer/hotel, trip_index, trip_position_index)
@@ -128,7 +180,6 @@ class Solution:
                 new_right = old_trip[trip_position_index:]
             
                 # One additional trip
-                self._trips_size = self._trips_size + 1
 
 
                 # ----------------------------------- RECALC - TRIP - VALUES - BEGIN --------------------
@@ -196,12 +247,22 @@ class Solution:
 
                 # Ctd. adding hotel
 
+                self._trips_size = self._trips_size + 1
+
                 self._trips[trip_index] = new_left
                 self._trips.insert(trip_index + 1, new_right)
                 self._trip_lengths[trip_index] = new_left_val
                 self._trip_lengths.insert(trip_index + 1, new_right_val)
+                self._hotel_fees = self._hotel_fees + obj.get_fee() 
 
-                # Prize doesn't change 
+                self._objective_value = self._objective_value - old_trip_value + new_left_val + new_right_val + obj.get_fee()
+
+                if new_left_val >= new_right_val and new_left_val > self._max_trip_length:
+                        self._max_trip_length = new_left_val
+                elif new_right_val > new_left_val and new_right_val > self._max_trip_length:
+                        self._max_trip_length = new_right_val
+
+                # Prize (i.e. customers) doesn't change 
 
                 self._hotels.insert(trip_index + 1, obj)
             else:
@@ -209,27 +270,32 @@ class Solution:
                 trip = self._trips[trip_index]
 
                 if trip_position_index <= len(trip):
-                    self._prize = self._prize + obj.get_prize()
+
+                    cur_trip_value = self._trip_lengths[trip_index]
+                    old_trip_value = cur_trip_value
 
                     # Recalc trip value
                     if len(trip) == 0:
                         cur_trip_value = self._instance.get_distance(self._hotels[trip_index - 1], obj) + self._instance.get_distance(obj, self._hotels[trip_index])
-                    elif trip_position_index == 0:
-                        cur_trip_value = self._trip_lengths[trip_index]
 
+                    elif trip_position_index == 0:
                         cur_trip_value = cur_trip_value - self._instance.get_distance(self._hotels[trip_index - 1], trip[0]) + self._instance.get_distance(self._hotels[trip_index - 1], obj) + self._instance.get_distance(obj, trip[0])
     
                     elif trip_position_index >= (len(trip) - 1):
-                        cur_trip_value = self._trip_lengths[trip_index]
-
                         cur_trip_value = cur_trip_value - self._instance.get_distance(trip[len(trip) - 1], self._hotels[trip_index]) + self._instance.get_distance(trip[len(trip) - 1], obj) + self._instance.get_distance(obj, self._hotels[trip_index])
 
                     elif trip_position_index > 0 and trip_position_index < (len(trip) - 1):
-                        cur_trip_value = self._trip_lengths[trip_index]
                         cur_trip_value = cur_trip_value - self._instance.get_distance(trip[trip_position_index - 1], trip[trip_position_index]) + self._instance.get_distance(trip[trip_position_index - 1], obj) + self._instance.get_distance(obj, trip[trip_position_index])
 
 
+                    self._penalties = self._penalties - obj.get_penalty()
+                    self._objective_value = self._objective_value + cur_trip_value - old_trip_value - obj.get_penalty()
                     self._trip_lengths[trip_index] = cur_trip_value
+
+                    if cur_trip_value > self._max_trip_length:
+                        self._max_trip_length = cur_trip_value
+
+                    self._prize = self._prize + obj.get_prize()
 
                     trip.insert(trip_position_index, obj)
                 else:
@@ -237,7 +303,17 @@ class Solution:
         
                 
                 
-            
+    def get_objective_value(self):
+        return self._objective_value
+
+    def get_max_trip_length(self):
+        return self._max_trip_length
+
+    def get_number_of_trips(self):
+        return self._trips_size
+
+    def get_prize(self):
+        return self._prize
     
 
     
