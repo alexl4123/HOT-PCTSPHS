@@ -57,7 +57,8 @@ class Input_file_parser():
 
         input_file.close()
 
-        instance.precompute_all_pairs_shortest_paths()
+        #instance.precompute_all_pairs_shortest_paths()
+        instance.precompute_all_nearest_neighbors()
      
         return instance
 

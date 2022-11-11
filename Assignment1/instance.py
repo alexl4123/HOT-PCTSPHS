@@ -7,6 +7,7 @@ import logging
 
 import networkx as nx
 import matplotlib.pyplot as plt
+import collections
 
 
 from constants import logger_name
@@ -81,16 +82,12 @@ class Instance:
 
         self._graph = nx.Graph()
 
-        self._nearest_hotels = None
-        self._nearest_customers = None
-    
-        self._dist_hotels = None
-        self._dist_customers = None
+        self._edge_lookup = {}
 
-        self._paths_hotels = None
-        self._paths_customers = None
-
-
+        self._nearest_neighbors = {}
+        self._nearest_hotels = {}
+        self._nearest_customers = {}
+        
     def add_hotel(self, fee):
 
         if self._customers or self._edges:
@@ -100,6 +97,10 @@ class Instance:
         new_hotel_index = self._hotel_max_index
     
         hotel = Hotel(new_hotel_index, fee)
+
+        self._edge_lookup[hotel.get_id()] = {}
+        self._edge_lookup[hotel.get_id()][hotel.get_id()] = Edge(hotel, hotel, 0)
+
         self._hotels[new_hotel_index] = hotel
         self._hotels_list.append(hotel)
         self._graph.add_node(new_hotel_index)
@@ -116,6 +117,8 @@ class Instance:
         new_customer_index = new_max_customer_index + self._hotel_max_index
         
         customer = Customer(new_customer_index, prize, penalty)
+
+        self._edge_lookup[customer.get_id()] = {}
 
         self._customers[new_customer_index] = customer
         self._customers_list.append(customer)
@@ -142,6 +145,9 @@ class Instance:
         edge = Edge(vertex_a_obj, vertex_b_obj, weight)
 
         new_max_edges_index = self._edges_max_index
+
+        self._edge_lookup[vertex_a_obj.get_id()][vertex_b_obj.get_id()] = edge
+        self._edge_lookup[vertex_b_obj.get_id()][vertex_a_obj.get_id()] = edge
 
         self._edges[new_max_edges_index] = edge
         self._edges_list.append(edge)
@@ -186,102 +192,52 @@ class Instance:
         weights = nx.get_edge_attributes(self._graph, 'weight')
         nx.draw_networkx_edge_labels(self._graph, pos, edge_labels=weights)
 
-    def precompute_all_pairs_shortest_paths(self, debug = False):
-        """
-        Computes all pairs shortest paths and further arranges the result in datastructures, such that there is a differentiation between hotels and customers.
-        Further it precomputes all nearests neighbors.
 
-        The runtime complexity should mainly be determined by the all_paris_dijkstra function, the rest runs in about O(n^2), where n is |V|, i.e. the amount of vertices.
-        """
+    def precompute_all_nearest_neighbors(self, debug = False):
 
-        # This line computes all pairs shortest paths
-        shortest_path_dict = dict(nx.all_pairs_dijkstra(self._graph))
-
+        nearest_neighbors = {}
         nearest_hotels = {}
         nearest_customers = {}
-        
-        dist_hotels = {}
-        dist_customers = {}
 
-        paths_hotels = {}
-        paths_customers = {}
+        for key in self._edge_lookup.keys():
+            ds = self._edge_lookup[key]
 
-        for index in shortest_path_dict.keys():
-            (distances, paths) = shortest_path_dict[index]
-
-            nearest_hotels[index] = []
-            nearest_customers[index] = []
-
-            dist_hotels[index] = {}
-            dist_customers[index] = {}
-
-            paths_hotels[index] = {}
-            paths_customers[index] = {}
-
-            for index_b in distances.keys():
-                if index == index_b:
-                    continue
-                elif self._index_is_hotel(index_b):
-                    nearest_hotels[index].append(index_b)
-                    dist_hotels[index][index_b] = distances[index_b]
-                    paths_hotels[index][index_b] = paths[index_b]
-
-                else:
-                    nearest_customers[index].append(index_b)
-                    dist_customers[index][index_b] = distances[index_b]
-                    paths_customers[index][index_b] = paths[index_b]
-
-        
-            if debug:
-                if self._index_is_hotel(index):
-                    print("We created DS for Hotel with index: " + str(index))
-                else:
-                    print("We created DS for Customer with index: " + str(index))
-                     
-                print(nearest_hotels[index])
-                print(nearest_customers[index])
-
-                print(dist_hotels[index])
-                print(dist_customers[index])
-
-                print(paths_hotels[index])
-                print(paths_customers[index])
-
+            obj = self._get_object_from_index(key)
             
-            # TODO sanity check -> can be removed if it works:
-            for nearest_index in range(1, len(nearest_hotels[index]) - 1):
-                nearest_index_1 = nearest_hotels[index][nearest_index]
-                nearest_index_2 = nearest_hotels[index][nearest_index -1]
+            sorted_by_value = sorted(ds.items(), key=lambda item: item[1].get_weight())
 
-                if dist_hotels[index][nearest_index_2] > dist_hotels[index][nearest_index_1]:
-                    print("ERROR - for index " + str(index) + " it holds that the nearest neighbors (HOTELS) are not sorted!")
-                    quit()
-            for nearest_index in range(1, len(nearest_customers[index]) - 1):
-                nearest_index_1 = nearest_customers[index][nearest_index]
-                nearest_index_2 = nearest_customers[index][nearest_index -1]
+            nearest = []
+            nc_c = []
+            nc_h = []
 
-                if dist_customers[index][nearest_index_2] > dist_customers[index][nearest_index_1]:
-                    print("ERROR - for index " + str(index) + " it holds that the nearest neighbors (CUSTOMERS) are not sorted!")
-                    quit()   
+            for (key_2,edge) in sorted_by_value:
+                
+                obj_2 = self._get_object_from_index(key_2)
 
-            self._nearest_hotels = nearest_hotels
-            self._nearest_customers = nearest_customers
-        
-            self._dist_hotels = dist_hotels
-            self._dist_customers = dist_customers
+                nearest.append(obj_2)
 
-            self._paths_hotels = paths_hotels
-            self._paths_customers = paths_customers
+                if self._index_is_hotel(key_2):
+                    nc_h.append(obj_2)
+                else:
+                    nc_c.append(obj_2)
+
+        self._nearest_neighbors = nearest_neighbors
+        self._nearest_hotels = nearest_hotels
+        self._nearest_customers = nearest_customers
 
     def get_distance(self, vertex_a, vertex_b):
         """
         Precondition: precompute_all_pairs_shortest_paths must be called first.
         """
 
+        return (self._edge_lookup[vertex_a.get_id()][vertex_b.get_id()]).get_weight()
+
+        """
         if self._index_is_hotel(vertex_b.get_id()):
             return self._dist_hotels[vertex_a.get_id()][vertex_b.get_id()]
         else:
             return self._dist_customers[vertex_a.get_id()][vertex_b.get_id()]
+        """
 
     def get_nearest_customer(self, vertex_a, position = 0):
         """
@@ -311,8 +267,8 @@ class Instance:
 
     def _get_object_from_index(self, index):
         if self._index_is_hotel(index):
-            return self.get_hotel_per_index(vertex_b_index)
+            return self.get_hotel_per_index(index)
         else:
-            return self.get_customer_per_index(vertex_b_index)
+            return self.get_customer_per_index(index)
 
 
