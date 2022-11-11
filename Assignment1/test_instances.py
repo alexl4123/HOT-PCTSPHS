@@ -12,6 +12,7 @@ class Tester:
         self._instance = instance
 
 
+
     def trips_printer(self, trips):
         string = "["
         for trip in trips:

@@ -4,6 +4,9 @@ import logging
 from constants import logger_name
 from load_and_parse import Input_file_parser
 from solution import Solution, Delta
+from local_search import Local_Search, Step_Function_Type
+from initialization_procedure import Initialization_Procedure
+from neighborhood import Neighborhood
 
 from test_instances import Tester
 
@@ -20,10 +23,19 @@ else:
 args = sys.argv
 file_name = args[1]
 
-
-
 my_object = Input_file_parser(file_name)
 instance = my_object.load_and_parse_input_file()
+instance.precompute_all_nearest_neighbors()
+
+
+initialization_procedure = Initialization_Procedure(instance)
+neighborhood = Neighborhood(instance)
+
+search_alg = Local_Search(instance)
+result = search_alg.start_search(initialization_procedure, Step_Function_Type.FIRST, neighborhood)
+
+print("Trace of objective values: " + str(result.get_trace()))
+print(result.get_best_solution().to_string())
 
 
 #tester = Tester(instance)

@@ -24,6 +24,7 @@ class Delta:
 
 class Solution:
 
+
     def __init__(self, instance):
 
         self._instance = instance
@@ -336,7 +337,31 @@ class Solution:
 
     def get_prize(self):
         return self._prize
-    
+ 
+    def to_string(self):
+        string = "[0,"
+
+        for index in range(0, self._trips_size):
+            trip = self._trips[index]
+
+            string = string + "["
+            for index_2 in range(0, len(trip)):
+                obj = trip[index_2]
+                if index_2 < (len(trip) - 1):
+                    string = string + str(obj.get_id()) + "-"
+                else:
+                    string = string + str(obj.get_id())
+
+            string = string + "],"
+
+            if index < (self._trips_size - 1):
+                string = string + str(self._hotels[index + 1].get_id()) + ","
+            else:
+                string = string + str(self._hotels[index + 1].get_id()) + "]"
+
+        return string
+
+   
 
     
 
