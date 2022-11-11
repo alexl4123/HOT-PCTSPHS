@@ -73,7 +73,7 @@ class Solution:
 
         self._trips = []
         self._trips.insert(0, [])
-        self._hotels = [instance.get_hotel_per_index(0), instance.get_hotel_per_index(0)]
+        self._hotels = [self._instance.get_hotel_per_index(0),self._instance.get_hotel_per_index(0)]
 
         self._prize = 0
         self._trip_lengths = [0]
@@ -90,6 +90,8 @@ class Solution:
             self._penalties = self._penalties + customer.get_penalty()
 
         self._objective_value = self._sum_of_trips + self._hotel_fees + self._penalties
+
+        self._is_customer_served = {}
 
     def change_from_delta(self, delta):
         """
@@ -267,6 +269,9 @@ class Solution:
 
             self._objective_value = objective_value
 
+            del self._is_customer_served[obj]
+
+
         else:
             print("Cannot remove, due to index out of bounds for obj: " + str(obj.get_id()))
 
@@ -309,7 +314,7 @@ class Solution:
         # TODO: In O(n)!!!
         elif len(new_right) > 0 and len(new_right) < len(new_left) and len(new_left) > 0:
 
-            new_right_val = self._instance.get_distance(new_right_val[len(new_right) - 1], self._hotels[trip_index + 1])
+            new_right_val = self._instance.get_distance(new_right[len(new_right) - 1], self._hotels[trip_index + 1])
 
             for customer_index in range(1, len(new_right) - 1):
                 customer_prev = new_left[customer_index - 1]
@@ -421,6 +426,8 @@ class Solution:
 
             self._objective_value = objective_value
 
+            self._is_customer_served[obj] = True
+
         else:
             logger.error("Cannot insert, due to index out of bounds for obj: " + str(obj.get_id()) + " and trip index: " + str(trip_index) + " and trip index position " + str(trip_position_index))
 
@@ -438,6 +445,39 @@ class Solution:
 
     def get_prize(self):
         return self._prize
+
+    def is_customer_served(self, customer):
+        if customer in self._is_customer_served and self._is_customer_served[customer]:
+            return True
+        else:
+            return False
+
+    def is_c3_satisfied(self):
+        if self._prize >= self._instance.get_C3():
+            return True
+        else:
+            return False
+
+    def is_c2_satisfied(self):
+        if self._trips_size <= self._instance.get_C2():
+            return True
+        else:
+            return False
+
+    def is_c1_satisfied(self):
+        if self._max_trip_length <= self._instance.get_C1():
+            return True
+        else:
+            return False
+
+    def get_nearest_unserved_customer(self, location):
+        for nearest in self._instance.get_all_nearest_customers(location):
+            if not self.is_customer_served(nearest) and self._instance.get_distance(location, nearest) > 0:
+                return nearest
+
+        logger.critical("Ran out of nearest unserved customers! May never happen!")
+        quit()
+
  
     def to_string(self):
         string = "[0,"
@@ -463,20 +503,24 @@ class Solution:
         return string
 
    
+    def clone(self):
+        solution = Solution(self._instance)
 
-    
+        solution._trips = self._trips
+        solution._hotels = self._hotels
 
+        solution._prize = self._prize
+        solution._trip_lengths = self._trip_lengths.copy()
+        solution._max_trip_length = self._max_trip_length
+        solution._trips_size = self._trips_size
 
+        solution._sum_of_trips = self._sum_of_trips 
+        solution._hotel_fees = self._hotel_fees
+        solution._penalties = self._penalties
+        solution._objective_value = self._objective_value
+        solution._is_customer_served = self._is_customer_served.copy()
 
-
-
-
-
-
-
-
-
-
+        return solution
 
 
 

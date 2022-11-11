@@ -119,6 +119,7 @@ class Instance:
         customer = Customer(new_customer_index, prize, penalty)
 
         self._edge_lookup[customer.get_id()] = {}
+        self._edge_lookup[customer.get_id()][customer.get_id()] = Edge(customer, customer, 0)
 
         self._customers[new_customer_index] = customer
         self._customers_list.append(customer)
@@ -221,6 +222,10 @@ class Instance:
                 else:
                     nc_c.append(obj_2)
 
+            nearest_neighbors[key] = nearest
+            nearest_hotels[key] = nc_h
+            nearest_customers[key] = nc_c
+
         self._nearest_neighbors = nearest_neighbors
         self._nearest_hotels = nearest_hotels
         self._nearest_customers = nearest_customers
@@ -239,21 +244,22 @@ class Instance:
             return self._dist_customers[vertex_a.get_id()][vertex_b.get_id()]
         """
 
+    def get_all_nearest_customers(self, vertex_a):
+        return self._nearest_customers[vertex_a.get_id()]
+
     def get_nearest_customer(self, vertex_a, position = 0):
         """
         Precondition: precompute_all_pairs_shortest_paths must be called first.
         """
 
-        nearest_id = self._nearest_customers[vertex_a.get_id()][position]
-        return self.get_customer_per_index(nearest_id)
+        return self._nearest_customers[vertex_a.get_id()][position]
 
     def get_nearest_hotel(self, vertex_a, position = 0):
         """
         Precondition: precompute_all_pairs_shortest_paths must be called first.
         """
 
-        nearest_id = self._nearest_hotels[vertex_a.get_id()][position]
-        return self.get_hotel_per_index(nearest_id)
+        return self._nearest_hotels[vertex_a.get_id()][position]
 
     def obj_is_hotel(self, obj):
         index = obj.get_id()
@@ -285,11 +291,25 @@ class Instance:
         for customer in self._customers_list:
             total_prize = total_prize + customer.get_prize()
 
-            if total_prize > self._C3_P:
+            if total_prize >= self._C3_P:
                 check_C3 = False
 
 
+        print(check_C1)
+        print(check_C2)
+        print(check_C3)
+
         return check_C1 or check_C2 or check_C3
+
+
+    def get_C1(self):
+        return self._C1_L
+
+    def get_C2(self):
+        return self._C2_D
+
+    def get_C3(self):
+        return self._C3_P
 
     def _index_is_hotel(self, index):
         if index < self._hotel_max_index:
@@ -302,5 +322,8 @@ class Instance:
             return self.get_hotel_per_index(index)
         else:
             return self.get_customer_per_index(index)
+
+
+
 
 

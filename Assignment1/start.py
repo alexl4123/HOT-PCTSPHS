@@ -5,7 +5,7 @@ from constants import logger_name
 from load_and_parse import Input_file_parser
 from solution import Solution, Delta
 from local_search import Local_Search, Step_Function_Type
-from initialization_procedure import Initialization_Procedure
+from heuristic_2 import Deterministic_Greedy_Initialization
 from neighborhood import Neighborhood
 
 from test_instances import Tester
@@ -36,7 +36,7 @@ if instance.is_instance_not_computable():
     quit()
 
 
-initialization_procedure = Initialization_Procedure(instance)
+initialization_procedure = Deterministic_Greedy_Initialization(instance)
 neighborhood = Neighborhood(instance)
 
 search_alg = Local_Search(instance)
