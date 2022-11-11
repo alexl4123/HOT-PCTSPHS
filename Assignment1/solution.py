@@ -10,16 +10,12 @@ class Delta:
     def __init__(self, removes, adds):
         self._adds = adds
         self._removes = removes
-        self._objective_value = -1
 
     def get_adds(self):
         return self._adds
 
     def get_removes(self):
         return self._removes
-
-    def set_objective_value(self, value):
-        self._objective_value = value
 
     def add_add(self, add):
         self._adds.append(add)
@@ -41,11 +37,12 @@ class Delta:
         return string
 
 class Solution_Worthiness:
-    def __init__(self, objective_value, max_trip_duration, performed_trips, collected_prizes, reverse_delta):
+    def __init__(self, objective_value, max_trip_duration, performed_trips, collected_prizes, delta, reverse_delta):
         self._objective_value = objective_value
         self._max_trip_duration = max_trip_duration
         self._performed_trips = performed_trips
         self._collected_prizes = collected_prizes
+        self._delta = delta
         self._reverse_delta = reverse_delta
 
     def get_objective_value(self):
@@ -59,6 +56,9 @@ class Solution_Worthiness:
 
     def get_collected_prizes(self):
         return self._collected_prizes
+
+    def get_delta(self):
+        return self._delta
 
     def get_reverse_delta(self):
         return self._reverse_delta
@@ -120,7 +120,7 @@ class Solution:
             else:
                 self._add_customer(obj, trip_index, trip_position_index, reverse_delta)
 
-        return Solution_Worthiness(self._objective_value, self._max_trip_length, self._trips_size, self._prize, reverse_delta)
+        return Solution_Worthiness(self._objective_value, self._max_trip_length, self._trips_size, self._prize, delta, reverse_delta)
  
     def calculate_max_trip_length(self, new_value, old_trip_value, skipped_indexes):
         max_trip_length = self._max_trip_length

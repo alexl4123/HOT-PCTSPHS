@@ -1,6 +1,6 @@
 import random
 
-from solution import Delta
+from solution import Delta, Solution_Worthiness
 from algorithm import Algorithm, Algorithm_Result
 
 from enum import Enum
@@ -13,62 +13,58 @@ class Local_Search(Algorithm):
 
     def start_search(self, initialization_procedure, step_function_type, neighborhood, termination_criterion = 10):
 
-        current_solution = initialization_procedure.create_solution()
-        current_objective_value = current_solution.get_objective_value()
+        solution = initialization_procedure.create_solution()
+        current_best_worthiness = Solution_Worthiness(solution.get_objective_value(), solution.get_max_trip_length(), solution.get_number_of_trips(), solution.get_prize(), Delta([],[]), Delta([],[]))
 
         trace = []
-        trace.append(current_solution.get_objective_value())
+        trace.append(solution.get_objective_value())
 
         step = 0
 
         while step < termination_criterion:
-            (new_solution, reverse_delta) = self._step_function(neighborhood, current_solution, step_function_type)
-
-            if not (new_solution.get_objective_value() < current_objective_value):
-                # If it is not better, then go back
-                new_solution.change_from_delta(reverse_delta)
-
+            new_worthiness = self._step_function(neighborhood, solution, step_function_type)
             
-            trace.append(current_solution.get_objective_value())
+
+            if not (new_worthiness.get_objective_value() > current_best_worthiness.get_objective_value()):
+                # If it is not better, then go back
+                solution.change_from_delta(new_worthiness.get_reverse_delta())
+            else:
+                current_best_worthiness = new_worthiness
+            
+            trace.append(current_best_worthiness.get_objective_value())
+            
             step = step + 1
 
-        return Algorithm_Result(new_solution, trace)
+        return Algorithm_Result(solution, trace)
 
 
 
 
     def _step_function(self, neighborhood, solution, step_function_type):
+
         if step_function_type == Step_Function_Type.RANDOM:
             k = random.randint(0, neighborhood.get_number_possible_solutions() - 1)
-            (new_solution, delta, reverse_delta) = neighborhood.calc_solution(solution, k)
+            return neighborhood.calc_solution(solution, k)
 
-            return (new_solution, reverse_delta)
         else:
             current_solution = solution
-            current_value = solution.get_objective_value()
-            best_delta = Delta([],[])
-            best_reverse_delta = Delta([],[])
+            current_worthiness = Solution_Worthiness(solution.get_objective_value(), solution.get_max_trip_length(), solution.get_number_of_trips(), solution.get_prize(), Delta([],[]), Delta([],[]))
 
             k = 0
             while k < neighborhood.get_number_possible_solutions():
-                (new_solution, delta, reverse_delta) = neighborhood.calc_solution(solution, k)
+                new_worthiness = neighborhood.calc_solution(solution, k)
 
-                """
-                if new_solution.get_objective_value() < current_value and step_function_type == Step_Function_Type.FIRST:
-                    return (new_solution, reverse_delta)
-                elif 
+                if new_worthiness.get_objective_value() < current_worthiness.get_objective_value() and step_function_type == Step_Function_Type.FIRST:
+                    return new_worthiness
+                elif new_worthiness.get_objective_value() < current_worthiness.get_objective_value():
+                    current_worthiness = new_worthiness
 
-
-                if                     current_solution = new_solution
-
-                    if 
-                """
+                solution.change_from_delta(new_worthiness.get_reverse_delta())
 
                 k = k + 1
 
-
-
-            return (current_solution, best_reverse_delta)
+            solution.change_from_delta(current_worthiness.get_delta())
+            return current_worthiness
 
 
             

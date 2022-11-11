@@ -1,4 +1,4 @@
-from solution import Delta
+from solution import Delta, Solution_Worthiness
 
 class Neighborhood:
 
@@ -9,4 +9,4 @@ class Neighborhood:
         return 0
 
     def calc_solution(self, base_solution, permutation_index):
-        return (base_solution, Delta([],[]))
+        return Solution_Worthiness(solution.get_objective_value(), solution.get_max_trip_length(), solution.get_number_of_trips(), solution.get_prize(), Delta([],[]), Delta([],[]))

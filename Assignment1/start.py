@@ -36,7 +36,6 @@ if instance.is_instance_not_computable():
     quit()
 
 
-"""
 initialization_procedure = Initialization_Procedure(instance)
 neighborhood = Neighborhood(instance)
 
@@ -45,11 +44,10 @@ result = search_alg.start_search(initialization_procedure, Step_Function_Type.FI
 
 logger.info("Trace of objective values: " + str(result.get_trace()))
 logger.info(result.get_best_solution().to_string())
-"""
 
 
-tester = Tester(instance)
-tester.test_solution_class()
+#tester = Tester(instance)
+#tester.test_solution_class()
 
 
 """
