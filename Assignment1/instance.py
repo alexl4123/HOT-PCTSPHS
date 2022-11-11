@@ -259,6 +259,38 @@ class Instance:
         index = obj.get_id()
         return self._index_is_hotel(index)
 
+    def is_instance_not_computable(self):
+        """
+        An instance is only computable, if it can satisfy all three constraints. This method defines and checks one necessary condition for each constraint.
+        """
+
+        check_C1 = True
+
+        # C1: Simple check (at least one edge-weight must be smaller than L)
+        for edge in self._edges_list:
+            if edge.get_weight() < self._C1_L:
+                check_C1 = False
+                break
+
+        # C2: D > 0 must hold
+        check_C2 = True
+
+        if self._C2_D > 0:
+            check_C2 = False
+
+        # C3: The sum of all prizes must be at least P
+        check_C3 = True
+
+        total_prize = 0
+        for customer in self._customers_list:
+            total_prize = total_prize + customer.get_prize()
+
+            if total_prize > self._C3_P:
+                check_C3 = False
+
+
+        return check_C1 or check_C2 or check_C3
+
     def _index_is_hotel(self, index):
         if index < self._hotel_max_index:
             return True

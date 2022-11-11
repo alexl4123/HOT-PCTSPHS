@@ -37,7 +37,13 @@ class Tester:
 
     def _mini_test(self, solution, removes, adds, should_objective_value, should_max_trip_length, should_number_of_trips, should_prize):
         my_delta = Delta(removes, adds)
-        solution.change_from_delta(my_delta)
+
+        prev_obj_val = solution.get_objective_value()
+        prev_max_trip_length = solution.get_max_trip_length()
+        prev_number_of_trips = solution.get_number_of_trips()
+        prev_prize = solution.get_prize()
+
+        reverse_delta = solution.change_from_delta(my_delta)
 
         works = True
 
@@ -64,6 +70,46 @@ class Tester:
 
         self.trips_printer(solution._trips)
         self.hotels_printer(solution._hotels)
+
+        # ------ TESTS REVERSE ---------
+
+        reverse_reverse = solution.change_from_delta(reverse_delta.get_reverse_delta())
+
+        if solution.get_objective_value() != prev_obj_val:
+            logger.error("REVERSE: Should and Is objective_value do not correspond: SHOULD: " + str(should_objective_value) + " IS:" + str(solution.get_objective_value()))
+            works = False
+
+        if solution.get_max_trip_length() != prev_max_trip_length:
+            logger.error("REVERSE: Should and Is max_trip_length do not correspond: SHOULD: " + str(should_max_trip_length) + " IS:" + str(solution.get_max_trip_length()))
+            works = False
+
+        if solution.get_number_of_trips() != prev_number_of_trips:
+            logger.error("REVERSE: Should and Is number_of_trips do not correspond: SHOULD: " + str(should_number_of_trips) + " IS:" + str(solution.get_number_of_trips()))
+            works = False
+
+        if solution.get_prize() != prev_prize:
+            logger.error("REVERSE: Should and Is prize do not correspond: SHOULD: " + str(should_prize) + " IS:" + str(solution.get_prize()))
+            works = False
+
+        # -------- TESTS REVERSE REVERSE ----------
+
+        solution.change_from_delta(reverse_reverse.get_reverse_delta())
+
+        if solution.get_objective_value() != should_objective_value:
+            logger.error("Should and Is objective_value do not correspond: SHOULD: " + str(should_objective_value) + " IS:" + str(solution.get_objective_value()))
+            works = False
+
+        if solution.get_max_trip_length() != should_max_trip_length:
+            logger.error("Should and Is max_trip_length do not correspond: SHOULD: " + str(should_max_trip_length) + " IS:" + str(solution.get_max_trip_length()))
+            works = False
+
+        if solution.get_number_of_trips() != should_number_of_trips:
+            logger.error("Should and Is number_of_trips do not correspond: SHOULD: " + str(should_number_of_trips) + " IS:" + str(solution.get_number_of_trips()))
+            works = False
+
+        if solution.get_prize() != should_prize:
+            logger.error("Should and Is prize do not correspond: SHOULD: " + str(should_prize) + " IS:" + str(solution.get_prize()))
+            works = False
 
         return works
 

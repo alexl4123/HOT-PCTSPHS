@@ -11,14 +11,18 @@ from neighborhood import Neighborhood
 from test_instances import Tester
 
 logger = logging.getLogger(logger_name)
+logger.setLevel(logging.DEBUG)
+handler = logging.StreamHandler(sys.stdout)
+formatter = logging.Formatter("[%(levelname)s][%(asctime)s] %(message)s")
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
 
 argv = len(sys.argv)
 
 if argv != 2:
     logger.critical("LOL")
     quit()
-else:
-    logger.info("ZZZ")
 
 args = sys.argv
 file_name = args[1]
@@ -27,19 +31,25 @@ my_object = Input_file_parser(file_name)
 instance = my_object.load_and_parse_input_file()
 instance.precompute_all_nearest_neighbors()
 
+if instance.is_instance_not_computable():
+    logger.error("The given instance is not computable according to the necessary constraints!")
+    quit()
 
+
+"""
 initialization_procedure = Initialization_Procedure(instance)
 neighborhood = Neighborhood(instance)
 
 search_alg = Local_Search(instance)
 result = search_alg.start_search(initialization_procedure, Step_Function_Type.FIRST, neighborhood)
 
-print("Trace of objective values: " + str(result.get_trace()))
-print(result.get_best_solution().to_string())
+logger.info("Trace of objective values: " + str(result.get_trace()))
+logger.info(result.get_best_solution().to_string())
+"""
 
 
-#tester = Tester(instance)
-#tester.test_solution_class()
+tester = Tester(instance)
+tester.test_solution_class()
 
 
 """

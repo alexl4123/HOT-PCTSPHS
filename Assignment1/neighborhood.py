@@ -1,3 +1,4 @@
+from solution import Delta
 
 class Neighborhood:
 
@@ -8,4 +9,4 @@ class Neighborhood:
         return 0
 
     def calc_solution(self, base_solution, permutation_index):
-        return base_solution
+        return (base_solution, Delta([],[]))
