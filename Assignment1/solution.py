@@ -5,34 +5,74 @@ from constants import logger_name
 
 logger = logging.getLogger(logger_name)
 
+class Operation:
+
+    def to_string(self):
+        return ""
+
+class Add(Operation):
+
+    def __init__(self, obj, trip_index, trip_index_position):
+        self._obj = obj
+        self._trip_index = trip_index
+        self._trip_index_position = trip_index_position
+
+    def get_operation(self):
+        return (self._obj, self._trip_index, self._trip_index_position)
+
+    def to_string(self):
+        string = "(ADD:" + str(obj.get_id()) + "," + str(self._trip_index) + "," + str(self._trip_index_position) + ")"
+
+class Remove(Operation):
+
+    def __init__(self, obj, trip_index, trip_index_position):
+        self._obj = obj
+        self._trip_index = trip_index
+        self._trip_index_position = trip_index_position
+
+    def get_operation(self):
+        return (self._obj, self._trip_index, self._trip_index_position)
+
+    def to_string(self):
+        string = "(REMOVE:" + str(obj.get_id()) + "," + str(self._trip_index) + "," + str(self._trip_index_position) + ")"
+
+
+class Reverse(Operation):
+
+    def __init__(self, obj_1, start_trip_index, start_trip_index_position, obj_2, end_trip_index, end_trip_index_position):
+        self._obj_1 = obj_1
+        self._start_trip_index = start_trip_index
+        self._start_trip_index_position = start_trip_index_position
+        self._obj_2 = obj_2
+        self._end_trip_index = end_trip_index
+        self._end_trip_index_position = end_trip_index_position
+
+
+    def get_operation(self):
+        return (self._obj_1, self._start_trip_index, self._start_trip_index_position, self._obj_2, self._end_trip_index, self._end_trip_index_position)
+
+
+    def to_string(self):
+        string = "(REVERSE:" + str(self._obj_1.get_id()) + "," + str(self._start_trip_index) + "," + str(self._start_trip_index_position) + "," + str(self._obj_2.get_id()) + "," + str(self._end_trip_index) + "," + str(self._end_trip_index_position) + ")"
+
+
 class Delta:
 
-    def __init__(self, removes, adds):
-        self._adds = adds
-        self._removes = removes
+    def __init__(self, operations):
+        self._operations = operations
 
-    def get_adds(self):
-        return self._adds
+    def add_operation(self, operation):
+        self._operations.append(operation)
 
-    def get_removes(self):
-        return self._removes
-
-    def add_add(self, add):
-        self._adds.append(add)
-
-    def add_remove(self, remove):
-        self._removes.append(remove)
+    def get_operations(self):
+        return self._operations
 
     def to_string(self):
         string = "("
-        string = string + "["
-        for rmv in self._removes:
-            string = string + "(" + str(rmv[0].get_id()) + "," + str(rmv[1]) + "," + str(rmv[2]) + "),"
+        for op in self._operations:
+            string = string + str(op.to_string()) + ","
 
-        string = string + "],["
-        for add in self._adds:
-            string = string +  "(" + str(add[0].get_id()) + "," + str(add[1]) + "," + str(add[2]) + "),"
-        string = string + "])"
+        string = string + ")"
 
         return string
 
@@ -100,27 +140,40 @@ class Solution:
         specifying the object and the position.
         """
 
-        reverse_delta = Delta([],[])
+        reverse_delta = Delta([])
 
-        removes = delta.get_removes()
-        for remove in removes: # rmv:(customer/hotel, trip_index, trip_position_index)
+        operations = delta.get_operations()
 
-            (obj, trip_index, trip_position_index) = remove
+        for operation in operations:
+            if isinstance(operation, Remove):
+                (obj, trip_index, trip_position_index) = operation.get_operation()
 
-            if self._instance.obj_is_hotel(obj):
-                self._remove_hotel(obj, trip_index, trip_position_index, reverse_delta)
+                if self._instance.obj_is_hotel(obj):
+                    self._remove_hotel(obj, trip_index, trip_position_index, reverse_delta)
+
+                else:
+                    self._remove_customer(obj, trip_index, trip_position_index, reverse_delta)
+            elif isinstance(operation, Add):
+                (obj, trip_index, trip_position_index) = operation.get_operation()
+
+                if self._instance.obj_is_hotel(obj):
+                    self._add_hotel(obj, trip_index, trip_position_index, reverse_delta)
+                else:
+                    self._add_customer(obj, trip_index, trip_position_index, reverse_delta)
+            elif isinstance(operation,Reverse):
+                (obj_1, start_trip_index, start_trip_index_position, obj_2, end_trip_index, end_trip_index_position) = operation.get_operation()
+
+                if start_trip_index == end_trip_index and not self._instance.obj_is_hotel(obj_1) and not self._instance.obj_is_hotel(obj_2):
+                    self._reverse_customers_from_same_trip(start_trip_index, start_trip_index_position, end_trip_index_position)
+                else:
+                    logger.error("Not supported REVERSE operation")
+                    print(operation)
+                    quit()
 
             else:
-                self._remove_customer(obj, trip_index, trip_position_index, reverse_delta)
-
-        adds = delta.get_adds()
-        for add in adds: # add:(obj=customer/hotel, trip_index, trip_position_index)
-            (obj, trip_index, trip_position_index) = add
-
-            if self._instance.obj_is_hotel(obj):
-                self._add_hotel(obj, trip_index, trip_position_index, reverse_delta)
-            else:
-                self._add_customer(obj, trip_index, trip_position_index, reverse_delta)
+                logger.error("Not supported operation")
+                print(operation)
+                quit()
 
         return Solution_Worthiness(self._objective_value, self._max_trip_length, self._trips_size, self._prize, delta, reverse_delta)
  
@@ -141,7 +194,64 @@ class Solution:
 
         return max_trip_length
 
+    def left_neighbor_customer(self, trip_index, trip_index_position):
+        trip = self._trips[trip_index]
+
+        if trip_index_position == 0:
+            return self._hotels[trip_index]
+        else:
+            return trip[trip_index_position]
+
+    def right_neighbor_customer(self, trip_index, trip_index_position):
+        trip = self._trips[trip_index]
+
+        if trip_index_position == len(trip) - 1:
+            return self._hotels[trip_index + 1]
+        else:
+            return trip[trip_index_position]
   
+    def _reverse_customers_from_same_trip(self, trip_index, start_trip_index_position, end_trip_index_position):
+
+        trip = self._trips[trip_index]
+        inst = self._instance
+
+        old_trip_val = self._trip_lengths[trip_index]
+
+        obj_1 = trip[start_trip_index_position]
+        obj_2 = trip[end_trip_index_position]
+
+        delta_minus = - inst.get_distance(self.left_neighbor_customer(trip_index, start_trip_index_position), obj_1)  - inst.get_distance(self.left_neighbor_customer(trip_index, end_trip_index_position), obj_2) - inst.get_distance(obj_1, self.right_neighbor_customer(trip_index, start_trip_index_position)) - inst.get_distance(obj_2, self.left_neighbor_customer(trip_index, end_trip_index_position))
+
+        delta_plus = inst.get_distance(self.left_neighbor_customer(trip_index, start_trip_index_position), obj_2)  + inst.get_distance(self.left_neighbor_customer(trip_index, end_trip_index_position), obj_1) + inst.get_distance(obj_2, self.right_neighbor_customer(trip_index, start_trip_index_position)) + inst.get_distance(obj_1, self.left_neighbor_customer(trip_index, end_trip_index_position))
+
+        lower_index = start_trip_index_position
+        upper_index = end_trip_index_position
+
+        print("REVERSE:" + str(trip_index) + "," + str(start_trip_index_position) + "," + str(end_trip_index_position) + ",LEN(TRIP) = " + str(len(trip)))
+
+        while (lower_index < upper_index):
+            tmp = trip[lower_index]
+            trip[lower_index] = trip[upper_index]
+            trip[upper_index] = tmp
+
+            lower_index = lower_index + 1
+            upper_index = upper_index - 1
+
+        sum_of_trips = self._sum_of_trips + delta_minus + delta_plus
+
+        objective_value = sum_of_trips + self._hotel_fees + self._penalties
+
+        max_trip_length = self.calculate_max_trip_length((old_trip_val + delta_minus + delta_plus), old_trip_val, [trip_index])
+
+        # ------------- Write to solution ---------
+        self._sum_of_trips = sum_of_trips
+
+        self._trip_lengths[trip_index] = old_trip_val + delta_minus + delta_plus
+
+        self._max_trip_length = max_trip_length
+
+        self._objective_value = objective_value
+
 
     def _remove_hotel(self, obj, trip_index, trip_position_index, reverse_delta):
         # ----- REMOVE SINGLE HOTEL --------
@@ -193,7 +303,7 @@ class Solution:
         # ----- SOLUTION CHANGES ----
 
     
-        reverse_delta.add_add((obj, trip_index - 1, len(old_left_trip)))
+        reverse_delta.add_operation(Add(obj, trip_index - 1, len(old_left_trip)))
 
         self._hotels.pop(trip_index)
 
@@ -254,7 +364,7 @@ class Solution:
 
             # ----- SOLUTION CHANGES ----
 
-            reverse_delta.add_add((obj, trip_index, trip_position_index))
+            reverse_delta.add_operation(Add(obj, trip_index, trip_position_index))
 
             self._prize = prize
             self._penalties = penalties
@@ -356,7 +466,7 @@ class Solution:
 
         # ----- SOLUTION CHANGES ----
 
-        reverse_delta.add_remove((obj, trip_index + 1, 0))
+        reverse_delta.add(Remove(obj, trip_index + 1, 0))
 
         self._trips_size = trips_size
 
@@ -411,7 +521,7 @@ class Solution:
 
             # ----- SOLUTION CHANGES ----
 
-            reverse_delta.add_remove((obj, trip_index, trip_position_index))
+            reverse_delta.add_operation(Remove(obj, trip_index, trip_position_index))
 
             self._penalties = penalties
             self._sum_of_trips = sum_of_trips

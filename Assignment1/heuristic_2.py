@@ -1,6 +1,6 @@
 
 import logging
-from solution import Solution, Delta
+from solution import Solution, Delta, Add, Remove, Reverse
 from initialization_procedure import Initialization_Procedure
 from constants import logger_name
 
@@ -32,7 +32,7 @@ class Deterministic_Greedy_Initialization(Initialization_Procedure):
                 d_n_c = inst.get_distance(current_location, nearest_unserved_customer) 
 
 
-            solution.change_from_delta(Delta([],[(nearest_unserved_customer, current_trip_position, current_trip_index_position)]))
+            solution.change_from_delta(Delta([Add(nearest_unserved_customer, current_trip_position, current_trip_index_position)]))
             current_trip_index_position = current_trip_index_position + 1
             current_trip_value = current_trip_value + d_n_c
             current_location = nearest_unserved_customer
@@ -50,11 +50,7 @@ class Deterministic_Greedy_Initialization(Initialization_Procedure):
 
         i_2 = 0
 
-        print(solution.to_string())
-
-
         while index <= upper_index and i_2 < 6:
-            print("Outer-" + str(index))
             if index == lower_index:
                 if index < upper_index:
                     trip_size_new = trip_size + inst.get_distance(solution._hotels[trip_index], greedy_trip[index])
@@ -69,20 +65,15 @@ class Deterministic_Greedy_Initialization(Initialization_Procedure):
             if trip_size_new > inst.get_C1():
 
                 index = index - 1
-                print(index)
 
                 while index >= lower_index:
                     nearest_hotel = inst.get_nearest_hotel(greedy_trip[index])
                     d_n_h = inst.get_distance(greedy_trip[index], nearest_hotel)
 
-                    print(trip_size)
-                    print(d_n_h)
-
                     if trip_size + d_n_h <= inst.get_C1():
                         # Good Case :-)
 
-                        print("GOOD:" + str(index) + "::" + str(trip_index) + "::" + str(trip_index_position))
-                        solution.change_from_delta(Delta([],[(nearest_hotel, trip_index, trip_index_position)]))
+                        solution.change_from_delta(Delta([Add(nearest_hotel, trip_index, trip_index_position)]))
 
                         trip_index = trip_index + 1
                         trip_index_position = 0
@@ -92,7 +83,6 @@ class Deterministic_Greedy_Initialization(Initialization_Procedure):
 
                         break
                     else:
-                        print("BAD:" + str(index))
                         index = index - 1
                         trip_index_position = trip_index_position - 1
                         trip_size = trip_size - inst.get_distance(greedy_trip[index], greedy_trip[index + 1])
@@ -110,8 +100,6 @@ class Deterministic_Greedy_Initialization(Initialization_Procedure):
 
 
 
-
-        print(solution.to_string())
 
         logger.info("Deterministic greedy found solution with obj-value of " + str(solution.get_objective_value()))
         logger.info(solution.to_string())

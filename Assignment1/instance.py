@@ -295,10 +295,6 @@ class Instance:
                 check_C3 = False
 
 
-        print(check_C1)
-        print(check_C2)
-        print(check_C3)
-
         return check_C1 or check_C2 or check_C3
 
 

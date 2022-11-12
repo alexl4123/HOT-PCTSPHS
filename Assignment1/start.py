@@ -7,6 +7,7 @@ from solution import Solution, Delta
 from local_search import Local_Search, Step_Function_Type
 from heuristic_2 import Deterministic_Greedy_Initialization
 from neighborhood import Neighborhood
+from trip_2_opt import Trip_2_Opt
 
 from test_instances import Tester
 
@@ -37,7 +38,7 @@ if instance.is_instance_not_computable():
 
 
 initialization_procedure = Deterministic_Greedy_Initialization(instance)
-neighborhood = Neighborhood(instance)
+neighborhood = Trip_2_Opt(instance)
 
 search_alg = Local_Search(instance)
 result = search_alg.start_search(initialization_procedure, Step_Function_Type.FIRST, neighborhood)
