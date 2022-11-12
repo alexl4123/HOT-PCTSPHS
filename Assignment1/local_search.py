@@ -11,7 +11,7 @@ class Local_Search(Algorithm):
     def __init__(self, instance):
         super().__init__(instance)
 
-    def start_search(self, initialization_procedure, step_function_type, neighborhood, termination_criterion = 10):
+    def start_search(self, initialization_procedure, step_function_type, neighborhood, termination_criterion = 100):
 
         solution = initialization_procedure.create_solution()
         current_best_worthiness = Solution_Worthiness(solution.get_objective_value(), solution.get_max_trip_length(), solution.get_number_of_trips(), solution.get_prize(), Delta([]), Delta([]))
@@ -21,8 +21,14 @@ class Local_Search(Algorithm):
 
         step = 0
 
-        while step < termination_criterion:
+        last_objective_value = 0
+        current_objective_value = current_best_worthiness.get_objective_value()
+
+        while step < termination_criterion and last_objective_value != current_objective_value:
             new_worthiness = self._step_function(neighborhood, solution, step_function_type)
+
+            last_objective_value = current_objective_value
+            current_objective_value = new_worthiness.get_objective_value()
             
 
             if new_worthiness.get_objective_value() < current_best_worthiness.get_objective_value():
@@ -34,6 +40,9 @@ class Local_Search(Algorithm):
             
             step = step + 1
 
+        print("SOL-FOUND: " + str(solution.get_objective_value()))
+        print(solution.slow_objective_values_calculation())
+
         return Algorithm_Result(solution, trace)
 
 
@@ -43,6 +52,9 @@ class Local_Search(Algorithm):
 
         neighborhood.set_solution(solution)
         neighborhood.reset_indexes()
+
+        #print("STEP-FUNCTION-BEAT:" + str(solution.get_objective_value()))
+        #print(solution.slow_objective_values_calculation())
 
         if step_function_type == Step_Function_Type.RANDOM:
             # Inefficient, but does the job
@@ -64,6 +76,7 @@ class Local_Search(Algorithm):
                 new_worthiness = neighborhood.next_solution()
 
                 if new_worthiness.get_objective_value() < current_worthiness.get_objective_value() and step_function_type == Step_Function_Type.FIRST:
+                    #print("first-better:" + str(new_worthiness.get_objective_value()) + ":OLD-VAL:" + str(current_worthiness.get_objective_value()) + ":DELTA:" + str(new_worthiness.get_delta()))
                     return new_worthiness
                 elif new_worthiness.get_objective_value() < current_worthiness.get_objective_value():
                     current_worthiness = new_worthiness

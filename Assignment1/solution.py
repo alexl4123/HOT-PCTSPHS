@@ -200,7 +200,7 @@ class Solution:
         if trip_index_position == 0:
             return self._hotels[trip_index]
         else:
-            return trip[trip_index_position]
+            return trip[trip_index_position - 1]
 
     def right_neighbor_customer(self, trip_index, trip_index_position):
         trip = self._trips[trip_index]
@@ -208,7 +208,7 @@ class Solution:
         if trip_index_position == len(trip) - 1:
             return self._hotels[trip_index + 1]
         else:
-            return trip[trip_index_position]
+            return trip[trip_index_position + 1]
   
     def _reverse_customers_from_same_trip(self, trip_index, start_trip_index_position, end_trip_index_position):
 
@@ -220,14 +220,16 @@ class Solution:
         obj_1 = trip[start_trip_index_position]
         obj_2 = trip[end_trip_index_position]
 
-        delta_minus = - inst.get_distance(self.left_neighbor_customer(trip_index, start_trip_index_position), obj_1)  - inst.get_distance(self.left_neighbor_customer(trip_index, end_trip_index_position), obj_2) - inst.get_distance(obj_1, self.right_neighbor_customer(trip_index, start_trip_index_position)) - inst.get_distance(obj_2, self.left_neighbor_customer(trip_index, end_trip_index_position))
+        prev_obj_1 = self.left_neighbor_customer(trip_index, start_trip_index_position)
+        post_obj_2 = self.right_neighbor_customer(trip_index, end_trip_index_position)
 
-        delta_plus = inst.get_distance(self.left_neighbor_customer(trip_index, start_trip_index_position), obj_2)  + inst.get_distance(self.left_neighbor_customer(trip_index, end_trip_index_position), obj_1) + inst.get_distance(obj_2, self.right_neighbor_customer(trip_index, start_trip_index_position)) + inst.get_distance(obj_1, self.left_neighbor_customer(trip_index, end_trip_index_position))
+        delta_minus = - inst.get_distance(prev_obj_1, obj_1) - inst.get_distance(obj_2, post_obj_2)
+        delta_plus = inst.get_distance(prev_obj_1, obj_2) + inst.get_distance(obj_1, post_obj_2)
 
         lower_index = start_trip_index_position
         upper_index = end_trip_index_position
 
-        print("REVERSE:" + str(trip_index) + "," + str(start_trip_index_position) + "," + str(end_trip_index_position) + ",LEN(TRIP) = " + str(len(trip)))
+        #print("REVERSE:" + str(trip_index) + "," + str(start_trip_index_position) + "," + str(end_trip_index_position) + ",LEN(TRIP) = " + str(len(trip)))
 
         while (lower_index < upper_index):
             tmp = trip[lower_index]
@@ -238,6 +240,8 @@ class Solution:
             upper_index = upper_index - 1
 
         sum_of_trips = self._sum_of_trips + delta_minus + delta_plus
+
+        #print("REV-delta_minus:" + str(delta_minus) + ":delta_plus:" + str(delta_plus))
 
         objective_value = sum_of_trips + self._hotel_fees + self._penalties
 
@@ -682,7 +686,6 @@ class Solution:
             if trip_dist > max_trip_length:
                 max_trip_length = trip_dist
 
-            print(trip_index)
             if trip_index > 0 and trip_index < (trips_size):
                 hotel_fees = hotel_fees + self._hotels[trip_index].get_fee()
 

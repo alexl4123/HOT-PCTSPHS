@@ -79,6 +79,8 @@ class Trip_2_Opt:
 
         new_length = self._instance.get_distance(vertex_p1, vertex_q2) + self._instance.get_distance(vertex_q1, vertex_p2)
 
+        #print("2-EXCH-delta_minus:" + str(current_length) + ":delta_plus:" + str(new_length))
+
         # Compute necessary operation
         reverse = Reverse(vertex_q1, self._trip_index, self._edge_1_vertex_index, vertex_q2, self._trip_index, self._edge_2_vertex_index - 1)
         delta = Delta([reverse])
