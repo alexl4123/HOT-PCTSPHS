@@ -13,7 +13,7 @@ class Local_Search(Algorithm):
 
     def start_search(self, initialization_procedure, step_function_type, neighborhood, termination_criterion = 100):
 
-        solution = initialization_procedure.create_solution()
+        solution = initialization_procedure.create_solution(1)
         current_best_worthiness = Solution_Worthiness(solution.get_objective_value(), solution.get_max_trip_length(), solution.get_number_of_trips(), solution.get_prize(), Delta([]), Delta([]))
 
         trace = []

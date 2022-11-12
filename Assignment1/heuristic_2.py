@@ -8,7 +8,7 @@ logger = logging.getLogger(logger_name)
 
 class Deterministic_Greedy_Initialization(Initialization_Procedure):
 
-    def create_solution(self):
+    def create_solution(self, random_k = 0):
 
         inst = self._instance
 
@@ -21,13 +21,9 @@ class Deterministic_Greedy_Initialization(Initialization_Procedure):
         current_trip_value = 0
 
         while not solution.is_c3_satisfied():
-            
-            nearest_unserved_customer = solution.get_nearest_unserved_customer(current_location)
+           
+            nearest_unserved_customer = solution.get_nearest_unserved_customer(current_location, random_k)
             d_n_c = inst.get_distance(current_location, nearest_unserved_customer) 
-            if d_n_c == 0:
-                nearest_unserved_customer = solution.get_nearest_unserved_customer(current_location, 1)
-                d_n_c = inst.get_distance(current_location, nearest_unserved_customer) 
-
 
             solution.change_from_delta(Delta([Add(nearest_unserved_customer, current_trip_position, current_trip_index_position)]))
             current_trip_index_position = current_trip_index_position + 1
