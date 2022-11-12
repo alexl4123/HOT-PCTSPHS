@@ -400,7 +400,7 @@ class Solution:
     
             new_left_val = self._instance.get_distance(self._hotels[trip_index], new_left[0])
 
-            for customer_index in range(1,len(new_left) - 1):
+            for customer_index in range(1,len(new_left)):
                 customer_prev = new_left[customer_index - 1]
                 customer = new_left[customer_index]
             
@@ -426,9 +426,11 @@ class Solution:
 
             new_right_val = self._instance.get_distance(new_right[len(new_right) - 1], self._hotels[trip_index + 1])
 
-            for customer_index in range(1, len(new_right) - 1):
-                customer_prev = new_left[customer_index - 1]
-                customer = new_left[customer_index]
+            for customer_index in range(1, len(new_right)):
+                customer_prev = new_right[customer_index - 1]
+                customer = new_right[customer_index]
+
+                #print("(C0:" + str(customer_prev.get_id()) + ":C1:" + str(customer.get_id()) + ")")
             
                 new_right_val = new_right_val + self._instance.get_distance(customer_prev, customer)
 
@@ -437,6 +439,8 @@ class Solution:
             new_right_val = new_right_val + self._instance.get_distance(obj, new_right[0])
 
             new_left_val = new_left_val + self._instance.get_distance(new_left[len(new_left) - 1], obj)
+
+            #print("SIZE-NEW-LEFT:" + str(len(new_left)) +  ":SIZE-NEW-RIGHT:" + str(len(new_right)) + ":OLD_TRIP_VALUE:" + str(old_trip_value) + ":NEW-LEFT-VAL:" + str(new_left_val) + ":NEW-RIGHT-VAL:" + str(new_right_val))
         else: # len(right) == 0
             new_right_val = self._instance.get_distance(obj, self._hotels[trip_index + 1])
             if len(new_left) == 0:
@@ -466,7 +470,7 @@ class Solution:
 
         # ----- SOLUTION CHANGES ----
 
-        reverse_delta.add(Remove(obj, trip_index + 1, 0))
+        reverse_delta.add_operation(Remove(obj, trip_index + 1, 0))
 
         self._trips_size = trips_size
 
@@ -631,6 +635,71 @@ class Solution:
         solution._is_customer_served = self._is_customer_served.copy()
 
         return solution
+
+    def slow_objective_values_calculation(self):
+
+        sum_trips = 0
+        max_trip_length = 0
+        collected_prize = 0
+        trips_size = len(self._trips)
+
+        used = {}
+
+        hotel_fees = 0
+        penalties = 0
+
+        for customer in self._instance._customers_list:
+            penalties = penalties + customer.get_penalty()
+
+        for trip_index in range(0, len(self._trips)):
+            trip = self._trips[trip_index]
+    
+            if len(trip) > 0:
+                trip_dist = self._instance.get_distance(self._hotels[trip_index], trip[0])
+
+                collected_prize = collected_prize + trip[0].get_prize()
+                penalties = penalties - trip[0].get_penalty()
+
+                if trip[0] in used:
+                    logger.error("Customer " + str(trip[0].get_id()) + " is used more often than ONCE!")
+                else:
+                    used[trip[0]] = True
+
+                for trip_index_position in range(1, len(trip)):
+                    trip_dist = trip_dist + self._instance.get_distance(trip[trip_index_position - 1], trip[trip_index_position])
+                    collected_prize = collected_prize + trip[trip_index_position].get_prize()
+                    penalties = penalties - trip[trip_index_position].get_penalty()
+
+                    if trip[trip_index_position] in used:
+                        logger.error("Customer " + str(trip[trip_index_position].get_id()) + " is used more often than ONCE!")
+                    else:
+                        used[trip[trip_index_position]] = True
+
+                trip_dist = trip_dist + self._instance.get_distance(trip[len(trip) - 1], self._hotels[trip_index + 1])
+            else:
+                trip_dist = self._instance.get_distance(self._hotels[trip_index], self._hotels[trip_index + 1])
+
+            if trip_dist > max_trip_length:
+                max_trip_length = trip_dist
+
+            print(trip_index)
+            if trip_index > 0 and trip_index < (trips_size):
+                hotel_fees = hotel_fees + self._hotels[trip_index].get_fee()
+
+            sum_trips = sum_trips + trip_dist
+
+        objective_value = sum_trips + penalties + hotel_fees
+
+        return (objective_value, sum_trips, penalties, hotel_fees, hotel_fees, max_trip_length, trips_size, collected_prize)
+
+
+
+
+
+
+
+
+
 
 
 

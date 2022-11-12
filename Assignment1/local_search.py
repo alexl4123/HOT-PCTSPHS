@@ -42,6 +42,7 @@ class Local_Search(Algorithm):
     def _step_function(self, neighborhood, solution, step_function_type):
 
         neighborhood.set_solution(solution)
+        neighborhood.reset_indexes()
 
         if step_function_type == Step_Function_Type.RANDOM:
             # Inefficient, but does the job
@@ -57,8 +58,9 @@ class Local_Search(Algorithm):
             current_solution = solution
             current_worthiness = Solution_Worthiness(solution.get_objective_value(), solution.get_max_trip_length(), solution.get_number_of_trips(), solution.get_prize(), Delta([]), Delta([]))
 
-            k = 0
-            while k < neighborhood.get_number_possible_solutions():
+            k = 1
+            number = neighborhood.get_number_possible_solutions()
+            while k < number:
                 new_worthiness = neighborhood.next_solution()
 
                 if new_worthiness.get_objective_value() < current_worthiness.get_objective_value() and step_function_type == Step_Function_Type.FIRST:

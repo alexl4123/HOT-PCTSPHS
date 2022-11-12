@@ -17,6 +17,15 @@ class Trip_2_Opt:
     def set_solution(self, solution):
         self._solution = solution
 
+    def reset_indexes(self):
+        self._trip_index = 0
+
+        self._edge_1_vertex_index = 0
+        self._edge_2_vertex_index = 2
+
+        self._number_of_solutions = None
+        self._current_solution_index = 0
+
     def get_number_possible_solutions(self):
 
         if not self._number_of_solutions:

@@ -20,9 +20,6 @@ class Deterministic_Greedy_Initialization(Initialization_Procedure):
 
         current_trip_value = 0
 
-        safe_state = (solution.clone(), current_location, current_trip_position, current_trip_index_position, current_trip_value)
-        safe_state_2 = None
-
         while not solution.is_c3_satisfied():
             
             nearest_unserved_customer = solution.get_nearest_unserved_customer(current_location)
@@ -36,6 +33,14 @@ class Deterministic_Greedy_Initialization(Initialization_Procedure):
             current_trip_index_position = current_trip_index_position + 1
             current_trip_value = current_trip_value + d_n_c
             current_location = nearest_unserved_customer
+    
+        """
+        print(solution.slow_objective_values_calculation())
+
+        print(solution.is_c1_satisfied())
+        print(solution.is_c2_satisfied())
+        print(solution.is_c3_satisfied())
+        """
 
         greedy_trip = solution._trips[0].copy()
 
@@ -48,9 +53,8 @@ class Deterministic_Greedy_Initialization(Initialization_Procedure):
         trip_index = 0
         trip_index_position = 0
 
-        i_2 = 0
 
-        while index <= upper_index and i_2 < 6:
+        while index <= upper_index:
             if index == lower_index:
                 if index < upper_index:
                     trip_size_new = trip_size + inst.get_distance(solution._hotels[trip_index], greedy_trip[index])
@@ -64,14 +68,16 @@ class Deterministic_Greedy_Initialization(Initialization_Procedure):
 
             if trip_size_new > inst.get_C1():
 
+                #print("Error-Case:" + str(greedy_trip[index].get_id()) + ":INDEX:" + str(index) + ":TRIP-SIZE:" + str(trip_size) + ":TRIP-SIZE-NEW:" + str(trip_size_new) + ":SOLUTION_MAX_VALUE:" + str(solution._max_trip_length))
+
                 index = index - 1
 
                 while index >= lower_index:
                     nearest_hotel = inst.get_nearest_hotel(greedy_trip[index])
                     d_n_h = inst.get_distance(greedy_trip[index], nearest_hotel)
 
+                    #print("Error-REPAIR-Case:" + str(greedy_trip[index].get_id()) + ":INDEX:" + str(index) + ":TRIP-SIZE:" + str(trip_size) + ":TRIP-SIZE-NEW:" + str(trip_size + d_n_h) + ":TRIP_INDEX:" + str(trip_index) + ":TRIP_INDEX_POSITION:" + str(trip_index_position) + ":SOLUTION_MAX_VALUE:" + str(solution._max_trip_length))
                     if trip_size + d_n_h <= inst.get_C1():
-                        # Good Case :-)
 
                         solution.change_from_delta(Delta([Add(nearest_hotel, trip_index, trip_index_position)]))
 
@@ -79,6 +85,11 @@ class Deterministic_Greedy_Initialization(Initialization_Procedure):
                         trip_index_position = 0
                         lower_index = index + 1
                         index = index + 1
+                        """
+                        print(trip_size)
+                        print(d_n_h)
+                        print(inst.get_C1())
+                        """
                         trip_size = 0
 
                         break
@@ -92,14 +103,22 @@ class Deterministic_Greedy_Initialization(Initialization_Procedure):
                     quit()
 
             else:
+                """
+                if index < upper_index:
+                    print("Valid-Case:" + str(greedy_trip[index].get_id()) + ":INDEX:" + str(index) + ":TRIP-SIZE:" + str(trip_size) + ":TRIP-SIZE-NEW:" + str(trip_size_new) + ":SOLUTION_MAX_VALUE:" + str(solution._max_trip_length))
+                """
+
                 index = index + 1
                 trip_index_position = trip_index_position + 1
                 trip_size = trip_size_new
 
-            i_2 = i_2 + 1
+        print(solution.is_c1_satisfied())
+        print(solution.is_c2_satisfied())
+        print(solution.is_c3_satisfied())
+        print(solution._max_trip_length)
 
-
-
+        print("SLOW-CALC:")
+        print(solution.slow_objective_values_calculation())
 
         logger.info("Deterministic greedy found solution with obj-value of " + str(solution.get_objective_value()))
         logger.info(solution.to_string())
