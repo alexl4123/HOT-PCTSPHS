@@ -6,6 +6,8 @@ from load_and_parse import Input_file_parser
 from solution import Solution, Delta
 from local_search import Local_Search, Step_Function_Type
 from heuristic_2 import Deterministic_Greedy_Initialization
+from heuristic_3 import Backtracking_Search
+
 from neighborhood import Neighborhood
 from trip_2_opt import Trip_2_Opt
 
@@ -37,7 +39,8 @@ if instance.is_instance_not_computable():
     quit()
 
 
-initialization_procedure = Deterministic_Greedy_Initialization(instance)
+#initialization_procedure = Deterministic_Greedy_Initialization(instance)
+initialization_procedure = Backtracking_Search(instance)
 neighborhood = Trip_2_Opt(instance)
 
 search_alg = Local_Search(instance)

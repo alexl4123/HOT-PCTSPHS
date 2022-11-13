@@ -254,6 +254,9 @@ class Instance:
 
         return self._nearest_customers[vertex_a.get_id()][position]
 
+    def get_all_nearest_hotels(self, vertex_a):
+        return self._nearest_hotels[vertex_a.get_id()]
+
     def get_nearest_hotel(self, vertex_a, position = 0):
         """
         Precondition: precompute_all_pairs_shortest_paths must be called first.
