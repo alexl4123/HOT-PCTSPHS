@@ -42,7 +42,8 @@ if instance.is_instance_not_computable():
 initialization_procedure = Backtracking_Search(instance)
 neighborhood = Trip_2_Opt(instance)
 
-search_alg = Local_Search(instance)
+randomization_k = 0
+search_alg = Local_Search(instance, randomization_k)
 result = search_alg.start_search(initialization_procedure, Step_Function_Type.FIRST, neighborhood)
 
 logger.info("Trace of objective values: " + str(result.get_trace()))

@@ -4,6 +4,7 @@ The datastructure is a typical object-oriented one, although it consumes more sp
 
 """
 import logging
+import numpy as np
 
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -193,8 +194,37 @@ class Instance:
         weights = nx.get_edge_attributes(self._graph, 'weight')
         nx.draw_networkx_edge_labels(self._graph, pos, edge_labels=weights)
 
+    def _ordering_function(self, edge, obj, alpha = 1, beta = -1, gamma = -1, delta = 1):
+        """
+        Used for ''ordering'', i.e. used to compute the ''nearest-neighbors''.
+        alpha: Parameter for setting the influence of the ''distance''
+        beta: Parameter for setting the influence of the prize of a customer
+        gamma: Parameter for setting the influence of the penalty of a customer
+        delta: Parameter for setting the influence of the fee of a hotel
+
+        """
+        term_1 = alpha * edge[1].get_weight()
+
+        obj_1 = edge[1].get_vertex_a()
+        obj_2 = edge[1].get_vertex_b()
+
+        other_obj = None
+        if obj == obj_1:
+            other_obj = obj_2
+        else:
+            other_obj = obj_1
+
+        if self.obj_is_hotel(other_obj):
+            term_2 = delta * other_obj.get_fee()
+        else:
+            term_2 = beta * other_obj.get_prize() + gamma * other_obj.get_penalty()
+
+
+
+        return term_1 + term_2
 
     def precompute_all_nearest_neighbors(self, debug = False):
+
 
         nearest_neighbors = {}
         nearest_hotels = {}
@@ -204,8 +234,10 @@ class Instance:
             ds = self._edge_lookup[key]
 
             obj = self._get_object_from_index(key)
+
+
             
-            sorted_by_value = sorted(ds.items(), key=lambda item: item[1].get_weight())
+            sorted_by_value = sorted(ds.items(), key=lambda item: self._ordering_function(item, obj))
 
             nearest = []
             nc_c = []
@@ -244,8 +276,22 @@ class Instance:
             return self._dist_customers[vertex_a.get_id()][vertex_b.get_id()]
         """
 
-    def get_all_nearest_customers(self, vertex_a):
-        return self._nearest_customers[vertex_a.get_id()]
+    def get_all_nearest_customers(self, vertex_a, random_k = 0):
+        if random_k == 0:
+            return self._nearest_customers[vertex_a.get_id()]
+        else:
+            if random_k > len(self._nearest_customers[vertex_a.get_id()]):
+                random_k = len(self._nearest_customers[vertex_a.get_id()])
+
+            l = range(0, random_k)
+            permuted = np.random.permutation(l)
+            shuffled = []
+            for i in range(len(l)):
+                shuffled.append(self._nearest_customers[vertex_a.get_id()][permuted[i]])
+
+            shuffled = shuffled + self._nearest_customers[vertex_a.get_id()][random_k:]
+            return shuffled
+
 
     def get_nearest_customer(self, vertex_a, position = 0):
         """

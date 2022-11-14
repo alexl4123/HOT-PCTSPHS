@@ -1,5 +1,7 @@
 
 import logging
+import random
+import numpy as np
 
 from framework.solution import Solution, Delta, Add, Remove, Reverse
 from framework.constants import logger_name
@@ -10,6 +12,8 @@ logger = logging.getLogger(logger_name)
 class Backtracking_Search(Initialization_Procedure):
 
     def create_solution(self, random_k = 0):
+
+        self._random_k = random_k
 
         solution = Solution(self._instance)
 
@@ -54,16 +58,17 @@ class Backtracking_Search(Initialization_Procedure):
         if trip_index_position == 0:
             index_upper_limit = 4
         elif trip_index_position == 1:
-            index_upper_limit = 2
+            index_upper_limit = 1
         else:
             index_upper_limit = 1
         # LIMIT-BREADTH
 
 
-        for nearest in self._instance.get_all_nearest_customers(obj):
+        for nearest in self._instance.get_all_nearest_customers(obj, self._random_k):
 
             new_dist = inst.get_distance(obj, nearest)
             if not solution.is_customer_served(nearest) and new_dist > 0:
+
                 # LIMIT-BREADTH
                 if index >= index_upper_limit:
                     break
