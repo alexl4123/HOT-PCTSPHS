@@ -4,11 +4,15 @@ This file contains the methods and functions for loading and parsing the input f
 
 import sys
 import random
+import logging
 
 import networkx as nx
 import matplotlib.pyplot as plt
 
-from instance import Instance
+from framework.constants import logger_name
+from framework.instance import Instance
+
+logger = logging.getLogger(logger_name)
 
 class Input_file_parser():
 
@@ -21,8 +25,7 @@ class Input_file_parser():
             No error checking or fallback provided
         """
         
-        if debug:
-            print(self._input_file_path)
+        logger.debug(self._input_file_path)
 
         input_file = open(self._input_file_path, "r")
 
@@ -39,13 +42,12 @@ class Input_file_parser():
         c2_D = int(parts[4]) # max performable trip number
         c3_P = int(parts[5]) # min prize count to collect
 
-        if debug:
-            print(num_hotels)
-            print(num_customers)
-            print(num_edges)
-            print(c1_L)
-            print(c2_D)
-            print(c3_P)
+        logger.debug(num_hotels)
+        logger.debug(num_customers)
+        logger.debug(num_edges)
+        logger.debug(c1_L)
+        logger.debug(c2_D)
+        logger.debug(c3_P)
 
         # Initialize instance
         instance = Instance(c1_L, c2_D, c3_P)
@@ -95,8 +97,8 @@ class Input_file_parser():
             split.pop(0)
             weight = int(' '.join(split).strip())
 
-            if debug:
-                print("A:" + str(vertex_a_number) + "::B::" + str(vertex_b_number) + "::WEIGHT::" + str(weight))
+
+            logger.debug("A:" + str(vertex_a_number) + "::B::" + str(vertex_b_number) + "::WEIGHT::" + str(weight))
 
             instance.add_edge(vertex_a_number, vertex_b_number, weight)
 

@@ -1,4 +1,4 @@
-from solution import Delta, Solution_Worthiness, Reverse
+from framework.solution import Delta, Solution_Worthiness, Reverse
 
 class Trip_2_Opt:
 

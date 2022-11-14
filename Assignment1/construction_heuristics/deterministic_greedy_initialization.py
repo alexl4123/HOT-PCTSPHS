@@ -7,6 +7,9 @@ from constants import logger_name
 logger = logging.getLogger(logger_name)
 
 class Deterministic_Greedy_Initialization(Initialization_Procedure):
+    """
+    Deprecated and not working, use Backtracking_Search instead
+    """
 
     def create_solution(self):
 

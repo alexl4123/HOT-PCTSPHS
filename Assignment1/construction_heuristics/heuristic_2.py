@@ -1,12 +1,15 @@
 
 import logging
-from solution import Solution, Delta, Add, Remove, Reverse
-from initialization_procedure import Initialization_Procedure
-from constants import logger_name
+from framework.solution import Solution, Delta, Add, Remove, Reverse
+from construction_heuristics.initialization_procedure import Initialization_Procedure
+from framework.constants import logger_name
 
 logger = logging.getLogger(logger_name)
 
 class Deterministic_Greedy_Initialization(Initialization_Procedure):
+    """
+    Deprecated, use Backtracking_Search instead
+    """
 
     def create_solution(self, random_k = 0):
 
@@ -30,14 +33,6 @@ class Deterministic_Greedy_Initialization(Initialization_Procedure):
             current_trip_value = current_trip_value + d_n_c
             current_location = nearest_unserved_customer
     
-        """
-        print(solution.slow_objective_values_calculation())
-
-        print(solution.is_c1_satisfied())
-        print(solution.is_c2_satisfied())
-        print(solution.is_c3_satisfied())
-        """
-
         greedy_trip = solution._trips[0].copy()
 
         trip_size = 0
@@ -64,15 +59,12 @@ class Deterministic_Greedy_Initialization(Initialization_Procedure):
 
             if trip_size_new > inst.get_C1():
 
-                #print("Error-Case:" + str(greedy_trip[index].get_id()) + ":INDEX:" + str(index) + ":TRIP-SIZE:" + str(trip_size) + ":TRIP-SIZE-NEW:" + str(trip_size_new) + ":SOLUTION_MAX_VALUE:" + str(solution._max_trip_length))
-
                 index = index - 1
 
                 while index >= lower_index:
                     nearest_hotel = inst.get_nearest_hotel(greedy_trip[index])
                     d_n_h = inst.get_distance(greedy_trip[index], nearest_hotel)
 
-                    #print("Error-REPAIR-Case:" + str(greedy_trip[index].get_id()) + ":INDEX:" + str(index) + ":TRIP-SIZE:" + str(trip_size) + ":TRIP-SIZE-NEW:" + str(trip_size + d_n_h) + ":TRIP_INDEX:" + str(trip_index) + ":TRIP_INDEX_POSITION:" + str(trip_index_position) + ":SOLUTION_MAX_VALUE:" + str(solution._max_trip_length))
                     if trip_size + d_n_h <= inst.get_C1():
 
                         solution.change_from_delta(Delta([Add(nearest_hotel, trip_index, trip_index_position)]))
@@ -81,11 +73,7 @@ class Deterministic_Greedy_Initialization(Initialization_Procedure):
                         trip_index_position = 0
                         lower_index = index + 1
                         index = index + 1
-                        """
-                        print(trip_size)
-                        print(d_n_h)
-                        print(inst.get_C1())
-                        """
+                        
                         trip_size = 0
 
                         break
@@ -99,26 +87,18 @@ class Deterministic_Greedy_Initialization(Initialization_Procedure):
                     quit()
 
             else:
-                """
-                if index < upper_index:
-                    print("Valid-Case:" + str(greedy_trip[index].get_id()) + ":INDEX:" + str(index) + ":TRIP-SIZE:" + str(trip_size) + ":TRIP-SIZE-NEW:" + str(trip_size_new) + ":SOLUTION_MAX_VALUE:" + str(solution._max_trip_length))
-                """
 
                 index = index + 1
                 trip_index_position = trip_index_position + 1
                 trip_size = trip_size_new
 
-        print(solution.is_c1_satisfied())
-        print(solution.is_c2_satisfied())
-        print(solution.is_c3_satisfied())
-        print(solution._max_trip_length)
 
-        print("SLOW-CALC:")
-        print(solution.slow_objective_values_calculation())
 
-        logger.info("Deterministic greedy found solution with obj-value of " + str(solution.get_objective_value()))
+        logger.debug("Check all constraints verified, C1: " + str(solution.is_c1_satisfied()) + ", C2:" + str(solution.is_c2_satisfied()) + ", C3:" + str(solution.is_c3_satisfied()))
+        logger.info("Greedy-CH found solution with obj-value of " + str(solution.get_objective_value()))
+        logger.debug("Greedy-CH solution verified by slow calculation:" + str(solution.slow_objective_values_calculation()))
         logger.info(solution.to_string())
-        
+
         return solution
 
 

@@ -1,8 +1,9 @@
 
 import logging
-from solution import Solution, Delta, Add, Remove, Reverse
-from initialization_procedure import Initialization_Procedure
-from constants import logger_name
+
+from framework.solution import Solution, Delta, Add, Remove, Reverse
+from framework.constants import logger_name
+from construction_heuristics.initialization_procedure import Initialization_Procedure
 
 logger = logging.getLogger(logger_name)
 
@@ -21,15 +22,9 @@ class Backtracking_Search(Initialization_Procedure):
 
 
         if result:
-            print(solution.is_c1_satisfied())
-            print(solution.is_c2_satisfied())
-            print(solution.is_c3_satisfied())
-            print(solution._max_trip_length)
-
-            print("SLOW-CALC:")
-            print(solution.slow_objective_values_calculation())
-
+            logger.debug("Check all constraints verified, C1: " + str(solution.is_c1_satisfied()) + ", C2:" + str(solution.is_c2_satisfied()) + ", C3:" + str(solution.is_c3_satisfied()))
             logger.info("Backtracking found solution with obj-value of " + str(solution.get_objective_value()))
+            logger.debug("Backtracking solution verified by slow calculation:" + str(solution.slow_objective_values_calculation()))
             logger.info(solution.to_string())
             
             return solution

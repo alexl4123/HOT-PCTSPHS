@@ -1,8 +1,8 @@
 
 import logging
 
-from solution import Solution, Delta
-from constants import logger_name
+from .solution import Solution, Delta
+from .constants import logger_name
 
 logger = logging.getLogger(logger_name)
 

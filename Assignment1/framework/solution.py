@@ -2,7 +2,7 @@
 import logging
 import random
 
-from constants import logger_name
+from framework.constants import logger_name
 
 logger = logging.getLogger(logger_name)
 
@@ -167,7 +167,7 @@ class Solution:
                 if start_trip_index == end_trip_index and not self._instance.obj_is_hotel(obj_1) and not self._instance.obj_is_hotel(obj_2):
                     self._reverse_customers_from_same_trip(start_trip_index, start_trip_index_position, end_trip_index_position)
                 else:
-                    logger.error("Not supported REVERSE operation")
+                    logger.error("Not supported REVERSE operation:") 
                     print(operation)
                     quit()
 
@@ -230,8 +230,6 @@ class Solution:
         lower_index = start_trip_index_position
         upper_index = end_trip_index_position
 
-        #print("REVERSE:" + str(trip_index) + "," + str(start_trip_index_position) + "," + str(end_trip_index_position) + ",LEN(TRIP) = " + str(len(trip)))
-
         while (lower_index < upper_index):
             tmp = trip[lower_index]
             trip[lower_index] = trip[upper_index]
@@ -241,8 +239,6 @@ class Solution:
             upper_index = upper_index - 1
 
         sum_of_trips = self._sum_of_trips + delta_minus + delta_plus
-
-        #print("REV-delta_minus:" + str(delta_minus) + ":delta_plus:" + str(delta_plus))
 
         objective_value = sum_of_trips + self._hotel_fees + self._penalties
 
@@ -388,7 +384,7 @@ class Solution:
 
 
         else:
-            print("Cannot remove, due to index out of bounds for obj: " + str(obj.get_id()))
+            logger.error("Cannot remove, due to index out of bounds for obj: " + str(obj.get_id()))
 
 
     def _add_hotel(self, obj, trip_index, trip_position_index, reverse_delta):
@@ -435,8 +431,6 @@ class Solution:
                 customer_prev = new_right[customer_index - 1]
                 customer = new_right[customer_index]
 
-                #print("(C0:" + str(customer_prev.get_id()) + ":C1:" + str(customer.get_id()) + ")")
-            
                 new_right_val = new_right_val + self._instance.get_distance(customer_prev, customer)
 
             new_left_val = old_trip_value - new_right_val - self._instance.get_distance(new_left[len(new_left) - 1], new_right[0])
@@ -445,7 +439,6 @@ class Solution:
 
             new_left_val = new_left_val + self._instance.get_distance(new_left[len(new_left) - 1], obj)
 
-            #print("SIZE-NEW-LEFT:" + str(len(new_left)) +  ":SIZE-NEW-RIGHT:" + str(len(new_right)) + ":OLD_TRIP_VALUE:" + str(old_trip_value) + ":NEW-LEFT-VAL:" + str(new_left_val) + ":NEW-RIGHT-VAL:" + str(new_right_val))
         else: # len(right) == 0
             new_right_val = self._instance.get_distance(obj, self._hotels[trip_index + 1])
             if len(new_left) == 0:

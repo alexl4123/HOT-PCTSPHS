@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import collections
 
 
-from constants import logger_name
+from framework.constants import logger_name
 
 logger = logging.getLogger(logger_name)
 

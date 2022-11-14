@@ -1,20 +1,20 @@
 import sys
 import logging
 
-from constants import logger_name
-from load_and_parse import Input_file_parser
-from solution import Solution, Delta
-from local_search import Local_Search, Step_Function_Type
-from heuristic_2 import Deterministic_Greedy_Initialization
-from heuristic_3 import Backtracking_Search
+from framework.constants import logger_name
+from framework.load_and_parse import Input_file_parser
+from framework.solution import Solution, Delta
+from framework.test_instances import Tester
 
-from neighborhood import Neighborhood
-from trip_2_opt import Trip_2_Opt
+from search_algorithms.local_search import Local_Search, Step_Function_Type
 
-from test_instances import Tester
+from construction_heuristics.heuristic_3 import Backtracking_Search
+
+from neighborhoods.neighborhood import Neighborhood
+from neighborhoods.trip_2_opt import Trip_2_Opt
 
 logger = logging.getLogger(logger_name)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 handler = logging.StreamHandler(sys.stdout)
 formatter = logging.Formatter("[%(levelname)s][%(asctime)s] %(message)s")
 handler.setFormatter(formatter)
@@ -24,7 +24,7 @@ logger.addHandler(handler)
 argv = len(sys.argv)
 
 if argv != 2:
-    logger.critical("LOL")
+    logger.critical("SYNOPSIS: python start.py filepath")
     quit()
 
 args = sys.argv
@@ -39,7 +39,6 @@ if instance.is_instance_not_computable():
     quit()
 
 
-#initialization_procedure = Deterministic_Greedy_Initialization(instance)
 initialization_procedure = Backtracking_Search(instance)
 neighborhood = Trip_2_Opt(instance)
 

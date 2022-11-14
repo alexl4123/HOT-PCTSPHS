@@ -1,4 +1,4 @@
-from solution import Delta, Solution_Worthiness
+from framework.solution import Delta, Solution_Worthiness
 
 class Neighborhood:
 

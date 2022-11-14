@@ -1,10 +1,14 @@
+import logging
 import random
-
-from solution import Delta, Solution_Worthiness
-from algorithm import Algorithm, Algorithm_Result
 
 from enum import Enum
 
+from framework.solution import Delta, Solution_Worthiness
+from framework.constants import logger_name
+from search_algorithms.algorithm import Algorithm, Algorithm_Result
+
+
+logger = logging.getLogger(logger_name)
 
 class Local_Search(Algorithm):
 
@@ -40,8 +44,9 @@ class Local_Search(Algorithm):
             
             step = step + 1
 
-        print("SOL-FOUND: " + str(solution.get_objective_value()))
-        print(solution.slow_objective_values_calculation())
+
+        logger.info("Local search found solution with objective value: " + str(solution.get_objective_value()))
+        logger.info("Local search solution verfification with slow calculation: " + str(solution.slow_objective_values_calculation()))
 
         return Algorithm_Result(solution, trace)
 
@@ -52,9 +57,6 @@ class Local_Search(Algorithm):
 
         neighborhood.set_solution(solution)
         neighborhood.reset_indexes()
-
-        #print("STEP-FUNCTION-BEAT:" + str(solution.get_objective_value()))
-        #print(solution.slow_objective_values_calculation())
 
         if step_function_type == Step_Function_Type.RANDOM:
             # Inefficient, but does the job
@@ -76,7 +78,6 @@ class Local_Search(Algorithm):
                 new_worthiness = neighborhood.next_solution()
 
                 if new_worthiness.get_objective_value() < current_worthiness.get_objective_value() and step_function_type == Step_Function_Type.FIRST:
-                    #print("first-better:" + str(new_worthiness.get_objective_value()) + ":OLD-VAL:" + str(current_worthiness.get_objective_value()) + ":DELTA:" + str(new_worthiness.get_delta()))
                     return new_worthiness
                 elif new_worthiness.get_objective_value() < current_worthiness.get_objective_value():
                     current_worthiness = new_worthiness
