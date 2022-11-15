@@ -63,7 +63,9 @@ class Edge:
 
 class Instance:
 
-    def __init__(self, c1_L, c2_D, c3_P):
+    def __init__(self, c1_L, c2_D, c3_P, basename_stem):
+        self._basename_stem = basename_stem
+
         self._hotels = {}
         self._hotels_list = []
 
@@ -194,7 +196,7 @@ class Instance:
         weights = nx.get_edge_attributes(self._graph, 'weight')
         nx.draw_networkx_edge_labels(self._graph, pos, edge_labels=weights)
 
-    def _ordering_function(self, edge, obj, alpha = 1, beta = -1, gamma = -1, delta = 1):
+    def _ordering_function(self, edge, obj, alpha = 1, beta = -0.5, gamma = -0.5, delta = 0.5):
         """
         Used for ''ordering'', i.e. used to compute the ''nearest-neighbors''.
         alpha: Parameter for setting the influence of the ''distance''
@@ -257,6 +259,8 @@ class Instance:
             nearest_neighbors[key] = nearest
             nearest_hotels[key] = nc_h
             nearest_customers[key] = nc_c
+
+        print("precomputation done")
 
         self._nearest_neighbors = nearest_neighbors
         self._nearest_hotels = nearest_hotels
@@ -355,6 +359,9 @@ class Instance:
 
     def get_C3(self):
         return self._C3_P
+
+    def get_basename(self):
+        return self._basename_stem
 
     def _index_is_hotel(self, index):
         if index < self._hotel_max_index:

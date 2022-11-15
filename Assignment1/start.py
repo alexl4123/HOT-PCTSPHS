@@ -1,13 +1,14 @@
 import sys
 import logging
 
-from framework.constants import logger_name
+from framework.constants import logger_name, file_path_to_solutions
 from framework.load_and_parse import Input_file_parser
 from framework.solution import Solution, Delta
 from framework.test_instances import Tester
 
 from search_algorithms.local_search import Local_Search, Step_Function_Type
 
+from construction_heuristics.heuristic_2 import Deterministic_Greedy_Initialization
 from construction_heuristics.heuristic_3 import Backtracking_Search
 
 from neighborhoods.neighborhood import Neighborhood
@@ -39,6 +40,7 @@ if instance.is_instance_not_computable():
     quit()
 
 
+#initialization_procedure = Deterministic_Greedy_Initialization(instance)
 initialization_procedure = Backtracking_Search(instance)
 neighborhood = Trip_2_Opt(instance)
 
@@ -48,6 +50,8 @@ result = search_alg.start_search(initialization_procedure, Step_Function_Type.FI
 
 logger.info("Trace of objective values: " + str(result.get_trace()))
 logger.info(result.get_best_solution().to_string())
+
+result.get_best_solution().write_solution_to_file(file_path_to_solutions)
 
 
 #tester = Tester(instance)

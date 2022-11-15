@@ -708,7 +708,44 @@ class Solution:
 
         return (objective_value, sum_trips, penalties, hotel_fees, hotel_fees, max_trip_length, trips_size, collected_prize)
 
+    def write_solution_to_file(self, file_path):
 
+        basename = self._instance.get_basename()
+
+        solution_string = ""
+
+        for index in range(len(self._trips)):
+            solution_string = solution_string + str(self._hotels[index].get_id()) + " "
+
+            for index_2 in range(len(self._trips[index])):
+                solution_string = solution_string + str(self._trips[index][index_2].get_id()) + " "
+
+
+        solution_string = solution_string + str(self._hotels[len(self._trips)].get_id())
+
+        print(basename)
+        print(solution_string)
+
+
+        output_file = open(file_path + "/solutions/" + basename + ".txt", "w")
+        output_file.write(basename + "\n")
+        output_file.write(solution_string)
+
+        output_file.close()
+
+        output_file = open(file_path + "/evaluations_of_solutions/" + basename + "_eval.txt", "w")
+
+        output_file.write("Objective_Value: " + str(self._objective_value) + "\n")
+        output_file.write("Sum_Trips_Value: " + str(self._sum_of_trips) + "\n")
+        output_file.write("Penalties_Value: " + str(self._penalties) + "\n")
+        output_file.write("Hotel_Fees_Value:" + str(self._hotel_fees) + "\n")
+        output_file.write("-----------------\n")
+        output_file.write("C1_Value (Max trip duration):" + str(self._max_trip_length) + "\n")
+        output_file.write("C2_Value (Number of trips):" + str(len(self._trips)) + "\n")
+        output_file.write("C3_Value (Collected Prize):" + str(self._prize) + "\n")
+        
+        output_file.close()
+       
 
 
 

@@ -2,12 +2,15 @@
 This file contains the methods and functions for loading and parsing the input files
 """
 
+import os
 import sys
 import random
 import logging
 
 import networkx as nx
 import matplotlib.pyplot as plt
+
+from pathlib import Path
 
 from framework.constants import logger_name
 from framework.instance import Instance
@@ -26,6 +29,8 @@ class Input_file_parser():
         """
         
         logger.debug(self._input_file_path)
+
+        basename_stem = Path(self._input_file_path).stem
 
         input_file = open(self._input_file_path, "r")
 
@@ -50,7 +55,7 @@ class Input_file_parser():
         logger.debug(c3_P)
 
         # Initialize instance
-        instance = Instance(c1_L, c2_D, c3_P)
+        instance = Instance(c1_L, c2_D, c3_P, basename_stem)
 
 
         self._parse_hotels(input_file, instance, total_hotels)
@@ -59,9 +64,6 @@ class Input_file_parser():
 
         input_file.close()
 
-        #instance.precompute_all_pairs_shortest_paths()
-        instance.precompute_all_nearest_neighbors()
-     
         return instance
 
     def _parse_hotels(self, input_file, instance, total_hotels, debug = False):

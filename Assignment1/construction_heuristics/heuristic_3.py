@@ -46,6 +46,7 @@ class Backtracking_Search(Initialization_Procedure):
                 return True
             else:
                 return self.backtracking_helper(solution,obj, trip_index, trip_index_position, current_trip_length)
+                #return False
 
         return False
 
@@ -56,7 +57,7 @@ class Backtracking_Search(Initialization_Procedure):
         # LIMIT-BREADTH
         index = 0
         if trip_index_position == 0:
-            index_upper_limit = 4
+            index_upper_limit = 1
         elif trip_index_position == 1:
             index_upper_limit = 1
         else:
@@ -65,13 +66,15 @@ class Backtracking_Search(Initialization_Procedure):
 
 
         for nearest in self._instance.get_all_nearest_customers(obj, self._random_k):
+            # LIMIT-BREADTH
+            if index >= index_upper_limit:
+                break
+            # LIMIT-BREADTH
 
             new_dist = inst.get_distance(obj, nearest)
             if not solution.is_customer_served(nearest) and new_dist > 0:
 
                 # LIMIT-BREADTH
-                if index >= index_upper_limit:
-                    break
                 index = index + 1
                 # LIMIT-BREADTH
 
@@ -91,7 +94,6 @@ class Backtracking_Search(Initialization_Procedure):
                         solution.change_from_delta(worthiness.get_reverse_delta())
 
                 else:
-                    # Note that this is a massive speedup, but comes at the cost, that the ''nearest'' can only be attributed to ''distance'' and not to function value
                     break
 
        
@@ -102,11 +104,15 @@ class Backtracking_Search(Initialization_Procedure):
 
         if current_trip_length > 0:
             for nearest in self._instance.get_all_nearest_hotels(obj):
+                # LIMIT-BREADTH
+                if index >= index_upper_limit:
+                    break
+                # LIMIT-BREADTH
+
                 new_dist = inst.get_distance(obj, nearest)
                 if new_dist > 0:
+
                     # LIMIT-BREADTH
-                    if index >= index_upper_limit:
-                        break
                     index = index + 1
                     # LIMIT-BREADTH
                     new_trip_length = new_dist + current_trip_length
@@ -124,7 +130,6 @@ class Backtracking_Search(Initialization_Procedure):
                         else:
                             solution.change_from_delta(worthiness.get_reverse_delta())
                     else:
-                        # Note that this is a massive speedup, but comes at the cost, that the ''nearest'' can only be attributed to ''distance'' and not to function value
                         break
 
         return False
