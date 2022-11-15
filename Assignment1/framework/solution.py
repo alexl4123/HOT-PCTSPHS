@@ -56,6 +56,22 @@ class Reverse(Operation):
     def to_string(self):
         string = "(REVERSE:" + str(self._obj_1.get_id()) + "," + str(self._start_trip_index) + "," + str(self._start_trip_index_position) + "," + str(self._obj_2.get_id()) + "," + str(self._end_trip_index) + "," + str(self._end_trip_index_position) + ")"
 
+class Swap(Operation):
+    def __init__(self, old_obj, old_trip_index, old_trip_index_position, new_obj, new_trip_index, new_trip_index_position):
+        self._old_obj = old_obj
+        self._old_trip_index = old_trip_index
+        self._old_trip_index_position = old_trip_index_position
+        
+        self._new_obj = new_obj
+        self._new_trip_index = new_trip_index
+        self._new_trip_index_position = new_trip_index_position
+
+    def get_operation(self):
+        return (self._old_obj, self._old_trip_index, self._old_trip_index_position, self._new_obj, self._new_trip_index, self._new_trip_index_position)
+
+    def to_string(self):
+        string = "(SWAP:" + str(self._old_obj.get_id()) + "," + str(self._old_obj_trip_index) + "," + str(self._old_obj_trip_index_position) + "," + str(self._new_obj.get_id()) + "," + str(self._new_trip_index) + "," + str(self._new_trip_index_position) + ")"
+
 
 class Delta:
 
@@ -170,6 +186,8 @@ class Solution:
                     logger.error("Not supported REVERSE operation:") 
                     print(operation)
                     quit()
+            elif isinstance(operation,Swap):
+                logger.info("Is SWAP")
 
             else:
                 logger.error("Not supported operation")
@@ -504,10 +522,10 @@ class Solution:
                 cur_trip_value = cur_trip_value - self._instance.get_distance(self._hotels[trip_index], trip[0]) + self._instance.get_distance(self._hotels[trip_index + 1], obj) + self._instance.get_distance(obj, trip[0])
 
 
-            elif trip_position_index >= (len(trip) - 1):
+            elif trip_position_index > (len(trip) - 1):
                 cur_trip_value = cur_trip_value - self._instance.get_distance(trip[len(trip) - 1], self._hotels[trip_index + 1]) + self._instance.get_distance(trip[len(trip) - 1], obj) + self._instance.get_distance(obj, self._hotels[trip_index + 1])
 
-            elif trip_position_index > 0 and trip_position_index < (len(trip) - 1):
+            elif trip_position_index > 0 and trip_position_index <= (len(trip) - 1):
                 cur_trip_value = cur_trip_value - self._instance.get_distance(trip[trip_position_index - 1], trip[trip_position_index]) + self._instance.get_distance(trip[trip_position_index - 1], obj) + self._instance.get_distance(obj, trip[trip_position_index])
 
             # ----- CALCULATIONS -------

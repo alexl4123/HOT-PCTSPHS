@@ -10,6 +10,7 @@ from search_algorithms.local_search import Local_Search, Step_Function_Type
 
 from construction_heuristics.heuristic_2 import Deterministic_Greedy_Initialization
 from construction_heuristics.heuristic_3 import Backtracking_Search
+from construction_heuristics.heuristic_4 import Insertion_Heuristic
 
 from neighborhoods.neighborhood import Neighborhood
 from neighborhoods.trip_2_opt import Trip_2_Opt
@@ -40,8 +41,8 @@ if instance.is_instance_not_computable():
     quit()
 
 
-#initialization_procedure = Deterministic_Greedy_Initialization(instance)
-initialization_procedure = Backtracking_Search(instance)
+initialization_procedure = Deterministic_Greedy_Initialization(instance)
+#initialization_procedure = Insertion_Heuristic(instance)
 neighborhood = Trip_2_Opt(instance)
 
 randomization_k = 0
