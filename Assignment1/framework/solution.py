@@ -402,6 +402,9 @@ class Solution:
 
 
         else:
+            print(self.to_string())
+            print(trip_index)
+            print(trip_position_index)
             logger.error("Cannot remove, due to index out of bounds for obj: " + str(obj.get_id()))
 
 

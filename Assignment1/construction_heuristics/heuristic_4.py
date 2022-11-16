@@ -44,18 +44,18 @@ class Insertion_Heuristic(Initialization_Procedure):
         self.unserved_customers = self._instance._customers_list.copy()
 
         while len(self.unserved_customers) > 0 and (not solution.is_c1_satisfied() or not solution.is_c2_satisfied() or not solution.is_c3_satisfied()):
+            print(len(self.unserved_customers))
 
             cur_best = None
+            cur_best_hotel = None
+            cur_best_distance_hotel = 0
+            cur_best_swap = None
+            cur_best_distance_swap = 0
 
-            """
-            print(solution.to_string())
-            id_list = []
-            for customer in self.unserved_customers:
-                id_list.append(customer.get_id())
-            print(id_list)
-            """
-                
-
+            avg_trip_distance = 0
+            for trip_index in range(len(solution._trips)):
+                avg_trip_distance = avg_trip_distance + solution._trip_lengths[trip_index]
+            avg_trip_distance = avg_trip_distance / len(solution._trips)
 
             for trip_index in range(len(solution._trips)):
                 last_node = solution._hotels[trip_index]
@@ -67,12 +67,28 @@ class Insertion_Heuristic(Initialization_Procedure):
                     next_trip_index = trip_index
                     next_trip_index_position = trip_position_index
 
-                    worthiness = self.get_best_insertion_for_edge(solution, last_trip_index, last_trip_index_position, last_node, next_trip_index, next_trip_index_position, next_node)
+                    worthiness = self.get_best_customer_for_edge(solution, last_trip_index, last_trip_index_position, last_node, next_trip_index, next_trip_index_position, next_node)
+                    (worthiness_hotel, distance_hotel) = self.get_best_hotel_for_edge(solution, avg_trip_distance, last_trip_index, last_trip_index_position, last_node, next_trip_index, next_trip_index_position, next_node)
+                    (worthiness_swap, distance_swap) = self.get_best_swap_customer(solution, avg_trip_distance, last_trip_index, last_trip_index_position, last_node, next_trip_index, next_trip_index_position, next_node)
 
                     if cur_best and worthiness and cur_best.get_objective_value() > worthiness.get_objective_value():
                         cur_best = worthiness
                     elif not cur_best and worthiness:
                         cur_best = worthiness
+
+                    if cur_best_hotel and worthiness_hotel and distance_hotel > cur_best_distance_hotel:
+                        cur_best_hotel = worthiness_hotel
+                        cur_best_distance_hotel = distance_hotel
+                    elif not cur_best_hotel and worthiness_hotel:
+                        cur_best_hotel = worthiness_hotel
+                        cur_best_distance_hotel = distance_hotel
+
+                    if cur_best_swap and worthiness_swap and distance_swap > cur_best_distance_swap:
+                        cur_best_swap = worthiness_swap
+                        cur_best_distance_swap = distance_swap
+                    elif not cur_best and worthiness:
+                        cur_best_swap = worthiness_swap
+                        cur_best_distance_swap = distance_swap
 
                     last_node = next_node
                     last_trip_index = next_trip_index
@@ -84,12 +100,38 @@ class Insertion_Heuristic(Initialization_Procedure):
                     next_trip_index = trip_index
                     next_trip_index_position = len(solution._trips[trip_index])
 
-                    worthiness = self.get_best_insertion_for_edge(solution, last_trip_index, last_trip_index_position, last_node, next_trip_index, next_trip_index_position, next_node)
+                    worthiness = self.get_best_customer_for_edge(solution, last_trip_index, last_trip_index_position, last_node, next_trip_index, next_trip_index_position, next_node)
+                    (worthiness_hotel, distance_hotel) = self.get_best_hotel_for_edge(solution, avg_trip_distance, last_trip_index, last_trip_index_position, last_node, next_trip_index, next_trip_index_position, next_node)
+                    # No SWAP!
+                    #worthiness_swap = self.get_best_swap_customer(solution, last_trip_index, last_trip_index_position, last_node, next_trip_index, next_trip_index_position, next_node)
 
                     if cur_best and worthiness and cur_best.get_objective_value() > worthiness.get_objective_value():
                         cur_best = worthiness
                     elif not cur_best and worthiness:
                         cur_best = worthiness
+
+                    if cur_best_hotel and worthiness_hotel and distance_hotel > cur_best_distance_hotel:
+                        cur_best_hotel = worthiness_hotel
+                        cur_best_distance_hotel = distance_hotel
+                    elif not cur_best_hotel and worthiness_hotel:
+                        cur_best_hotel = worthiness_hotel
+                        cur_best_distance_hotel = distance_hotel
+
+                    """
+                    if cur_best_hotel and worthiness_hotel and cur_best_hotel.get_objective_value() > worthiness_hotel.get_objective_value():
+                        cur_best_hotel = worthiness_hotel
+                    elif not cur_best_hotel and worthiness_hotel:
+                        cur_best_hotel = worthiness_hotel
+                    """
+
+                    """
+                    if cur_best_swap and worthiness_swap and cur_best_swap.get_objective_value() > worthiness_swap.get_objective_value():
+                        cur_best_swap = worthiness_swap
+                    elif not cur_best and worthiness:
+                        cur_best_swap = worthiness_swap
+                    """
+
+
 
 
 
@@ -97,29 +139,54 @@ class Insertion_Heuristic(Initialization_Procedure):
             next_trip_index = len(solution._trips) - 1
             next_trip_index_position = 0
 
-            worthiness = self.get_best_insertion_for_edge(solution, last_trip_index, last_trip_index_position, last_node, next_trip_index, next_trip_index_position, next_node)
+            worthiness = self.get_best_customer_for_edge(solution, last_trip_index, last_trip_index_position, last_node, next_trip_index, next_trip_index_position, next_node)
+            (worthiness_hotel, distance_hotel) = self.get_best_hotel_for_edge(solution,  avg_trip_distance, last_trip_index, last_trip_index_position, last_node, next_trip_index, next_trip_index_position, next_node)
+            # NO SWAPPING HOTELS
+            #worthiness_swap = self.get_best_swap_customer(solution, last_trip_index, last_trip_index_position, last_node, next_trip_index, next_trip_index_position, next_node)
 
             if cur_best and worthiness and cur_best.get_objective_value() > worthiness.get_objective_value():
                 cur_best = worthiness
             elif not cur_best and worthiness:
                 cur_best = worthiness
 
+            if cur_best_hotel and worthiness_hotel and distance_hotel > cur_best_distance_hotel:
+                cur_best_hotel = worthiness_hotel
+                cur_best_distance_hotel = distance_hotel
+            elif not cur_best_hotel and worthiness_hotel:
+                cur_best_hotel = worthiness_hotel
+                cur_best_distance_hotel = distance_hotel
+
+            """
+            if cur_best_hotel and worthiness_hotel and cur_best_hotel.get_objective_value() > worthiness_hotel.get_objective_value():
+                cur_best_hotel = worthiness_hotel
+            elif not cur_best_hotel and worthiness_hotel:
+                cur_best_hotel = worthiness_hotel
+            """
+
+            """
+            if cur_best_swap and worthiness_swap and cur_best_swap.get_objective_value() > worthiness_swap.get_objective_value():
+                cur_best_swap = worthiness_swap
+            elif not cur_best and worthiness:
+                cur_best_swap = worthiness_swap
+            """
+
             if cur_best:
                 solution.change_from_delta(cur_best.get_delta())
                 if cur_best.get_is_unserved_customer():
                     del self.unserved_customers[cur_best.get_unserved_customer_index()]
+            elif cur_best_hotel:
+                solution.change_from_delta(cur_best_hotel.get_delta())
+            elif cur_best_swap:
+                solution.change_from_delta(cur_best_swap.get_delta())
             else:
-                new_worthiness = self.try_swapping(solution)
-
-                if not new_worthiness:
-                    logger.error("Insertion Heuristic could not find a solution!")
-                    quit()
-            
+                logger.error("Insertion Heuristic could not find a solution!")
+                quit()
+        
 
         if solution.is_c1_satisfied() and solution.is_c2_satisfied() and solution.is_c3_satisfied():
-            logger.debug("Check all constraints verified, C1: " + str(solution.is_c1_satisfied()) + ", C2:" + str(solution.is_c2_satisfied()) + ", C3:" + str(solution.is_c3_satisfied()))
+            logger.info("Check all constraints verified, C1: " + str(solution.is_c1_satisfied()) + ", C2:" + str(solution.is_c2_satisfied()) + ", C3:" + str(solution.is_c3_satisfied()))
             logger.info("Insertion found solution with obj-value of " + str(solution.get_objective_value()))
-            logger.debug("Insertion solution verified by slow calculation:" + str(solution.slow_objective_values_calculation()))
+            logger.info("Insertion solution verified by slow calculation:" + str(solution.slow_objective_values_calculation()))
             logger.info(solution.to_string())
             return solution
         else:
@@ -127,10 +194,7 @@ class Insertion_Heuristic(Initialization_Procedure):
             quit()
 
 
-                    
-
-    def get_best_insertion_for_edge(self, solution, last_trip_index, last_trip_index_position, last_node, next_trip_index, next_trip_index_position, next_node):
-
+    def get_best_customer_for_edge(self, solution, last_trip_index, last_trip_index_position, last_node, next_trip_index, next_trip_index_position, next_node):
 
         cur_best = None
 
@@ -166,10 +230,18 @@ class Insertion_Heuristic(Initialization_Procedure):
                 elif not cur_best:
                     cur_best = Solution_Worthiness_Insertion_Heuristic.clone_from_worthiness(worthiness, True, customer_index)
 
+                #if solution.is_c3_satisfied():
+                #    return worthiness
+
             solution.change_from_delta(worthiness.get_reverse_delta())
 
+        return cur_best
 
-        #if cur_best == None:
+    def get_best_hotel_for_edge(self, solution, avg_trip_distance, last_trip_index, last_trip_index_position, last_node, next_trip_index, next_trip_index_position, next_node):
+
+        cur_best = None
+        cur_best_distance = 0
+
         for hotel_index in range(len(self._instance._hotels_list)):
             hotel = self._instance._hotels_list[hotel_index]
 
@@ -193,19 +265,65 @@ class Insertion_Heuristic(Initialization_Procedure):
             """
 
             if solution.is_c1_satisfied() and solution.is_c2_satisfied():
-                if cur_best and cur_best.get_objective_value() > worthiness.get_objective_value():
-                    cur_best = Solution_Worthiness_Insertion_Heuristic.clone_from_worthiness(worthiness, False, customer_index)
+                new_avg_trip_distance = 0
+                for trip_index in range(len(solution._trips)):
+                    new_avg_trip_distance = new_avg_trip_distance + solution._trip_lengths[trip_index]
+                new_avg_trip_distance = new_avg_trip_distance / len(solution._trips)
+
+                diff_avg_trip_distance = avg_trip_distance - new_avg_trip_distance
+
+                if cur_best and diff_avg_trip_distance > cur_best_distance:
+                    cur_best = Solution_Worthiness_Insertion_Heuristic.clone_from_worthiness(worthiness, False, 0)
+                    cur_best_distance = diff_avg_trip_distance
                 elif not cur_best:
-                    cur_best = Solution_Worthiness_Insertion_Heuristic.clone_from_worthiness(worthiness, False, customer_index)
+                    cur_best = Solution_Worthiness_Insertion_Heuristic.clone_from_worthiness(worthiness, False, 0)
+                    cur_best_distance = diff_avg_trip_distance
                 
 
             solution.change_from_delta(worthiness.get_reverse_delta())
 
-        return cur_best
+        return (cur_best, cur_best_distance)
 
 
-    def try_swapping(self, solution):
-        # TODO
+    def get_best_swap_customer(self, solution, avg_trip_distance, last_trip_index, last_trip_index_position, last_node, next_trip_index, next_trip_index_position, next_node):
+
+        cur_best = None 
+        cur_best_distance = 0
+
+        for hotel in self._instance._hotels_list:
+            #print(str(cur_max_trip_value_index) + str(item_index))
+            remove = Remove(next_node, next_trip_index, next_trip_index_position)
+            add = Add(hotel, next_trip_index, next_trip_index_position)
+
+            delta = Delta([remove,add])
+
+            worthiness = solution.change_from_delta(delta)
+
+
+            if solution.is_c1_satisfied() and solution.is_c2_satisfied():
+                new_avg_trip_distance = 0
+                for trip_index in range(len(solution._trips)):
+                    new_avg_trip_distance = new_avg_trip_distance + solution._trip_lengths[trip_index]
+                new_avg_trip_distance = new_avg_trip_distance / len(solution._trips)
+
+                diff_avg_trip_distance = avg_trip_distance - new_avg_trip_distance
+
+
+                if cur_best and diff_avg_trip_distance > cur_best_distance:
+                    cur_best = Solution_Worthiness_Insertion_Heuristic.clone_from_worthiness(worthiness, False, 0)
+                    cur_best_distance = diff_avg_trip_distance
+                elif not cur_best:
+                    cur_best = Solution_Worthiness_Insertion_Heuristic.clone_from_worthiness(worthiness, False, 0)
+                    cur_best_distance = diff_avg_trip_distance
+                
+            solution.change_from_delta(worthiness.get_reverse_delta())
+
+
+        return (cur_best, cur_best_distance)
+
+
+
+    """ 
         cur_max_trip_value = solution._max_trip_length
         cur_max_trip_value_index = -1
 
@@ -223,23 +341,4 @@ class Insertion_Heuristic(Initialization_Procedure):
 
             old_item = solution._trips[cur_max_trip_value_index][item_index]
 
-            for hotel in self._instance._hotels_list:
-                #print(str(cur_max_trip_value_index) + str(item_index))
-                remove = Remove(old_item, cur_max_trip_value_index,item_index)
-                add = Add(hotel, cur_max_trip_value_index,item_index)
-
-                delta = Delta([remove,add])
-
-                worthiness = solution.change_from_delta(delta)
-
-                if solution.is_c1_satisfied() and solution.is_c2_satisfied():
-                    return worthiness
-
-                solution.change_from_delta(worthiness.get_reverse_delta())
-
-
-        return None
-
-
-
-                
+    """           
