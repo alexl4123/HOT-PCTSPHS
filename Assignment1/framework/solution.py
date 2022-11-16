@@ -22,7 +22,7 @@ class Add(Operation):
         return (self._obj, self._trip_index, self._trip_index_position)
 
     def to_string(self):
-        string = "(ADD:" + str(obj.get_id()) + "," + str(self._trip_index) + "," + str(self._trip_index_position) + ")"
+        return "(ADD:" + str(self._obj.get_id()) + "," + str(self._trip_index) + "," + str(self._trip_index_position) + ")"
 
 class Remove(Operation):
 
@@ -35,7 +35,7 @@ class Remove(Operation):
         return (self._obj, self._trip_index, self._trip_index_position)
 
     def to_string(self):
-        string = "(REMOVE:" + str(obj.get_id()) + "," + str(self._trip_index) + "," + str(self._trip_index_position) + ")"
+        return "(REMOVE:" + str(self._obj.get_id()) + "," + str(self._trip_index) + "," + str(self._trip_index_position) + ")"
 
 
 class Reverse(Operation):
@@ -54,7 +54,7 @@ class Reverse(Operation):
 
 
     def to_string(self):
-        string = "(REVERSE:" + str(self._obj_1.get_id()) + "," + str(self._start_trip_index) + "," + str(self._start_trip_index_position) + "," + str(self._obj_2.get_id()) + "," + str(self._end_trip_index) + "," + str(self._end_trip_index_position) + ")"
+        return "(REVERSE:" + str(self._obj_1.get_id()) + "," + str(self._start_trip_index) + "," + str(self._start_trip_index_position) + "," + str(self._obj_2.get_id()) + "," + str(self._end_trip_index) + "," + str(self._end_trip_index_position) + ")"
 
 class Swap(Operation):
     def __init__(self, old_obj, old_trip_index, old_trip_index_position, new_obj, new_trip_index, new_trip_index_position):
@@ -81,13 +81,16 @@ class Delta:
     def add_operation(self, operation):
         self._operations.append(operation)
 
+    def push_operation(self, operation):
+        self._operations.insert(0, operation)
+
     def get_operations(self):
         return self._operations
 
     def to_string(self):
         string = "("
         for op in self._operations:
-            string = string + str(op.to_string()) + ","
+            string = string + op.to_string() + ","
 
         string = string + ")"
 
@@ -322,7 +325,7 @@ class Solution:
         # ----- SOLUTION CHANGES ----
 
     
-        reverse_delta.add_operation(Add(obj, trip_index - 1, len(old_left_trip)))
+        reverse_delta.push_operation(Add(obj, trip_index - 1, len(old_left_trip)))
 
         self._hotels.pop(trip_index)
 
@@ -383,7 +386,7 @@ class Solution:
 
             # ----- SOLUTION CHANGES ----
 
-            reverse_delta.add_operation(Add(obj, trip_index, trip_position_index))
+            reverse_delta.push_operation(Add(obj, trip_index, trip_position_index))
 
             self._prize = prize
             self._penalties = penalties
@@ -489,7 +492,7 @@ class Solution:
 
         # ----- SOLUTION CHANGES ----
 
-        reverse_delta.add_operation(Remove(obj, trip_index + 1, 0))
+        reverse_delta.push_operation(Remove(obj, trip_index + 1, 0))
 
         self._trips_size = trips_size
 
@@ -544,7 +547,7 @@ class Solution:
 
             # ----- SOLUTION CHANGES ----
 
-            reverse_delta.add_operation(Remove(obj, trip_index, trip_position_index))
+            reverse_delta.push_operation(Remove(obj, trip_index, trip_position_index))
 
             self._penalties = penalties
             self._sum_of_trips = sum_of_trips
@@ -680,6 +683,7 @@ class Solution:
         max_trip_length = 0
         collected_prize = 0
         trips_size = len(self._trips)
+        trip_lengths = []
 
         used = {}
 
@@ -720,6 +724,8 @@ class Solution:
             if trip_dist > max_trip_length:
                 max_trip_length = trip_dist
 
+            trip_lengths.append(trip_dist)
+
             if trip_index > 0 and trip_index < (trips_size):
                 hotel_fees = hotel_fees + self._hotels[trip_index].get_fee()
 
@@ -727,7 +733,13 @@ class Solution:
 
         objective_value = sum_trips + penalties + hotel_fees
 
-        return (objective_value, sum_trips, penalties, hotel_fees, hotel_fees, max_trip_length, trips_size, collected_prize)
+        avg_trip_length = 0
+        for trip_index in range(len(trip_lengths)):
+            avg_trip_length = avg_trip_length + trip_lengths[trip_index]
+        avg_trip_length = avg_trip_length / len(trip_lengths)
+
+
+        return (objective_value, sum_trips, penalties, hotel_fees, hotel_fees, max_trip_length, trips_size, collected_prize, trip_lengths, avg_trip_length)
 
     def write_solution_to_file(self, file_path):
 
