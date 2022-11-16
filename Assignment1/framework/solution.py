@@ -519,7 +519,7 @@ class Solution:
                 cur_trip_value = self._instance.get_distance(self._hotels[trip_index], obj) + self._instance.get_distance(obj, self._hotels[trip_index + 1])
 
             elif trip_position_index == 0:
-                cur_trip_value = cur_trip_value - self._instance.get_distance(self._hotels[trip_index], trip[0]) + self._instance.get_distance(self._hotels[trip_index + 1], obj) + self._instance.get_distance(obj, trip[0])
+                cur_trip_value = cur_trip_value - self._instance.get_distance(self._hotels[trip_index], trip[0]) + self._instance.get_distance(self._hotels[trip_index], obj) + self._instance.get_distance(obj, trip[0])
 
 
             elif trip_position_index > (len(trip) - 1):

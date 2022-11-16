@@ -41,8 +41,8 @@ if instance.is_instance_not_computable():
     quit()
 
 
-initialization_procedure = Deterministic_Greedy_Initialization(instance)
-#initialization_procedure = Insertion_Heuristic(instance)
+#initialization_procedure = Deterministic_Greedy_Initialization(instance)
+initialization_procedure = Insertion_Heuristic(instance)
 neighborhood = Trip_2_Opt(instance)
 
 randomization_k = 0

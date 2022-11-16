@@ -149,7 +149,9 @@ class Insertion_Heuristic(Initialization_Procedure):
                 print(solution.slow_objective_values_calculation())
                 print(solution._max_trip_length)
             """
+            
             worthiness = solution.change_from_delta(delta)
+
             """
             if customer.get_id() == 6:
                 print(solution.to_string())
@@ -165,6 +167,7 @@ class Insertion_Heuristic(Initialization_Procedure):
                     cur_best = Solution_Worthiness_Insertion_Heuristic.clone_from_worthiness(worthiness, True, customer_index)
 
             solution.change_from_delta(worthiness.get_reverse_delta())
+
 
         #if cur_best == None:
         for hotel_index in range(len(self._instance._hotels_list)):
@@ -182,6 +185,7 @@ class Insertion_Heuristic(Initialization_Procedure):
             print(solution._max_trip_length)
             """
             worthiness = solution.change_from_delta(delta)
+
             """
             print(solution.slow_objective_values_calculation())
             print(solution._max_trip_length)
