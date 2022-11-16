@@ -118,8 +118,8 @@ class Insertion_Heuristic(Initialization_Procedure):
 
         if solution.is_c1_satisfied() and solution.is_c2_satisfied() and solution.is_c3_satisfied():
             logger.debug("Check all constraints verified, C1: " + str(solution.is_c1_satisfied()) + ", C2:" + str(solution.is_c2_satisfied()) + ", C3:" + str(solution.is_c3_satisfied()))
-            logger.info("Backtracking found solution with obj-value of " + str(solution.get_objective_value()))
-            logger.debug("Backtracking solution verified by slow calculation:" + str(solution.slow_objective_values_calculation()))
+            logger.info("Insertion found solution with obj-value of " + str(solution.get_objective_value()))
+            logger.debug("Insertion solution verified by slow calculation:" + str(solution.slow_objective_values_calculation()))
             logger.info(solution.to_string())
             return solution
         else:
