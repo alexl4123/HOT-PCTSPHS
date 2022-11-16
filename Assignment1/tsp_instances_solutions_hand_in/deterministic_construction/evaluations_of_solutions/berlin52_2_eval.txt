@@ -1,0 +1,8 @@
+Objective_Value: 9408
+Sum_Trips_Value: 7769
+Penalties_Value: 429
+Hotel_Fees_Value:1210
+-----------------
+C1_Value (Max trip duration):1274
+C2_Value (Number of trips):7
+C3_Value (Collected Prize):1347

@@ -83,8 +83,9 @@ class Deterministic_Greedy_Initialization(Initialization_Procedure):
                         trip_size = trip_size - inst.get_distance(greedy_trip[index], greedy_trip[index + 1])
 
                 if index < lower_index:
-                    logger.error("deterministic procedure could not find valid path, quitting")
-                    quit()
+                    logger.error("deterministic procedure could not find valid path!")
+                    return False
+
 
             else:
 

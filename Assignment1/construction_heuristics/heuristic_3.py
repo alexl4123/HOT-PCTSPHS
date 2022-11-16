@@ -34,7 +34,7 @@ class Backtracking_Search(Initialization_Procedure):
             return solution
         else:
             logger.error("Backtracking could not find a solution!")
-            quit()
+            return False
 
 
     def backtracking(self, solution, obj, trip_index, trip_index_position, current_trip_length):
