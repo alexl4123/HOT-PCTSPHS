@@ -17,17 +17,18 @@ from framework.instance import Instance
 
 logger = logging.getLogger(logger_name)
 
-class Input_file_parser():
+
+class Input_file_parser:
 
     def __init__(self, input_file_path):
         self._input_file_path = input_file_path
 
-    def load_and_parse_input_file(self, debug = False):
+    def load_and_parse_input_file(self, debug=False):
         """
             Simple load and parse procedure
             No error checking or fallback provided
         """
-        
+
         logger.debug(self._input_file_path)
 
         basename_stem = Path(self._input_file_path).stem
@@ -38,14 +39,14 @@ class Input_file_parser():
 
         parts = first_line.split(' ')
 
-        num_hotels = int(parts[0])    # hotel number
-        total_hotels = num_hotels + 1 # hotel number incl. hotel 0
-        num_customers = int(parts[1]) # customer number
-        num_edges = int(parts[2])     # edge number
+        num_hotels = int(parts[0])  # hotel number
+        total_hotels = num_hotels + 1  # hotel number incl. hotel 0
+        num_customers = int(parts[1])  # customer number
+        num_edges = int(parts[2])  # edge number
 
-        c1_L = int(parts[3]) # max allowed duration of the trip
-        c2_D = int(parts[4]) # max performable trip number
-        c3_P = int(parts[5]) # min prize count to collect
+        c1_L = int(parts[3])  # max allowed duration of the trip
+        c2_D = int(parts[4])  # max performable trip number
+        c3_P = int(parts[5])  # min prize count to collect
 
         logger.debug(num_hotels)
         logger.debug(num_customers)
@@ -57,7 +58,6 @@ class Input_file_parser():
         # Initialize instance
         instance = Instance(c1_L, c2_D, c3_P, basename_stem)
 
-
         self._parse_hotels(input_file, instance, total_hotels)
         self._parse_customers(input_file, instance, num_customers)
         self._parse_edges(input_file, instance, num_edges)
@@ -66,13 +66,13 @@ class Input_file_parser():
 
         return instance
 
-    def _parse_hotels(self, input_file, instance, total_hotels, debug = False):
+    def _parse_hotels(self, input_file, instance, total_hotels, debug=False):
         # Parse Hotels
         for i in range(total_hotels):
             fee = int(input_file.readline())
             instance.add_hotel(fee)
 
-    def _parse_customers(self, input_file, instance, num_customers, debug = False):
+    def _parse_customers(self, input_file, instance, num_customers, debug=False):
 
         for i in range(num_customers):
             unparsed = input_file.readline()
@@ -83,13 +83,12 @@ class Input_file_parser():
 
             instance.add_customer(prize, penalty)
 
-    def _parse_edges(self, input_file, instance, num_edges, debug = False):
+    def _parse_edges(self, input_file, instance, num_edges, debug=False):
         for i in range(num_edges):
             unparsed = input_file.readline()
 
             split = unparsed.strip().split(' ')
             vertex_a_number = int(split[0])
-
 
             split.pop(0)
             split = (' '.join(split)).strip().split(' ')
@@ -99,30 +98,6 @@ class Input_file_parser():
             split.pop(0)
             weight = int(' '.join(split).strip())
 
-
             logger.debug("A:" + str(vertex_a_number) + "::B::" + str(vertex_b_number) + "::WEIGHT::" + str(weight))
 
             instance.add_edge(vertex_a_number, vertex_b_number, weight)
-
-
-
-
-
-def find_hamiltonian_cycle(graph: nx.Graph, node):
-    node_cycle = []
-    nodes = []
-    for n in graph.nodes:
-        nodes.append(n)
-    while len(node_cycle) < node:
-        chosen = random.choice(nodes)
-        if chosen not in node_cycle:
-            node_cycle.append(chosen)
-    return nodeCycle
-
-
-def calculate_route_cost(route, graph: nx.Graph):
-    route_cost = 0
-    for i in range(len(route)):
-        route_cost += get_edge_weight(route[i], route[(i + 1) % len(route)], graph)
-    return route_cost
-

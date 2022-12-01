@@ -1,4 +1,3 @@
-
 import logging
 import random
 import numpy as np
@@ -9,9 +8,10 @@ from construction_heuristics.initialization_procedure import Initialization_Proc
 
 logger = logging.getLogger(logger_name)
 
+
 class Backtracking_Search(Initialization_Procedure):
 
-    def create_solution(self, random_k = 0):
+    def create_solution(self, random_k=0):
 
         self._random_k = random_k
 
@@ -22,35 +22,36 @@ class Backtracking_Search(Initialization_Procedure):
         starting_trip_index_position = 0
         starting_trip_length = 0
 
-        result = self.backtracking(solution, starting_hotel, starting_trip_index, starting_trip_index_position, starting_trip_length)
-
+        result = self.backtracking(solution, starting_hotel, starting_trip_index, starting_trip_index_position,
+                                   starting_trip_length)
 
         if result:
-            logger.debug("Check all constraints verified, C1: " + str(solution.is_c1_satisfied()) + ", C2:" + str(solution.is_c2_satisfied()) + ", C3:" + str(solution.is_c3_satisfied()))
+            logger.debug("Check all constraints verified, C1: " + str(solution.is_c1_satisfied()) + ", C2:" + str(
+                solution.is_c2_satisfied()) + ", C3:" + str(solution.is_c3_satisfied()))
             logger.info("Backtracking found solution with obj-value of " + str(solution.get_objective_value()))
-            logger.debug("Backtracking solution verified by slow calculation:" + str(solution.slow_objective_values_calculation()))
+            logger.debug("Backtracking solution verified by slow calculation:" + str(
+                solution.slow_objective_values_calculation()))
             logger.info(solution.to_string())
-            
+
             return solution
         else:
             logger.error("Backtracking could not find a solution!")
             return False
 
-
     def backtracking(self, solution, obj, trip_index, trip_index_position, current_trip_length):
 
         if not solution.is_c3_satisfied() and solution.is_c2_satisfied():
-            return self.backtracking_helper(solution,obj, trip_index, trip_index_position, current_trip_length)
+            return self.backtracking_helper(solution, obj, trip_index, trip_index_position, current_trip_length)
         elif solution.is_c2_satisfied():
             if solution.is_c1_satisfied() and solution.is_c2_satisfied() and solution.is_c3_satisfied():
                 return True
             else:
-                return self.backtracking_helper(solution,obj, trip_index, trip_index_position, current_trip_length)
-                #return False
+                return self.backtracking_helper(solution, obj, trip_index, trip_index_position, current_trip_length)
+                # return False
 
         return False
 
-    def backtracking_helper(self, solution,obj, trip_index, trip_index_position, current_trip_length):
+    def backtracking_helper(self, solution, obj, trip_index, trip_index_position, current_trip_length):
 
         inst = self._instance
 
@@ -63,7 +64,6 @@ class Backtracking_Search(Initialization_Procedure):
         else:
             index_upper_limit = 1
         # LIMIT-BREADTH
-
 
         for nearest in self._instance.get_all_nearest_customers(obj, self._random_k):
             # LIMIT-BREADTH
@@ -96,7 +96,6 @@ class Backtracking_Search(Initialization_Procedure):
                 else:
                     break
 
-       
         # LIMIT-BREADTH
         index = 0
         index_upper_limit = 1
@@ -133,24 +132,3 @@ class Backtracking_Search(Initialization_Procedure):
                         break
 
         return False
-
-
-
-
-
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

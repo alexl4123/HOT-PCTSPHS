@@ -1,5 +1,6 @@
 from framework.solution import Delta, Solution_Worthiness, Reverse
 
+
 class Trip_2_Opt:
 
     def __init__(self, instance):
@@ -34,7 +35,7 @@ class Trip_2_Opt:
 
             for trip in self._solution._trips:
                 number_of_vertices = len(trip)
-                number_of_edges = number_of_vertices + 1 # Due to edges from and to hotels
+                number_of_edges = number_of_vertices + 1  # Due to edges from and to hotels
                 number_of_relevant_edges = number_of_edges - 2
 
                 number_of_possible_exchanges_for_trip = (number_of_relevant_edges * (number_of_relevant_edges + 1)) / 2
@@ -42,7 +43,7 @@ class Trip_2_Opt:
                 self._number_of_solutions = self._number_of_solutions + number_of_possible_exchanges_for_trip
 
             self._number_of_solutions = int(self._number_of_solutions)
-            
+
         return self._number_of_solutions
 
     def next_solution(self):
@@ -51,13 +52,15 @@ class Trip_2_Opt:
             val = self.get_number_possible_solutions
             if val == 0:
                 print("NO 2-OPT-Solutions possible")
-                return Solution_Worthiness(self._solution.get_objective_value(), self._solution.get_max_trip_length(), self._solution.get_number_of_trips(), self._solution.get_prize(), Delta([]), Delta([]))
+                return Solution_Worthiness(self._solution.get_objective_value(), self._solution.get_max_trip_length(),
+                                           self._solution.get_number_of_trips(), self._solution.get_prize(), Delta([]),
+                                           Delta([]))
 
         if self._current_solution_index >= self._number_of_solutions:
             print("NO MORE SOLUTIONS AVAILABLE")
-            return Solution_Worthiness(self._solution.get_objective_value(), self._solution.get_max_trip_length(), self._solution.get_number_of_trips(), self._solution.get_prize(), Delta([]), Delta([]))
-
-
+            return Solution_Worthiness(self._solution.get_objective_value(), self._solution.get_max_trip_length(),
+                                       self._solution.get_number_of_trips(), self._solution.get_prize(), Delta([]),
+                                       Delta([]))
 
         # Calculate cost of exchange
 
@@ -65,7 +68,7 @@ class Trip_2_Opt:
 
         if self._edge_1_vertex_index > 0:
             vertex_p1 = trip[self._edge_1_vertex_index - 1]
-        else: 
+        else:
             vertex_p1 = self._solution._hotels[self._trip_index]
         vertex_q1 = trip[self._edge_1_vertex_index]
 
@@ -75,14 +78,17 @@ class Trip_2_Opt:
             vertex_p2 = self._solution._hotels[self._trip_index + 1]
         vertex_q2 = trip[self._edge_2_vertex_index - 1]
 
-        current_length =  self._instance.get_distance(vertex_p1, vertex_q1) + self._instance.get_distance(vertex_q2, vertex_p2)
+        current_length = self._instance.get_distance(vertex_p1, vertex_q1) + self._instance.get_distance(vertex_q2,
+                                                                                                         vertex_p2)
 
-        new_length = self._instance.get_distance(vertex_p1, vertex_q2) + self._instance.get_distance(vertex_q1, vertex_p2)
+        new_length = self._instance.get_distance(vertex_p1, vertex_q2) + self._instance.get_distance(vertex_q1,
+                                                                                                     vertex_p2)
 
-        #print("2-EXCH-delta_minus:" + str(current_length) + ":delta_plus:" + str(new_length))
+        # print("2-EXCH-delta_minus:" + str(current_length) + ":delta_plus:" + str(new_length))
 
         # Compute necessary operation
-        reverse = Reverse(vertex_q1, self._trip_index, self._edge_1_vertex_index, vertex_q2, self._trip_index, self._edge_2_vertex_index - 1)
+        reverse = Reverse(vertex_q1, self._trip_index, self._edge_1_vertex_index, vertex_q2, self._trip_index,
+                          self._edge_2_vertex_index - 1)
         delta = Delta([reverse])
 
         # Calculate new solution-worthiness
@@ -95,8 +101,8 @@ class Trip_2_Opt:
 
         new_objective_value = self._solution.get_objective_value() - current_length + new_length
 
-        worthiness = Solution_Worthiness(new_objective_value, new_max_trip_length, self._solution.get_number_of_trips(), self._solution.get_prize(), delta, Delta([]))
-
+        worthiness = Solution_Worthiness(new_objective_value, new_max_trip_length, self._solution.get_number_of_trips(),
+                                         self._solution.get_prize(), delta, Delta([]))
 
         # Set next solution
         self._current_solution_index = self._current_solution_index + 1
@@ -118,19 +124,3 @@ class Trip_2_Opt:
                     break
 
         return worthiness
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

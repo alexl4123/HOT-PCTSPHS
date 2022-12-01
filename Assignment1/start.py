@@ -18,13 +18,13 @@ from construction_heuristics.heuristic_deterministic import Combination_Of_Heuri
 from neighborhoods.neighborhood import Neighborhood
 from neighborhoods.trip_2_opt import Trip_2_Opt
 
+
 logger = logging.getLogger(logger_name)
 logger.setLevel(logging.INFO)
 handler = logging.StreamHandler(sys.stdout)
 formatter = logging.Formatter("[%(levelname)s][%(asctime)s] %(message)s")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
-
 
 argv = len(sys.argv)
 
@@ -43,9 +43,8 @@ if instance.is_instance_not_computable():
     logger.error("The given instance is not computable according to the necessary constraints!")
     quit()
 
-
-#initialization_procedure = Deterministic_Greedy_Initialization(instance)
-#initialization_procedure = Insertion_Heuristic_3(instance)
+# initialization_procedure = Deterministic_Greedy_Initialization(instance)
+# initialization_procedure = Insertion_Heuristic_3(instance)
 initialization_procedure = Combination_Of_Heuristics(instance)
 result = initialization_procedure.create_solution(0)
 result.write_solution_to_file(file_path_to_solutions)
@@ -76,5 +75,4 @@ for customer in instance.get_list_of_customers():
 
 for edge in instance.get_list_of_edges():
     print("Edge with vertex_a_id: " + str(edge.get_vertex_a().get_id()) + ", vertex_b_id: " + str(edge.get_vertex_b().get_id()) + " has weight " + str(edge.get_weight()))
-"""      
-
+"""

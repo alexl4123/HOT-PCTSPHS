@@ -1,19 +1,18 @@
-
 from construction_heuristics.initialization_procedure import Initialization_Procedure
 from construction_heuristics.heuristic_2 import Deterministic_Greedy_Initialization
 from construction_heuristics.heuristic_3 import Backtracking_Search
 from construction_heuristics.heuristic_4 import Insertion_Heuristic
 from construction_heuristics.heuristic_6 import Insertion_Heuristic_3
 
+
 class Combination_Of_Heuristics(Initialization_Procedure):
 
-    def create_solution(self, random_k = 0):
+    def create_solution(self, random_k=0):
 
         procedure_1 = Deterministic_Greedy_Initialization(self._instance)
         procedure_2 = Backtracking_Search(self._instance)
         procedure_3 = Insertion_Heuristic(self._instance)
         procedure_4 = Insertion_Heuristic_3(self._instance)
-
 
         if random_k == 0:
 
@@ -37,7 +36,3 @@ class Combination_Of_Heuristics(Initialization_Procedure):
             return best_solution
         else:
             return procedure_2.create_solution(random_k)
-                
-
-
-

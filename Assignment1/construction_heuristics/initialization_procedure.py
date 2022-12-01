@@ -1,5 +1,5 @@
-
 from framework.solution import Solution
+
 
 class Initialization_Procedure:
 
