@@ -1,0 +1,14 @@
+#ignore local Python environment
+env/**
+venv/**
+
+#ignore Pycharm ProjectFiles
+.idea/**
+
+#ignore all pychaches
+**__pycache__**
+
+#ignore distribution files
+build/**
+dist/**
+*.egg-info/**
