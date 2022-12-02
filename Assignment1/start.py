@@ -20,6 +20,7 @@ from neighborhoods.trip_2_opt import Trip_2_Opt
 from neighborhoods.remove_customer import Remove_Customer
 from neighborhoods.add_customer import Add_Customer
 from neighborhoods.swap_served_unserved_customer import Swap_Served_Unserved_Customer
+from neighborhoods.interchange_customers import Interchange_Customers
 
 
 logger = logging.getLogger(logger_name)
@@ -56,7 +57,8 @@ result.write_solution_to_file(file_path_to_solutions)
 #neighborhood = Trip_2_Opt(instance)
 #neighborhood = Remove_Customer(instance)
 #neighborhood = Add_Customer(instance)
-neighborhood = Swap_Served_Unserved_Customer(instance)
+#neighborhood = Swap_Served_Unserved_Customer(instance)
+neighborhood = Interchange_Customers(instance)
 
 randomization_k = 0
 search_alg = Local_Search(instance, randomization_k)
