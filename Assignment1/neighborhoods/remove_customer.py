@@ -1,7 +1,9 @@
+
+from neighborhoods.neighborhood import Neighborhood
 from framework.solution import Delta, Solution_Worthiness, Reverse, Remove
 
 
-class Remove_Customer:
+class Remove_Customer(Neighborhood):
 
     def __init__(self, instance):
         self._instance = instance
@@ -80,7 +82,7 @@ class Remove_Customer:
 
         # Calculate new solution worthiness
         left = self._solution.left_neighbor_customer(self._trip_index, self._trip_position_index)
-        right = self._solution.left_neighbor_customer(self._trip_index, self._trip_position_index)
+        right = self._solution.right_neighbor_customer(self._trip_index, self._trip_position_index)
 
         old_length = self._instance.get_distance(left, obj)  + self._instance.get_distance(obj, right)
         new_length = self._instance.get_distance(left, right)
@@ -119,5 +121,6 @@ class Remove_Customer:
         worthiness = Solution_Worthiness(new_objective_value, new_max_trip_length, self._solution.get_number_of_trips(), new_prize, delta, Delta([]))
 
         self._trip_position_index += 1
+        self._current_solution_index += 1
 
         return worthiness

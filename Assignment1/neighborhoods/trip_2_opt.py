@@ -1,7 +1,10 @@
+
+from neighborhoods.neighborhood import Neighborhood
+
 from framework.solution import Delta, Solution_Worthiness, Reverse
 
 
-class Trip_2_Opt:
+class Trip_2_Opt(Neighborhood):
 
     def __init__(self, instance):
         self._instance = instance
@@ -49,7 +52,7 @@ class Trip_2_Opt:
     def next_solution(self):
 
         if not self._number_of_solutions:
-            val = self.get_number_possible_solutions
+            val = self.get_number_possible_solutions()
             if val == 0:
                 print("NO 2-OPT-Solutions possible")
                 return Solution_Worthiness(self._solution.get_objective_value(), self._solution.get_max_trip_length(),
