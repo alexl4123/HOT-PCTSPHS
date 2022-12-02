@@ -12,13 +12,12 @@ class Add_Hotel(Neighborhood):
         self._trip_index = 0
         self._trip_position_index = 0
         self._hotels_index = 0
-        self._hotels = []
+        self._hotels = instance.get_list_of_hotels()
 
         self._current_solution_index = 0
 
     def set_solution(self, solution):
         self._solution = solution
-        self._hotels = solution._hotels
 
     def reset_indexes(self):
 
