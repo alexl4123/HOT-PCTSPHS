@@ -95,7 +95,7 @@ class Remove_Hotel(Neighborhood):
         # Recalculate new prize
         new_prize = self._solution._prize
 
-        new_objective_value = self._solution.get_objective_value() - old_length + new_length + hotel.get_fee()
+        new_objective_value = self._solution.get_objective_value() - old_length + new_length - hotel.get_fee()
 
 
         worthiness = Solution_Worthiness(new_objective_value, new_max_trip_length, self._solution.get_number_of_trips(), new_prize, delta, Delta([]))

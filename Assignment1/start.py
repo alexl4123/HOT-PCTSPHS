@@ -23,6 +23,7 @@ from neighborhoods.swap_served_unserved_customer import Swap_Served_Unserved_Cus
 from neighborhoods.interchange_customers import Interchange_Customers
 from neighborhoods.insert_customer import Insert_Customer
 from neighborhoods.remove_hotel import Remove_Hotel
+from neighborhoods.add_hotel import Add_Hotel
 
 logger = logging.getLogger(logger_name)
 logger.setLevel(logging.INFO)
@@ -61,7 +62,8 @@ result.write_solution_to_file(file_path_to_solutions)
 #neighborhood = Swap_Served_Unserved_Customer(instance)
 #neighborhood = Interchange_Customers(instance)
 #neighborhood = Insert_Customer(instance)
-neighborhood = Remove_Hotel(instance)
+#neighborhood = Remove_Hotel(instance)
+neighborhood = Add_Hotel(instance)
 
 randomization_k = 0
 search_alg = Local_Search(instance, randomization_k)
