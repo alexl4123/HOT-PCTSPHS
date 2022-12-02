@@ -21,6 +21,7 @@ from neighborhoods.remove_customer import Remove_Customer
 from neighborhoods.add_customer import Add_Customer
 from neighborhoods.swap_served_unserved_customer import Swap_Served_Unserved_Customer
 from neighborhoods.interchange_customers import Interchange_Customers
+from neighborhoods.insert_customer import Insert_Customer
 
 
 logger = logging.getLogger(logger_name)
@@ -58,7 +59,8 @@ result.write_solution_to_file(file_path_to_solutions)
 #neighborhood = Remove_Customer(instance)
 #neighborhood = Add_Customer(instance)
 #neighborhood = Swap_Served_Unserved_Customer(instance)
-neighborhood = Interchange_Customers(instance)
+#neighborhood = Interchange_Customers(instance)
+neighborhood = Insert_Customer(instance)
 
 randomization_k = 0
 search_alg = Local_Search(instance, randomization_k)
