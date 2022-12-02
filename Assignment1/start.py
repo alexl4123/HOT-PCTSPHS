@@ -25,6 +25,7 @@ from neighborhoods.insert_customer import Insert_Customer
 from neighborhoods.remove_hotel import Remove_Hotel
 from neighborhoods.add_hotel import Add_Hotel
 from neighborhoods.exchange_hotel import Exchange_Hotel
+from neighborhoods.move_hotel import Move_Hotel
 
 logger = logging.getLogger(logger_name)
 logger.setLevel(logging.INFO)
@@ -52,9 +53,11 @@ if instance.is_instance_not_computable():
 
 # initialization_procedure = Deterministic_Greedy_Initialization(instance)
 # initialization_procedure = Insertion_Heuristic_3(instance)
-initialization_procedure = Combination_Of_Heuristics(instance)
-result = initialization_procedure.create_solution(0)
-result.write_solution_to_file(file_path_to_solutions)
+#initialization_procedure = Combination_Of_Heuristics(instance)
+#result = initialization_procedure.create_solution(0)
+#result.write_solution_to_file(file_path_to_solutions)
+
+initialization_procedure = Backtracking_Search(instance)
 
 
 #neighborhood = Trip_2_Opt(instance)
@@ -64,8 +67,9 @@ result.write_solution_to_file(file_path_to_solutions)
 #neighborhood = Interchange_Customers(instance)
 #neighborhood = Insert_Customer(instance)
 #neighborhood = Remove_Hotel(instance)
-#neighborhood = Add_Hotel(instance)
-neighborhood = Exchange_Hotel(instance)
+neighborhood = Add_Hotel(instance)
+#neighborhood = Exchange_Hotel(instance)
+#neighborhood = Move_Hotel(instance)
 
 randomization_k = 0
 search_alg = Local_Search(instance, randomization_k)

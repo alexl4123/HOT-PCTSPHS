@@ -80,9 +80,12 @@ class Exchange_Hotel(Neighborhood):
         old_hotel = sol_hotels[self._trip_index]
 
         # Compute necessary operations
-        add = Add(hotel, self._trip_index, 0)
-        rmv = Remove(old_hotel, self._trip_index, self._trip_position_index)
-        delta = Delta([add,rmv])
+        if hotel.get_id() != old_hotel.get_id():
+            add = Add(hotel, self._trip_index, 0)
+            rmv = Remove(old_hotel, self._trip_index, self._trip_position_index)
+            delta = Delta([add,rmv])
+        else:
+            delta = Delta([])
 
         # Calculate new solution worthiness
         left = self._solution.left_neighbor_hotel(self._trip_index)

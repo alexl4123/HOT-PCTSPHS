@@ -231,6 +231,30 @@ class Solution:
 
         return max_trip_length
 
+
+    def left_neighbor_hotel(self, trip_index):
+        if trip_index == 0:
+            return None
+        else:
+            left_trip = self._trips[trip_index - 1]
+
+            if len(left_trip) > 0:
+                return left_trip[len(left_trip) - 1]
+            else:
+                return self._hotels[trip_index - 1]
+
+    def right_neighbor_hotel(self, trip_index):
+        if trip_index == len(self._hotels) - 1:
+            return None
+        else:
+            right_trip = self._trips[trip_index]
+
+            if len(right_trip) > 0:
+                return right_trip[0]
+            else:
+                return self._hotels[trip_index + 1]
+
+
     def left_neighbor_customer(self, trip_index, trip_index_position):
         trip = self._trips[trip_index]
 
@@ -242,9 +266,9 @@ class Solution:
     def right_neighbor_customer(self, trip_index, trip_index_position):
         trip = self._trips[trip_index]
 
-        if trip_index_position == len(trip) - 1:
+        if trip_index_position >= len(trip) - 1:
             return self._hotels[trip_index + 1]
-        else:
+        elif trip_index_position < len(trip) - 1:
             return trip[trip_index_position + 1]
 
     def _reverse_customers_from_same_trip(self, trip_index, start_trip_index_position, end_trip_index_position):
@@ -424,15 +448,16 @@ class Solution:
             print(trip_position_index)
             logger.error("Cannot remove, due to index out of bounds for obj: " + str(obj.get_id()))
 
-    def _add_hotel(self, obj, trip_index, trip_position_index, reverse_delta):
-        # ------- ADD SINGLE HOTEL ------------
+
+    def get_left_right_length_of_trip(self, trip_index, trip_position_index, obj):
+
         old_trip = self._trips[trip_index]
+        old_trip_value = self._trip_lengths[trip_index]
 
         new_left = old_trip[:trip_position_index]
         new_right = old_trip[trip_position_index:]
 
         # ----------------------------------- RECALC - TRIP - VALUES - BEGIN --------------------
-        old_trip_value = self._trip_lengths[trip_index]
         # TODO: This part of delta-eval is in O(n)!!!
         if len(new_left) <= len(new_right) and len(new_left) > 0 and len(new_right) > 0:
 
@@ -488,7 +513,21 @@ class Solution:
                 new_left_val = old_trip_value - self._instance.get_distance(new_left[len(new_left) - 1], self._hotels[
                     trip_index + 1]) + self._instance.get_distance(new_left[len(new_left) - 1], obj)
 
-        # ----------- CALCULATION --------
+        return (new_left_val, new_right_val)
+
+
+
+    def _add_hotel(self, obj, trip_index, trip_position_index, reverse_delta):
+        # ------- ADD SINGLE HOTEL ------------
+        old_trip = self._trips[trip_index]
+        old_trip_value = self._trip_lengths[trip_index]
+
+        new_left = old_trip[:trip_position_index]
+        new_right = old_trip[trip_position_index:]
+
+        # ----------- CALCULATION -------
+
+        (new_left_val, new_right_val) = self.get_left_right_length_of_trip(trip_index, trip_position_index, obj)
 
         trips_size = self._trips_size + 1
 
