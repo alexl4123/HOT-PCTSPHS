@@ -10,6 +10,10 @@ logger = logging.getLogger(logger_name)
 
 
 class Backtracking_Search(Initialization_Procedure):
+    """
+    Tries to do a breadth limited backtracking search, thereby increasing the speed, but it may not find a solution.
+    Breadth limited means in this context, that it backtracks if it cannot progress further, if it does so it only considers the (randomized) nearest neighbor and the nearest hotel, so in the worst possible outcome we have a branching factor of 2.
+    """
 
     def create_solution(self, random_k=0):
 

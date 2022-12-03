@@ -34,7 +34,14 @@ class Solution_Worthiness_Insertion_Heuristic(Solution_Worthiness):
                                                        unserved_customer_index)
 
 
-class Insertion_Heuristic(Initialization_Procedure):
+class Insertion_Heuristic_Sum_Of_Trips(Initialization_Procedure):
+    """
+    Is an insertion heuristic, that works according to the following principle:
+    1.) It starts with an ''empty'' tour (i.e. 0[]0)
+    2.) Tries to add as many customers as possible, s.t. constraint 1 is satisfied (the customer is chosen, s.t. the total sum of trips is minimized)
+    3.) If one cannot add anymore customers without destroying constraint 1, then try to add hotels
+    4.) If also adding hotels doesn't work, try swapping
+    """
 
     def create_solution(self, random_k=0):
 

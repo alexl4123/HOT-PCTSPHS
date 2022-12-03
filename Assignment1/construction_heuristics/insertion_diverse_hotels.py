@@ -34,7 +34,13 @@ class Solution_Worthiness_Insertion_Heuristic(Solution_Worthiness):
                                                        unserved_customer_index)
 
 
-class Insertion_Heuristic_3(Initialization_Procedure):
+class Insertion_Diverse_Hotels(Initialization_Procedure):
+    """
+    Basically is a hybrid between insertion and greedy heuristic
+    1.) It starts with the empty solution (i.e. 0[]0)
+    2.) It then adds customers until constraint 1 is violated
+    3.) It then tries to add a best fitting hotel at the very last position at the last trip.
+    """
 
     def create_solution(self, random_k=0):
 
@@ -69,6 +75,8 @@ class Insertion_Heuristic_3(Initialization_Procedure):
             failed = True
 
             if cur_best:
+                # Adding customers
+
                 base_mode = False
                 base_mode_reverse_delta = None
 
@@ -88,6 +96,9 @@ class Insertion_Heuristic_3(Initialization_Procedure):
                     for unserved_customer_index in cur_best.get_unserved_customer_indexes():
                         del self.unserved_customers[unserved_customer_index]
             elif change_base_index_2 < len(self._instance._hotels_list):
+                # Adding hotels
+                # Tries to add a hotel, but only looks at the very last trip
+
                 failed = False
 
                 if change_base_mode_reverse_delta:

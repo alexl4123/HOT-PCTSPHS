@@ -6,9 +6,11 @@ from framework.constants import logger_name
 logger = logging.getLogger(logger_name)
 
 
-class Deterministic_Greedy_Initialization(Initialization_Procedure):
+class Greedy_Nearest_Neighbor_Initialization(Initialization_Procedure):
     """
-    Deprecated, use Backtracking_Search instead
+    Greedy nearest neighbor initialization procedure.
+    1.) Constructs a greedy-nearest-neighbor-tour while ignoring all constraints
+    2.) Tries to repair solution, by inserting hotels
     """
 
     def create_solution(self, random_k=0):
@@ -23,6 +25,7 @@ class Deterministic_Greedy_Initialization(Initialization_Procedure):
 
         current_trip_value = 0
 
+        # Until C3 is satisfied -> insert greedily nearest neighbors
         while not solution.is_c3_satisfied():
             nearest_unserved_customer = solution.get_nearest_unserved_customer(current_location, random_k)
             d_n_c = inst.get_distance(current_location, nearest_unserved_customer)
@@ -44,6 +47,8 @@ class Deterministic_Greedy_Initialization(Initialization_Procedure):
         trip_index = 0
         trip_index_position = 0
 
+        # Try to repair the solution by inserting hotels
+        # Thereby going through all customers, and if there is a customer, where it is then not fulfilled, we try to insert a hotel -> if this fails we abort
         while index <= upper_index:
             if index == lower_index:
                 if index < upper_index:
@@ -98,6 +103,6 @@ class Deterministic_Greedy_Initialization(Initialization_Procedure):
         logger.info("Greedy-CH found solution with obj-value of " + str(solution.get_objective_value()))
         logger.debug(
             "Greedy-CH solution verified by slow calculation:" + str(solution.slow_objective_values_calculation()))
-        logger.info(solution.to_string())
+        logger.debug(solution.to_string())
 
         return solution

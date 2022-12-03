@@ -1,18 +1,18 @@
 from construction_heuristics.initialization_procedure import Initialization_Procedure
-from construction_heuristics.heuristic_2 import Deterministic_Greedy_Initialization
-from construction_heuristics.heuristic_3 import Backtracking_Search
-from construction_heuristics.heuristic_4 import Insertion_Heuristic
-from construction_heuristics.heuristic_6 import Insertion_Heuristic_3
+from construction_heuristics.greedy_nearest_neighbor_initialization import Greedy_Nearest_Neighbor_Initialization
+from construction_heuristics.backtracking_search import Backtracking_Search
+from construction_heuristics.insertion_heuristic_sum_of_trips import Insertion_Heuristic_Sum_Of_Trips
+from construction_heuristics.insertion_diverse_hotels import Insertion_Diverse_Hotels
 
 
 class Combination_Of_Heuristics(Initialization_Procedure):
 
     def create_solution(self, random_k=0):
 
-        procedure_1 = Deterministic_Greedy_Initialization(self._instance)
+        procedure_1 = Greedy_Nearest_Neighbor_Initialization(self._instance)
         procedure_2 = Backtracking_Search(self._instance)
-        procedure_3 = Insertion_Heuristic(self._instance)
-        procedure_4 = Insertion_Heuristic_3(self._instance)
+        procedure_3 = Insertion_Heuristic_Sum_Of_Trips(self._instance)
+        procedure_4 = Insertion_Diverse_Hotels(self._instance)
 
         if random_k == 0:
 
