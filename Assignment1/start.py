@@ -13,6 +13,7 @@ from framework.test_instances import Tester
 
 from search_algorithms.local_search import Local_Search, Step_Function_Type
 from search_algorithms.vnd import Vnd
+from search_algorithms.grasp import Grasp
 
 from construction_heuristics.greedy_nearest_neighbor_initialization import Greedy_Nearest_Neighbor_Initialization
 from construction_heuristics.backtracking_search import Backtracking_Search
@@ -259,6 +260,30 @@ class Start_PCTSPHS:
     def start_grasp_search(self, random_k, neighborhood):
         print("start-grasp-search..." + str(random_k) + "::" + str(neighborhood))
 
+
+        for instance in self._instances:
+
+            instance_base_name = instance.get_basename()
+
+            grasp = Grasp(instance, random_k)
+            result = grasp.start_search(None, None, None, self._max_runtime)
+
+            result.get_best_solution().write_solution_to_file(file_path_to_solutions + "grasp")
+
+            header_line = ["Instance_Name","Number_Of_Customers","Number_Of_Hotels","Objective_Value","Sum_of_Trips","Penalties","Hotel_Fees","Max_Trip_Length","Number_Of_Trips","Prize","Time","Trace"]
+
+            solution = result.get_best_solution()
+            instance_name = instance.get_instance_name()
+
+            content_line = [str(instance_name), str(len(instance._customers_list)), str(len(instance._hotels_list)), str(solution._objective_value), str(solution._sum_of_trips), str(solution._penalties), str(solution._hotel_fees), str(solution._max_trip_length), str(len(solution._trips)), str(solution._prize), str(result.get_time()), str(result.get_trace())]
+
+            result.write_result_metadata_to_file(file_path_to_solutions + "grasp", header_line, content_line)
+
+
+
+
+
+
     def start_vnd_search(self, pre_load):
         print("start-vnd-search")
 
@@ -279,7 +304,7 @@ class Start_PCTSPHS:
                 initialization_procedure = Backtracking_Search(instance)
                 solution = initialization_procedure.create_solution().get_best_solution()
 
-            neighborhoods = [Remove_Customer(instance), Add_Customer(instance),Insert_Customer(instance), Swap_Served_Unserved_Customer(instance), Interchange_Customers(instance), Trip_2_Opt(instance), Remove_Hotel(instance), Add_Hotel(instance),Exchange_Hotel(instance), Move_Hotel(instance)]
+            neighborhoods = [Interchange_Customers(instance),Insert_Customer(instance), Trip_2_Opt(instance), Swap_Served_Unserved_Customer(instance), Remove_Customer(instance), Add_Customer(instance), Remove_Hotel(instance), Add_Hotel(instance),Exchange_Hotel(instance), Move_Hotel(instance)]
             
             vnd = Vnd(instance, 0)
             #vnd = Local_Search(instance, 0)

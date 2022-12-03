@@ -12,7 +12,7 @@ from framework.result import Result
 
 class Combination_Of_Heuristics(Initialization_Procedure):
 
-    def create_solution(self, random_k=0):
+    def create_solution(self, random_k=0, output = True):
 
         procedure_1 = Greedy_Nearest_Neighbor_Initialization(self._instance)
         procedure_2 = Backtracking_Search(self._instance)
@@ -25,10 +25,10 @@ class Combination_Of_Heuristics(Initialization_Procedure):
 
             starting_time = time.time()
 
-            result_1 = procedure_1.create_solution()
-            result_2 = procedure_2.create_solution()
-            result_3 = procedure_3.create_solution()
-            result_4 = procedure_4.create_solution()
+            result_1 = procedure_1.create_solution(output)
+            result_2 = procedure_2.create_solution(output)
+            result_3 = procedure_3.create_solution(output)
+            result_4 = procedure_4.create_solution(output)
 
             if result_1.get_best_solution():
                 best_result = result_1
@@ -43,4 +43,4 @@ class Combination_Of_Heuristics(Initialization_Procedure):
 
             return Result(best_result.get_best_solution(), [best_result.get_best_solution().get_objective_value()], duration)
         else:
-            return procedure_2.create_solution(random_k)
+            return procedure_2.create_solution(random_k, output)

@@ -19,7 +19,7 @@ class Local_Search(Algorithm):
 
         self._random_k = random_k
 
-    def start_search(self, init_solution, step_function_type, neighborhoods, max_runtime, termination_criterion=1000, starting_time = None):
+    def start_search(self, init_solution, step_function_type, neighborhoods, max_runtime, termination_criterion=1000, starting_time = None, output=True):
 
         neighborhood = neighborhoods[0]
 
@@ -69,9 +69,10 @@ class Local_Search(Algorithm):
 
         checked_values = solution.slow_objective_values_calculation()
 
-        logger.info("Local search found solution with objective value: " + str(solution.get_objective_value()))
-        logger.info("Local search solution verfification with slow calculation: " + str(checked_values))
-        logger.info("Trace:" + str(trace))
+        if output:
+            logger.info("Local search found solution with objective value: " + str(solution.get_objective_value()))
+            logger.info("Local search solution verfification with slow calculation: " + str(checked_values))
+            logger.info("Trace:" + str(trace))
 
         if checked_values[0] != solution.get_objective_value():
             logger.error("Likely error in delta-evaluation!")

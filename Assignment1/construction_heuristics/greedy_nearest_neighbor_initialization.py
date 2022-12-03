@@ -16,7 +16,7 @@ class Greedy_Nearest_Neighbor_Initialization(Initialization_Procedure):
     2.) Tries to repair solution, by inserting hotels
     """
 
-    def create_solution(self, random_k=0):
+    def create_solution(self, random_k=0, output=True):
 
         inst = self._instance
 
@@ -104,12 +104,13 @@ class Greedy_Nearest_Neighbor_Initialization(Initialization_Procedure):
                 trip_index_position = trip_index_position + 1
                 trip_size = trip_size_new
 
-        logger.debug("Check all constraints verified, C1: " + str(solution.is_c1_satisfied()) + ", C2:" + str(
-            solution.is_c2_satisfied()) + ", C3:" + str(solution.is_c3_satisfied()))
-        logger.info("Greedy-CH found solution with obj-value of " + str(solution.get_objective_value()))
-        logger.debug(
-            "Greedy-CH solution verified by slow calculation:" + str(solution.slow_objective_values_calculation()))
-        logger.debug(solution.to_string())
+        if output:
+            logger.debug("Check all constraints verified, C1: " + str(solution.is_c1_satisfied()) + ", C2:" + str(
+                solution.is_c2_satisfied()) + ", C3:" + str(solution.is_c3_satisfied()))
+            logger.info("Greedy-CH found solution with obj-value of " + str(solution.get_objective_value()))
+            logger.debug(
+                "Greedy-CH solution verified by slow calculation:" + str(solution.slow_objective_values_calculation()))
+            logger.debug(solution.to_string())
 
         duration = time.time() - starting_time
         return Result(solution, [solution.get_objective_value()], duration)

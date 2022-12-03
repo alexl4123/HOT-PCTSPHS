@@ -44,7 +44,7 @@ class Insertion_Diverse_Hotels(Initialization_Procedure):
     3.) It then tries to add a best fitting hotel at the very last position at the last trip.
     """
 
-    def create_solution(self, random_k=0):
+    def create_solution(self, random_k=0, output = True):
 
         self._random_k = random_k
 
@@ -138,12 +138,13 @@ class Insertion_Diverse_Hotels(Initialization_Procedure):
         duration = time.time() - starting_time
 
         if solution.is_c1_satisfied() and solution.is_c2_satisfied() and solution.is_c3_satisfied():
-            logger.debug("Check all constraints verified, C1: " + str(solution.is_c1_satisfied()) + ", C2:" + str(
-                solution.is_c2_satisfied()) + ", C3:" + str(solution.is_c3_satisfied()))
-            logger.info("Insertion-3 found solution with obj-value of " + str(solution.get_objective_value()))
-            logger.debug("Insertion-3 solution verified by slow calculation:" + str(
-                solution.slow_objective_values_calculation()))
-            logger.info(solution.to_string())
+            if output:
+                logger.debug("Check all constraints verified, C1: " + str(solution.is_c1_satisfied()) + ", C2:" + str(
+                    solution.is_c2_satisfied()) + ", C3:" + str(solution.is_c3_satisfied()))
+                logger.info("Insertion-3 found solution with obj-value of " + str(solution.get_objective_value()))
+                logger.debug("Insertion-3 solution verified by slow calculation:" + str(
+                    solution.slow_objective_values_calculation()))
+                logger.info(solution.to_string())
             return Result(solution, [solution.get_objective_value()], duration)
         else:
             logger.error("Insertion-3 Heuristic could not find a solution!")

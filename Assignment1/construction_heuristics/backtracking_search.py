@@ -17,7 +17,7 @@ class Backtracking_Search(Initialization_Procedure):
     Breadth limited means in this context, that it backtracks if it cannot progress further, if it does so it only considers the (randomized) nearest neighbor and the nearest hotel, so in the worst possible outcome we have a branching factor of 2.
     """
 
-    def create_solution(self, random_k=0):
+    def create_solution(self, random_k=0, output = True):
 
         self._random_k = random_k
 
@@ -36,12 +36,13 @@ class Backtracking_Search(Initialization_Procedure):
         duration = time.time() - starting_time
 
         if result:
-            logger.debug("Check all constraints verified, C1: " + str(solution.is_c1_satisfied()) + ", C2:" + str(
-                solution.is_c2_satisfied()) + ", C3:" + str(solution.is_c3_satisfied()))
-            logger.info("Backtracking found solution with obj-value of " + str(solution.get_objective_value()))
-            logger.debug("Backtracking solution verified by slow calculation:" + str(
-                solution.slow_objective_values_calculation()))
-            logger.info(solution.to_string())
+            if output:
+                logger.debug("Check all constraints verified, C1: " + str(solution.is_c1_satisfied()) + ", C2:" + str(
+                    solution.is_c2_satisfied()) + ", C3:" + str(solution.is_c3_satisfied()))
+                logger.info("Backtracking found solution with obj-value of " + str(solution.get_objective_value()))
+                logger.debug("Backtracking solution verified by slow calculation:" + str(
+                    solution.slow_objective_values_calculation()))
+                logger.info(solution.to_string())
 
             return Result(solution, [solution.get_objective_value()], duration)
         else:

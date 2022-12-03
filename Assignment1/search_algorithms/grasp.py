@@ -1,10 +1,28 @@
-from time import process_time
-
+import time
 import logging
 
+from construction_heuristics.combination_of_heuristics import Combination_Of_Heuristics
+
 from framework.solution import Delta, Solution_Worthiness
+from framework.result import Result
 from framework.constants import logger_name
-from search_algorithms.algorithm import Algorithm, Algorithm_Result
+
+from search_algorithms.algorithm import Algorithm
+from search_algorithms.local_search import Local_Search, Step_Function_Type
+from search_algorithms.vnd import Vnd
+
+from neighborhoods.neighborhood import Neighborhood
+from neighborhoods.trip_2_opt import Trip_2_Opt
+from neighborhoods.remove_customer import Remove_Customer
+from neighborhoods.add_customer import Add_Customer
+from neighborhoods.swap_served_unserved_customer import Swap_Served_Unserved_Customer
+from neighborhoods.interchange_customers import Interchange_Customers
+from neighborhoods.insert_customer import Insert_Customer
+from neighborhoods.remove_hotel import Remove_Hotel
+from neighborhoods.add_hotel import Add_Hotel
+from neighborhoods.exchange_hotel import Exchange_Hotel
+from neighborhoods.move_hotel import Move_Hotel
+
 
 logger = logging.getLogger(logger_name)
 
@@ -16,58 +34,66 @@ class Grasp(Algorithm):
 
         self._random_k = random_k
 
-    # TODO -> Rename to ''start_search'', as this makes life easier for experiments
-    def start_grasp(self, initialization_procedure, step_function_type, neighborhood, termination_criterion=100):
+    def start_search(self, init_solution, step_function_type, neighborhoods, max_runtime, termination_criterion=10, starting_time = None, output=True):
         solution = None
-        # TODO -> Would be better to give this as an argument
-        max_runtime = 15 * 60  # max 15 minutes
-        step1 = 0
-        total_process_time = 0
-        process_start = process_time()
-        while total_process_time < max_runtime and step1 < termination_criterion:
-            # here I simply copy from local_search.py start_search method just with additional runtime criterion
-            initial_randomized_solution = initialization_procedure.create_solution(self._random_k)
-            current_best_worthiness = Solution_Worthiness(initial_randomized_solution.get_objective_value(),
-                                                          initial_randomized_solution.get_max_trip_length(),
-                                                          initial_randomized_solution.get_number_of_trips(),
-                                                          initial_randomized_solution.get_prize(),
-                                                          Delta([]),
-                                                          Delta([]))
-            trace = [initial_randomized_solution.get_objective_value()]
+        iteration = 0
 
-            step2 = 0
+        trace = []
 
-            last_objective_value = 0
-            current_objective_value = current_best_worthiness.get_objective_value()
+        if not starting_time:
+            starting_time = time.time()
 
-            # TODO:
-            # I think it would be better to just use local search here (makes life easier, but we have to refactor something in Local Search
-            # In local search: We have to add the argument for the starting solution (that the solution is not generated), then we can give the initial_randomized_solution as an argument
-            # e.g. ls =  Local_Search(instance, random_k)
-            # res = ls.start_search(initial_randomized_solution, step_function_type, neighborhood, termination_criterion)
-            while step2 < termination_criterion and last_objective_value != current_objective_value:
-                new_worthiness = self._step_function(neighborhood, initial_randomized_solution, step_function_type)
 
-                last_objective_value = current_objective_value
-                current_objective_value = new_worthiness.get_objective_value()
+        instance = self._instance
 
-                if new_worthiness.get_objective_value() < current_best_worthiness.get_objective_value():
-                    # If it is better, apply changes
-                    initial_randomized_solution.change_from_delta(new_worthiness.get_delta())
-                    current_best_worthiness = new_worthiness
+        while iteration < termination_criterion:
 
-                trace.append(current_best_worthiness.get_objective_value())
 
-                step2 = step2 + 1
+            randomized_procedure = Combination_Of_Heuristics(instance)
+            retry = 0
+            while retry < 10:
+                result = randomized_procedure.create_solution(self._random_k, False)
+                if result.get_best_solution():
+                    break
 
-            solution = initial_randomized_solution
-            step1 += 1
-            process_end = process_time()
-            total_process_time += process_end - process_start
-            process_start = process_end
+            if not result.get_best_solution():
+                continue
 
-        logger.info("GRASP found solution with objective value: " + str(solution.get_objective_value()))
-        logger.info("GRASP solution verfification with slow calculation: " + str(
-            solution.slow_objective_values_calculation()))
 
-        return Algorithm_Result(initial_randomized_solution, trace)
+            neighborhoods = [Interchange_Customers(instance),Insert_Customer(instance), Trip_2_Opt(instance), Swap_Served_Unserved_Customer(instance), Remove_Customer(instance), Add_Customer(instance), Remove_Hotel(instance), Add_Hotel(instance),Exchange_Hotel(instance), Move_Hotel(instance)]
+
+            vnd = Vnd(instance, 0)
+            result = vnd.start_search(result.get_best_solution(), Step_Function_Type.FIRST, neighborhoods,  max_runtime, output = False)
+
+            if not solution or result.get_best_solution().get_objective_value() < solution.get_objective_value():
+                solution = result.get_best_solution()
+
+            trace.append(result.get_best_solution().get_objective_value())
+
+            iteration += 1
+
+            current_time = time.time()
+            delta = current_time - starting_time
+            if delta > max_runtime:
+                break
+
+
+        duration = time.time() - starting_time
+        if duration > max_runtime:
+            logger.info("Runtime limit reached, actual runtime: " + max_runtime)
+
+            duration = max_runtime
+
+        checked_values = solution.slow_objective_values_calculation()
+        if output:
+            logger.info("GRASP found solution with objective value: " + str(solution.get_objective_value()))
+            logger.info("GRASP solution verfification with slow calculation: " + str(checked_values[0]))
+            logger.info("GRASP Trace:" + str(trace))
+
+        if checked_values[0] != solution.get_objective_value():
+            logger.error("Likely error in delta-evaluation!")
+            quit()
+
+        return Result(solution, trace, duration)
+
+

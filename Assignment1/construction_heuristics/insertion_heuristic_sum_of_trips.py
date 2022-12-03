@@ -45,7 +45,7 @@ class Insertion_Heuristic_Sum_Of_Trips(Initialization_Procedure):
     4.) If also adding hotels doesn't work, try swapping
     """
 
-    def create_solution(self, random_k=0):
+    def create_solution(self, random_k=0, output=True):
 
         self._random_k = random_k
 
@@ -238,12 +238,13 @@ class Insertion_Heuristic_Sum_Of_Trips(Initialization_Procedure):
                 return Result(False, [-1], duration)
 
         if solution.is_c1_satisfied() and solution.is_c2_satisfied() and solution.is_c3_satisfied():
-            logger.debug("Check all constraints verified, C1: " + str(solution.is_c1_satisfied()) + ", C2:" + str(
-                solution.is_c2_satisfied()) + ", C3:" + str(solution.is_c3_satisfied()))
-            logger.info("Insertion found solution with obj-value of " + str(solution.get_objective_value()))
-            logger.debug(
-                "Insertion solution verified by slow calculation:" + str(solution.slow_objective_values_calculation()))
-            logger.info(solution.to_string())
+            if output:
+                logger.debug("Check all constraints verified, C1: " + str(solution.is_c1_satisfied()) + ", C2:" + str(
+                    solution.is_c2_satisfied()) + ", C3:" + str(solution.is_c3_satisfied()))
+                logger.info("Insertion found solution with obj-value of " + str(solution.get_objective_value()))
+                logger.debug(
+                    "Insertion solution verified by slow calculation:" + str(solution.slow_objective_values_calculation()))
+                logger.info(solution.to_string())
 
             duration = time.time() - starting_time
             return Result(solution, [solution.get_objective_value()], duration)

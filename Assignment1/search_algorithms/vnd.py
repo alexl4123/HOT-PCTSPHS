@@ -21,7 +21,7 @@ class Vnd(Algorithm):
 
         self._random_k = random_k
 
-    def start_search(self, init_solution, step_function_type, neighborhoods, max_runtime, termination_criterion=1000, starting_time = None):
+    def start_search(self, init_solution, step_function_type, neighborhoods, max_runtime, termination_criterion=1000, starting_time = None, output=True):
 
         neighborhood_number = 0
         max_neighborhood_number = len(neighborhoods) - 1 
@@ -39,7 +39,7 @@ class Vnd(Algorithm):
 
             cur_neighborhood = neighborhoods[neighborhood_number]
             local_search = Local_Search(self._instance, 0)
-            result = local_search.start_search(solution, step_function_type, [cur_neighborhood], termination_criterion, int(max_runtime/10))
+            result = local_search.start_search(solution, step_function_type, [cur_neighborhood], termination_criterion, int(max_runtime/10), output=False)
 
             if result.get_best_solution().get_objective_value() < old_objective_value:
                 neighborhood_number = 0
@@ -64,9 +64,10 @@ class Vnd(Algorithm):
 
         checked_values = solution.slow_objective_values_calculation()
 
-        logger.info("VND search found solution with objective value: " + str(solution.get_objective_value()))
-        logger.info("VND search solution verfification with slow calculation: " + str(checked_values))
-        logger.info("VND Trace:" + str(trace))
+        if output:
+            logger.info("VND search found solution with objective value: " + str(solution.get_objective_value()))
+            logger.info("VND search solution verfification with slow calculation: " + str(checked_values))
+            logger.info("VND Trace:" + str(trace))
 
         if checked_values[0] != solution.get_objective_value():
             logger.error("Likely error in delta-evaluation!")
