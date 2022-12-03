@@ -259,7 +259,6 @@ class Instance:
             nearest_hotels[key] = nc_h
             nearest_customers[key] = nc_c
 
-        print("precomputation done")
 
         self._nearest_neighbors = nearest_neighbors
         self._nearest_hotels = nearest_hotels

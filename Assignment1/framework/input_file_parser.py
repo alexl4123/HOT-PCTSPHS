@@ -18,7 +18,7 @@ from framework.instance import Instance
 logger = logging.getLogger(logger_name)
 
 
-class Input_file_parser:
+class Input_File_Parser:
 
     def __init__(self, input_file_path):
         self._input_file_path = input_file_path
@@ -63,6 +63,8 @@ class Input_file_parser:
         self._parse_edges(input_file, instance, num_edges)
 
         input_file.close()
+
+        instance.precompute_all_nearest_neighbors()
 
         return instance
 
