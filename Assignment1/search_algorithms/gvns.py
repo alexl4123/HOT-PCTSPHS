@@ -24,10 +24,13 @@ class Gvns(Algorithm):
 
     def start_gvns(self, initialization_procedure, neighborhood, termination_criterion=100):
         # FIXME: Here I am not sure about the implementation at all
+        # TODO: Look up how this should work
         solution = initialization_procedure.create_solution(self._random_k)
         solution = Vnd.start_vnd(initialization_procedure, neighborhood, termination_criterion)
         k = 1
         kmax = 4
+        
+        # TODO:  Add max runtime as parameter
         max_runtime = 15 * 60  # max 15 minutes
         total_process_time = 0
         process_start = process_time()

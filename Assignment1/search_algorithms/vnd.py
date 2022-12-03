@@ -20,16 +20,30 @@ class Vnd(Algorithm):
 
         self._random_k = random_k
 
-    def start_vnd(self, initialization_procedure, neighborhood, termination_criterion=100):
+    def start_vnd(self, initialization_procedure, neighborhoods, termination_criterion=100):
         solution = initialization_procedure.create_solution(self._random_k)
 
         # TODO: currently we have only one neighborhood structure. For more variety implement other ones
+        
+        # I would prefer that the neighborhoods are given as a parameter, i.e. vnd just takes a list of parameters (e.g. neighborhoods) and calls them in order in a loop -> rest as in VND with neighborhood number, going back to first neighborhood, etc.
         neighborhood_number = 1
         max_neighborhood_number = 3
+
+        # TODO: Add parameter max_runtime
         max_runtime = 15 * 60  # max 15 minutes
         total_process_time = 0
         process_start = process_time()
         while neighborhood_number <= max_neighborhood_number and total_process_time < max_runtime:
+
+            cur_neighborhood = neighborhoods[neighborhood_number]
+            algoritm_result = Local_Search.start_search(initialization_procedure, step_function_type, neighborhood, termination_criterion)
+            if new_solution.get_objective_value() < solution.get_objective_value():
+                solution = new_solution
+                neighborhood_number = 0
+
+            neighborhood_number += 1
+            
+
             if neighborhood_number == 1:
                 step_function_type = Step_Function_Type.FIRST
                 algoritm_result = Local_Search.start_search(initialization_procedure, step_function_type, neighborhood,

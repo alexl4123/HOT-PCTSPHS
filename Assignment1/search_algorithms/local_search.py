@@ -73,15 +73,16 @@ class Local_Search(Algorithm):
                                                      solution.get_number_of_trips(), solution.get_prize(), Delta([]),
                                                      Delta([]))
 
-            k = 1
+            k = 0
             number = neighborhood.get_number_possible_solutions()
             while k < number:
                 new_worthiness = neighborhood.next_solution()
 
-                if new_worthiness.get_objective_value() < current_worthiness.get_objective_value() and step_function_type == Step_Function_Type.FIRST:
-                    return new_worthiness
-                elif new_worthiness.get_objective_value() < current_worthiness.get_objective_value():
-                    current_worthiness = new_worthiness
+                if new_worthiness.get_max_trip_duration() <= self._instance.get_C1() and new_worthiness.get_performed_trips() <= self._instance.get_C2() and new_worthiness.get_collected_prizes() >= self._instance.get_C3():
+                    if new_worthiness.get_objective_value() < current_worthiness.get_objective_value() and step_function_type == Step_Function_Type.FIRST:
+                        return new_worthiness
+                    elif new_worthiness.get_objective_value() < current_worthiness.get_objective_value():
+                        current_worthiness = new_worthiness
 
                 k = k + 1
 

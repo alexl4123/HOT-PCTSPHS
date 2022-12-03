@@ -16,8 +16,10 @@ class Grasp(Algorithm):
 
         self._random_k = random_k
 
+    # TODO -> Rename to ''start_search'', as this makes life easier for experiments
     def start_grasp(self, initialization_procedure, step_function_type, neighborhood, termination_criterion=100):
         solution = None
+        # TODO -> Would be better to give this as an argument
         max_runtime = 15 * 60  # max 15 minutes
         step1 = 0
         total_process_time = 0
@@ -38,6 +40,11 @@ class Grasp(Algorithm):
             last_objective_value = 0
             current_objective_value = current_best_worthiness.get_objective_value()
 
+            # TODO:
+            # I think it would be better to just use local search here (makes life easier, but we have to refactor something in Local Search
+            # In local search: We have to add the argument for the starting solution (that the solution is not generated), then we can give the initial_randomized_solution as an argument
+            # e.g. ls =  Local_Search(instance, random_k)
+            # res = ls.start_search(initial_randomized_solution, step_function_type, neighborhood, termination_criterion)
             while step2 < termination_criterion and last_objective_value != current_objective_value:
                 new_worthiness = self._step_function(neighborhood, initial_randomized_solution, step_function_type)
 
