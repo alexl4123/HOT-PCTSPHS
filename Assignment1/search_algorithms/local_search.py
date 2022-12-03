@@ -1,11 +1,13 @@
 import logging
 import random
+import time
 
 from enum import Enum
 
 from framework.solution import Delta, Solution_Worthiness
 from framework.constants import logger_name
-from search_algorithms.algorithm import Algorithm, Algorithm_Result
+from search_algorithms.algorithm import Algorithm
+from framework.result import Result
 
 logger = logging.getLogger(logger_name)
 
@@ -17,7 +19,10 @@ class Local_Search(Algorithm):
 
         self._random_k = random_k
 
-    def start_search(self, init_solution, step_function_type, neighborhood, termination_criterion=100):
+    def start_search(self, init_solution, step_function_type, neighborhoods, max_runtime, termination_criterion=1000, starting_time = None):
+
+
+        neighborhood = neighborhoods[0]
 
         #solution = initialization_procedure.create_solution(self._random_k)
         solution = init_solution
@@ -32,7 +37,10 @@ class Local_Search(Algorithm):
         last_objective_value = 0
         current_objective_value = current_best_worthiness.get_objective_value()
 
-        while step < termination_criterion and last_objective_value != current_objective_value:
+        if not starting_time:
+            starting_time = time.time()
+
+        while step < termination_criterion and (last_objective_value != current_objective_value or step_function_type == Step_Function_Type.RANDOM):
             new_worthiness = self._step_function(neighborhood, solution, step_function_type)
 
             last_objective_value = current_objective_value
@@ -47,11 +55,34 @@ class Local_Search(Algorithm):
 
             step = step + 1
 
-        logger.info("Local search found solution with objective value: " + str(solution.get_objective_value()))
-        logger.info("Local search solution verfification with slow calculation: " + str(
-            solution.slow_objective_values_calculation()))
+            current_time = time.time()
+            delta = current_time - starting_time
 
-        return Algorithm_Result(solution, trace)
+            if delta > max_runtime:
+                break
+
+        duration = time.time() - starting_time
+        if duration > max_runtime:
+            logger.info("Runtime limit reached, actual runtime: " + max_runtime)
+
+            duration = max_runtime
+
+
+        checked_values = solution.slow_objective_values_calculation()
+
+        logger.info("Local search found solution with objective value: " + str(solution.get_objective_value()))
+        logger.info("Local search solution verfification with slow calculation: " + str(checked_values))
+        logger.info("Trace:" + str(trace))
+
+        if checked_values[0] != solution.get_objective_value():
+            logger.error("Likely error in delta-evaluation!")
+            quit()
+        if checked_values[0] != trace[len(trace) - 1]:
+            logger.error("Likely error in neighborhood-evaluation!")
+            quit()
+
+
+        return Result(solution, trace, duration)
 
     def _step_function(self, neighborhood, solution, step_function_type):
 
@@ -60,12 +91,15 @@ class Local_Search(Algorithm):
 
         if step_function_type == Step_Function_Type.RANDOM:
             # Inefficient, but does the job
-            k = random.randint(0, neighborhood.get_number_possible_solutions() - 1)
-            for i in range(0, k):
-                sol = neighborhood.next_solution()
+            upper = neighborhood.get_number_possible_solutions() - 1
+            sol = solution
+            if upper > 0:
+                k = random.randint(0, upper)
+                for i in range(0, k):
+                    sol = neighborhood.next_solution()
 
-            if k == 0 and neighborhood.get_number_possible_solutions() > 0:
-                sol = neighborhood.next_solution()
+                if k == 0 and neighborhood.get_number_possible_solutions() > 0:
+                    sol = neighborhood.next_solution()
 
             return sol
         else:

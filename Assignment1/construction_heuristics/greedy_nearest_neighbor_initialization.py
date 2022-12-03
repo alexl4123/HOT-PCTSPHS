@@ -1,4 +1,7 @@
 import logging
+import time
+
+from framework.result import Result
 from framework.solution import Solution, Delta, Add, Remove, Reverse
 from construction_heuristics.initialization_procedure import Initialization_Procedure
 from framework.constants import logger_name
@@ -24,6 +27,8 @@ class Greedy_Nearest_Neighbor_Initialization(Initialization_Procedure):
         current_trip_index_position = 0
 
         current_trip_value = 0
+
+        starting_time = time.time()
 
         # Until C3 is satisfied -> insert greedily nearest neighbors
         while not solution.is_c3_satisfied():
@@ -89,7 +94,8 @@ class Greedy_Nearest_Neighbor_Initialization(Initialization_Procedure):
 
                 if index < lower_index:
                     logger.error("deterministic procedure could not find valid path!")
-                    return False
+                    duration = time.time() - starting_time
+                    return Result(False, [-1], duration)
 
 
             else:
@@ -105,4 +111,5 @@ class Greedy_Nearest_Neighbor_Initialization(Initialization_Procedure):
             "Greedy-CH solution verified by slow calculation:" + str(solution.slow_objective_values_calculation()))
         logger.debug(solution.to_string())
 
-        return solution
+        duration = time.time() - starting_time
+        return Result(solution, [solution.get_objective_value()], duration)

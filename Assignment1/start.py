@@ -35,6 +35,7 @@ class Start_PCTSPHS:
 
         self._instances = []
         self._benchmark_instances_path = 'tsp_instances/'
+        self._max_runtime = 15*60 #seconds
 
     def start(self):
         logger = logging.getLogger(logger_name)
@@ -58,10 +59,14 @@ class Start_PCTSPHS:
             parser.add_argument('--randomization-factor',type=int, help='randomization-factor=0 means NO randomization, whereas the higher it is set the higher the randomization', default=0)
 
         if (args.mode == '2' or args.mode == 'local-search') or (args.mode == '3' or args.mode == 'GRASP'):
-            parser.add_argument('--neighborhood-structure',choices=['trip_2_opt', 'swap_served_unserved_customer', 'interchange_customers', 'exchange_hotel', 'move_hotel'], help='Choose a neighborhood structure for local search.', default='trip_2_opt')
+            parser.add_argument('--neighborhood-structure',choices=['remove_customer','add_customer','insert_customer','swap_served_unserved_customer','interchange_customers','trip_2_opt','remove_hotel','add_hotel','exchange_hotel','move_hotel'], help='Choose a neighborhood structure for local search.', default='trip_2_opt')
 
         if (args.mode == '2' or args.mode == 'local-search') or (args.mode == '4' or args.mode == 'VND') or (args.mode == '5' or args.mode == 'GVNS'):
             parser.add_argument('--preload-starting-solutions-from-path', help='Do you want to preload the starting solution? If so specify a path, where the files are (file name(s) must be exactly as in the instance files!).')
+
+        if (args.mode == '2' or args.mode == 'local-search'):
+            parser.add_argument('--benchmark-all-local-search', help='Do you want to run all benchmarking instances for local search?', action='store_true')
+            parser.add_argument('--step-function', choices=['first','best','random'], default='first', help='Which step-function?')
 
         if args.instance != "benchmark":
             parser.add_argument('--instance-check-necessary-constraints', action='store_true', help='Set this flag to enable a necessary condition check on the instances, i.e. if this test fails the instance cannot be computed.')
@@ -106,14 +111,40 @@ class Start_PCTSPHS:
 
         if args.mode == '0' or args.mode == 'construction':
             self.start_construction_heuristics()
+
         elif args.mode == '1' or args.mode == 'rand-construction':
             self.start_random_construction_heuristics(args.randomization_factor)
+
         elif args.mode == '2' or args.mode == 'local-search':
-            self.start_local_search(args.neighborhood_structure, args.preload_starting_solutions_from_path)
+
+            if args.step_function == 'first':
+                step_function = Step_Function_Type.FIRST
+            elif args.step_function == 'best':
+                step_function = Step_Function_Type.BEST
+            elif args.step_function == 'random':
+                step_function = Step_Function_Type.RANDOM
+
+
+            if not args.benchmark_all_local_search:
+                self.start_local_search(args.neighborhood_structure, args.preload_starting_solutions_from_path, step_function)
+            else:
+                step_functions = [Step_Function_Type.FIRST, Step_Function_Type.BEST, Step_Function_Type.RANDOM]
+                neighborhoods = ['remove_customer','add_customer','insert_customer','swap_served_unserved_customer','interchange_customers','trip_2_opt','remove_hotel','add_hotel','exchange_hotel','move_hotel']
+                
+
+                for step_function in step_functions:
+                    for neighborhood in neighborhoods:
+
+                        print("<<<<<<<<<<<<" + str(step_function) + ":::" + str(neighborhood) + ">>>>>>")
+                        self.start_local_search(neighborhood, args.preload_starting_solutions_from_path, step_function)
+
+
         elif args.mode == '3' or args.mode == 'GRASP':
             self.start_grasp_search(args.randomization_factor,args.neighborhood_structure)
+
         elif args.mode == '4' or args.mode =='VND':
             self.start_vnd_search(args.preload_starting_solutions_from_path)
+
         elif args.mode == '5' or args.mode == 'GVNS':
             self.start_gvns_search(args.preload_starting_solutions_from_path)
 
@@ -125,14 +156,24 @@ class Start_PCTSPHS:
 
             initialization_procedure = Combination_Of_Heuristics(instance)
             result = initialization_procedure.create_solution(0)
-            result.write_solution_to_file(file_path_to_solutions + "construction_heuristic")
+            result.get_best_solution().write_solution_to_file(file_path_to_solutions + "construction_heuristic")
+
+            solution = result.get_best_solution()
+            instance_name = instance.get_instance_name()
+
+            header_line = ["Instance_Name","Number_Of_Customers","Number_Of_Hotels","Objective_Value","Sum_of_Trips","Penalties","Hotel_Fees","Max_Trip_Length","Number_Of_Trips","Prize","Time","Trace"]
+
+            content_line = [str(instance_name), str(len(instance._customers_list)), str(len(instance._hotels_list)), str(solution._objective_value), str(solution._sum_of_trips), str(solution._penalties), str(solution._hotel_fees), str(solution._max_trip_length), str(len(solution._trips)), str(solution._prize), str(result.get_time()), str(result.get_trace())]
+
+            result.write_result_metadata_to_file(file_path_to_solutions + "construction_heuristic", header_line, content_line)
 
 
     def start_random_construction_heuristics(self, random_k):
         print("start-random-const..." + str(random_k))
 
-    def start_local_search(self, neighborhood_str, pre_load):
+    def start_local_search(self, neighborhood_str, pre_load, step_function):
         print("start-local-search..." + str(neighborhood_str))
+
 
         if pre_load:
             pre_load_files = {}
@@ -148,40 +189,53 @@ class Start_PCTSPHS:
                 solution = self.pre_load_solution_from_path(instance, pre_load, instance_base_name, pre_load_files)
             else:
                 initialization_procedure = Backtracking_Search(instance)
-                solution = initialization_procedure.create_solution()
+                solution = initialization_procedure.create_solution().get_best_solution()
 
-            if neighborhood_str == 'trip_2_opt':
-                neighborhood = Trip_2_Opt(instance)
+            if neighborhood_str == 'remove_customer':
+                neighborhood = Remove_Customer(instance)
+            elif neighborhood_str == 'add_customer':
+                neighborhood = Add_Customer(instance)
+            elif neighborhood_str == 'insert_customer':
+                neighborhood = Insert_Customer(instance)
             elif neighborhood_str == 'swap_served_unserved_customer':
                 neighborhood = Swap_Served_Unserved_Customer(instance)
             elif neighborhood_str == 'interchange_customers':
                 neighborhood = Interchange_Customers(instance)
+            elif neighborhood_str == 'trip_2_opt':
+                neighborhood = Trip_2_Opt(instance)
+            elif neighborhood_str == 'remove_hotel':
+                neighborhood = Remove_Hotel(instance)
+            elif neighborhood_str == 'add_hotel':
+                neighborhood = Add_Hotel(instance)
             elif neighborhood_str == 'exchange_hotel':
                 neighborhood = Exchange_Hotel(instance)
             elif neighborhood_str == 'move_hotel':
                 neighborhood = Move_Hotel(instance)
 
-            #neighborhood = Remove_Customer(instance)
-            #neighborhood = Add_Customer(instance)
-            #neighborhood = Insert_Customer(instance)
-
-            #neighborhood = Remove_Hotel(instance)
-            #neighborhood = Add_Hotel(instance)
-
-
             randomization_k = 0
             search_alg = Local_Search(instance, randomization_k)
-            result = search_alg.start_search(solution, Step_Function_Type.FIRST, neighborhood)
+            result = search_alg.start_search(solution, step_function, [neighborhood], self._max_runtime)
 
-            self._logger.info("Trace of objective values: " + str(result.get_trace()))
-            self._logger.info(result.get_best_solution().to_string())
+            result.get_best_solution().write_solution_to_file(file_path_to_solutions + "local_search", neighborhood_str + "_" + str(step_function))
 
+            header_line = ["Instance_Name","Number_Of_Customers","Number_Of_Hotels","Objective_Value","Sum_of_Trips","Penalties","Hotel_Fees","Max_Trip_Length","Number_Of_Trips","Prize","Time","Trace", "Neighborhood", "Step_Function"]
+
+            solution = result.get_best_solution()
+            instance_name = instance.get_instance_name()
+
+            content_line = [str(instance_name), str(len(instance._customers_list)), str(len(instance._hotels_list)), str(solution._objective_value), str(solution._sum_of_trips), str(solution._penalties), str(solution._hotel_fees), str(solution._max_trip_length), str(len(solution._trips)), str(solution._prize), str(result.get_time()), str(result.get_trace()), neighborhood_str, str(step_function)]
+
+
+
+            result.write_result_metadata_to_file(file_path_to_solutions + "local_search", header_line, content_line)
 
 
     def start_grasp_search(self, random_k, neighborhood):
         print("start-grasp-search..." + str(random_k) + "::" + str(neighborhood))
 
     def start_vnd_search(self, pre_load):
+
+
         print("start-vnd-search")
 
     def start_gvns_search(self, pre_load):

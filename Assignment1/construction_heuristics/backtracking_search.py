@@ -1,7 +1,9 @@
+import time
 import logging
 import random
 import numpy as np
 
+from framework.result import Result
 from framework.solution import Solution, Delta, Add, Remove, Reverse
 from framework.constants import logger_name
 from construction_heuristics.initialization_procedure import Initialization_Procedure
@@ -26,8 +28,12 @@ class Backtracking_Search(Initialization_Procedure):
         starting_trip_index_position = 0
         starting_trip_length = 0
 
+        starting_time = time.time()
+
         result = self.backtracking(solution, starting_hotel, starting_trip_index, starting_trip_index_position,
                                    starting_trip_length)
+
+        duration = time.time() - starting_time
 
         if result:
             logger.debug("Check all constraints verified, C1: " + str(solution.is_c1_satisfied()) + ", C2:" + str(
@@ -37,10 +43,10 @@ class Backtracking_Search(Initialization_Procedure):
                 solution.slow_objective_values_calculation()))
             logger.info(solution.to_string())
 
-            return solution
+            return Result(solution, [solution.get_objective_value()], duration)
         else:
             logger.error("Backtracking could not find a solution!")
-            return False
+            return Result(False, [-1], duration)
 
     def backtracking(self, solution, obj, trip_index, trip_index_position, current_trip_length):
 

@@ -22,7 +22,7 @@ class Add_Hotel(Neighborhood):
     def reset_indexes(self):
 
         self._trip_index = 0
-        self._unserved_customer_index = 0
+        self._trip_position_index = 0
         self._hotels_index = 0
 
         self._current_solution_index = 0
@@ -50,7 +50,7 @@ class Add_Hotel(Neighborhood):
         if not self._number_of_solutions:
             val = self.get_number_possible_solutions()
             if val == 0:
-                print("NO ADD_CUSTOMER-Solutions possible")
+                print("NO ADD_HOTEL-Solutions possible")
                 return Solution_Worthiness(self._solution.get_objective_value(), self._solution.get_max_trip_length(),
                                            self._solution.get_number_of_trips(), self._solution.get_prize(), Delta([]),
                                            Delta([]))
@@ -66,10 +66,11 @@ class Add_Hotel(Neighborhood):
         obj = None
         while obj == None:
             if self._trip_index >= len(self._solution._trips):
-                print("FATAL ERROR IN ADD_CUSTOMER NEIGHBORHOOD")
+                print("FATAL ERROR IN ADD_HOTEL NEIGHBORHOOD")
                 quit()
 
             cur_trip =  self._solution._trips[self._trip_index]
+
 
             if len(cur_trip) >= 0 and self._trip_position_index <= len(cur_trip) and self._hotels_index < len(self._hotels):
                 obj = self._hotels[self._hotels_index]
@@ -91,9 +92,18 @@ class Add_Hotel(Neighborhood):
 
 
         # Calculate new solution worthiness
-        left = self._solution.left_neighbor_customer(self._trip_index, self._trip_position_index)
+        trip = self._solution._trips[self._trip_index]
 
-        right = self._solution.right_neighbor_customer(self._trip_index, self._trip_position_index)
+        # Calculate new solution worthiness
+        if self._trip_position_index < len(trip) - 1:
+            left = self._solution.left_neighbor_customer(self._trip_index, self._trip_position_index)
+        else: 
+            left = self._solution.left_neighbor_hotel(self._trip_index + 1)
+
+        if self._trip_position_index > 0:
+            right = self._solution.right_neighbor_customer(self._trip_index, self._trip_position_index - 1)
+        else:
+            right = self._solution.right_neighbor_hotel(self._trip_index)
 
         old_length = self._instance.get_distance(left, right)
         new_length_0 = self._instance.get_distance(left, obj)

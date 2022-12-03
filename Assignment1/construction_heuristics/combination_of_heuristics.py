@@ -1,8 +1,13 @@
+import time
+
 from construction_heuristics.initialization_procedure import Initialization_Procedure
 from construction_heuristics.greedy_nearest_neighbor_initialization import Greedy_Nearest_Neighbor_Initialization
 from construction_heuristics.backtracking_search import Backtracking_Search
 from construction_heuristics.insertion_heuristic_sum_of_trips import Insertion_Heuristic_Sum_Of_Trips
 from construction_heuristics.insertion_diverse_hotels import Insertion_Diverse_Hotels
+
+from framework.result import Result
+
 
 
 class Combination_Of_Heuristics(Initialization_Procedure):
@@ -16,23 +21,26 @@ class Combination_Of_Heuristics(Initialization_Procedure):
 
         if random_k == 0:
 
-            best_solution = None
+            best_result = None
 
-            solutions = []
-            solution_1 = procedure_1.create_solution()
-            solution_2 = procedure_2.create_solution()
-            solution_3 = procedure_3.create_solution()
-            solution_4 = procedure_4.create_solution()
+            starting_time = time.time()
 
-            if solution_1:
-                best_solution = solution_1
-            if solution_2 and best_solution.get_objective_value() > solution_2.get_objective_value():
-                best_solution = solution_2
-            if solution_3 and best_solution.get_objective_value() > solution_3.get_objective_value():
-                best_solution = solution_3
-            if solution_4 and best_solution.get_objective_value() > solution_4.get_objective_value():
-                best_solution = solution_4
+            result_1 = procedure_1.create_solution()
+            result_2 = procedure_2.create_solution()
+            result_3 = procedure_3.create_solution()
+            result_4 = procedure_4.create_solution()
 
-            return best_solution
+            if result_1.get_best_solution():
+                best_result = result_1
+            if result_2.get_best_solution() and best_result.get_best_solution().get_objective_value() > result_2.get_best_solution().get_objective_value():
+                best_result = result_2
+            if result_3.get_best_solution() and best_result.get_best_solution().get_objective_value() > result_3.get_best_solution().get_objective_value():
+                best_result = result_3
+            if result_4.get_best_solution() and best_result.get_best_solution().get_objective_value() > result_4.get_best_solution().get_objective_value():
+                best_result = result_4
+
+            duration = time.time() - starting_time
+
+            return Result(best_result.get_best_solution(), [best_result.get_best_solution().get_objective_value()], duration)
         else:
             return procedure_2.create_solution(random_k)

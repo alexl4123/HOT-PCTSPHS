@@ -1,10 +1,12 @@
 import logging
 import random
 import numpy as np
+import time
 
 from framework.solution import Solution, Delta, Add, Remove, Reverse, Solution_Worthiness, Swap
 from framework.constants import logger_name
 from construction_heuristics.initialization_procedure import Initialization_Procedure
+from framework.result import Result
 
 logger = logging.getLogger(logger_name)
 
@@ -67,6 +69,8 @@ class Insertion_Diverse_Hotels(Initialization_Procedure):
         change_hotel_index_2 = 0
         change_hotel_reverse_delta = None
 
+        starting_time = time.time()
+
         while len(self.unserved_customers) > 0 and (
                 not solution.is_c1_satisfied() or not solution.is_c2_satisfied() or not solution.is_c3_satisfied()):
 
@@ -128,7 +132,10 @@ class Insertion_Diverse_Hotels(Initialization_Procedure):
 
             if failed:
                 logger.error("Insertion Heuristic-3 could not find a solution!")
-                return False
+                duration = time.time() - starting_time
+                return Result(False, [-1], duration)
+
+        duration = time.time() - starting_time
 
         if solution.is_c1_satisfied() and solution.is_c2_satisfied() and solution.is_c3_satisfied():
             logger.debug("Check all constraints verified, C1: " + str(solution.is_c1_satisfied()) + ", C2:" + str(
@@ -137,10 +144,10 @@ class Insertion_Diverse_Hotels(Initialization_Procedure):
             logger.debug("Insertion-3 solution verified by slow calculation:" + str(
                 solution.slow_objective_values_calculation()))
             logger.info(solution.to_string())
-            return solution
+            return Result(solution, [solution.get_objective_value()], duration)
         else:
             logger.error("Insertion-3 Heuristic could not find a solution!")
-            return False
+            return Result(False, [solution.get_objective_value()], duration)
 
     def get_best_customer(self, solution):
         cur_best = None

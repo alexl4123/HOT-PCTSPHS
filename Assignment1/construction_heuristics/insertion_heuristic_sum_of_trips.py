@@ -1,7 +1,9 @@
 import logging
 import random
 import numpy as np
+import time
 
+from framework.result import Result
 from framework.solution import Solution, Delta, Add, Remove, Reverse, Solution_Worthiness, Swap
 from framework.constants import logger_name
 from construction_heuristics.initialization_procedure import Initialization_Procedure
@@ -55,6 +57,8 @@ class Insertion_Heuristic_Sum_Of_Trips(Initialization_Procedure):
         starting_trip_length = 0
 
         self.unserved_customers = self._instance._customers_list.copy()
+
+        starting_time = time.time()
 
         while len(self.unserved_customers) > 0 and (
                 not solution.is_c1_satisfied() or not solution.is_c2_satisfied() or not solution.is_c3_satisfied()):
@@ -230,7 +234,8 @@ class Insertion_Heuristic_Sum_Of_Trips(Initialization_Procedure):
 
             else:
                 logger.error("Insertion Heuristic could not find a solution!")
-                return False
+                duration = time.time() - starting_time
+                return Result(False, [-1], duration)
 
         if solution.is_c1_satisfied() and solution.is_c2_satisfied() and solution.is_c3_satisfied():
             logger.debug("Check all constraints verified, C1: " + str(solution.is_c1_satisfied()) + ", C2:" + str(
@@ -239,10 +244,13 @@ class Insertion_Heuristic_Sum_Of_Trips(Initialization_Procedure):
             logger.debug(
                 "Insertion solution verified by slow calculation:" + str(solution.slow_objective_values_calculation()))
             logger.info(solution.to_string())
-            return solution
+
+            duration = time.time() - starting_time
+            return Result(solution, [solution.get_objective_value()], duration)
         else:
             logger.error("Insertion Heuristic could not find a solution!")
-            return False
+            duration = time.time() - starting_time
+            return Result(False, [-1], duration)
 
     def get_best_customer_for_edge(self, solution, last_trip_index, last_trip_index_position, last_node,
                                    next_trip_index, next_trip_index_position, next_node):

@@ -98,9 +98,18 @@ class Add_Customer(Neighborhood):
         delta = Delta([add])
 
 
+        trip = self._solution._trips[self._trip_index]
+
         # Calculate new solution worthiness
-        left = self._solution.left_neighbor_customer(self._trip_index, self._trip_position_index)
-        right = self._solution.right_neighbor_customer(self._trip_index, self._trip_position_index)
+        if self._trip_position_index < len(trip) - 1:
+            left = self._solution.left_neighbor_customer(self._trip_index, self._trip_position_index)
+        else: 
+            left = self._solution.left_neighbor_hotel(self._trip_index + 1)
+
+        if self._trip_position_index > 0:
+            right = self._solution.right_neighbor_customer(self._trip_index, self._trip_position_index - 1)
+        else:
+            right = self._solution.right_neighbor_hotel(self._trip_index)
 
         old_length = self._instance.get_distance(left, right)
         new_length = self._instance.get_distance(left, obj)  + self._instance.get_distance(obj, right)

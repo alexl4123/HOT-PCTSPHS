@@ -803,7 +803,10 @@ class Solution:
             objective_value, sum_trips, penalties, hotel_fees, hotel_fees, max_trip_length, trips_size, collected_prize,
             trip_lengths, avg_trip_length)
 
-    def write_solution_to_file(self, file_path):
+    def write_solution_to_file(self, file_path, file_specifier = None):
+        """
+            Writes the solution to a file
+        """
 
         basename = self._instance.get_basename()
         instance_name = self._instance.get_instance_name()
@@ -818,15 +821,21 @@ class Solution:
 
         solution_string = solution_string + str(self._hotels[len(self._trips)].get_id())
 
-        print(instance_name)
-        print(solution_string)
+        if file_specifier:
+            file_path_name = file_path + "/solutions/" + file_specifier + "_" + basename + ".txt"
+        else:
+            file_path_name = file_path + "/solutions/" + basename + ".txt"
 
-        output_file = open(file_path + "/solutions/" + basename + ".txt", "w")
+        output_file = open(file_path_name, "w")
         output_file.write(instance_name + "\n")
         output_file.write(solution_string)
 
         output_file.close()
 
+    def write_solution_metadata_to_file(self, file_path):
+        """
+            Writes the metadata of the solution to the file
+        """
 
         path_str = file_path + "/evaluations_of_solutions/analysis.csv"
         path = Path(path_str)
