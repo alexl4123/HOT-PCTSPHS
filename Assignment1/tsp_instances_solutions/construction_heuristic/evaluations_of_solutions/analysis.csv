@@ -1,2 +1,3 @@
 Instance_Name,Number_Of_Customers,Number_Of_Hotels,Objective_Value,Sum_of_Trips,Penalties,Hotel_Fees,Max_Trip_Length,Number_Of_Trips,Prize,Time,Trace
 test,3,2,1280,480,800,0,480,1,1000,0.0007534027099609375,[1280]
+test,3,2,1280,480,800,0,480,1,1000,0.0006818771362304688,[1280]

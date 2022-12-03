@@ -21,7 +21,6 @@ class Local_Search(Algorithm):
 
     def start_search(self, init_solution, step_function_type, neighborhoods, max_runtime, termination_criterion=1000, starting_time = None):
 
-
         neighborhood = neighborhoods[0]
 
         #solution = initialization_procedure.create_solution(self._random_k)

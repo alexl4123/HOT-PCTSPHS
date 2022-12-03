@@ -1,10 +1,11 @@
-from time import process_time
-
+import time
 import logging
 
 from framework.solution import Delta, Solution_Worthiness
 from framework.constants import logger_name
-from search_algorithms.algorithm import Algorithm, Algorithm_Result
+from framework.result import Result
+
+from search_algorithms.algorithm import Algorithm
 from search_algorithms.local_search import Local_Search, Step_Function_Type
 
 from neighborhoods.neighborhood import Neighborhood
@@ -20,55 +21,58 @@ class Vnd(Algorithm):
 
         self._random_k = random_k
 
-    def start_vnd(self, initialization_procedure, neighborhoods, termination_criterion=100):
-        solution = initialization_procedure.create_solution(self._random_k)
+    def start_search(self, init_solution, step_function_type, neighborhoods, max_runtime, termination_criterion=1000, starting_time = None):
 
-        # TODO: currently we have only one neighborhood structure. For more variety implement other ones
-        
-        # I would prefer that the neighborhoods are given as a parameter, i.e. vnd just takes a list of parameters (e.g. neighborhoods) and calls them in order in a loop -> rest as in VND with neighborhood number, going back to first neighborhood, etc.
-        neighborhood_number = 1
-        max_neighborhood_number = 3
+        neighborhood_number = 0
+        max_neighborhood_number = len(neighborhoods) - 1 
 
-        # TODO: Add parameter max_runtime
-        max_runtime = 15 * 60  # max 15 minutes
-        total_process_time = 0
-        process_start = process_time()
-        while neighborhood_number <= max_neighborhood_number and total_process_time < max_runtime:
+        solution = init_solution
+
+        trace = []
+
+        if not starting_time:
+            starting_time = time.time()
+
+        old_objective_value = solution.get_objective_value()
+
+        while neighborhood_number <= max_neighborhood_number:
 
             cur_neighborhood = neighborhoods[neighborhood_number]
-            algoritm_result = Local_Search.start_search(initialization_procedure, step_function_type, neighborhood, termination_criterion)
-            if new_solution.get_objective_value() < solution.get_objective_value():
-                solution = new_solution
+            local_search = Local_Search(self._instance, 0)
+            result = local_search.start_search(solution, step_function_type, [cur_neighborhood], termination_criterion, int(max_runtime/10))
+
+            if result.get_best_solution().get_objective_value() < old_objective_value:
                 neighborhood_number = 0
+                old_objective_value = result.get_best_solution().get_objective_value()
+            else: 
+                neighborhood_number += 1
 
-            neighborhood_number += 1
-            
+            trace.append(result.get_best_solution().get_objective_value())
 
-            if neighborhood_number == 1:
-                step_function_type = Step_Function_Type.FIRST
-                algoritm_result = Local_Search.start_search(initialization_procedure, step_function_type, neighborhood,
-                                                            termination_criterion)
-                new_solution = algoritm_result.get_best_solution()
-                if new_solution.get_objective_value() < solution.get_objective_value():
-                    solution = new_solution
-            elif neighborhood_number == 2:
-                step_function_type = Step_Function_Type.BEST
-                algoritm_result = Local_Search.start_search(initialization_procedure, step_function_type, neighborhood,
-                                                            termination_criterion)
-                new_solution = algoritm_result.get_best_solution()
-                if new_solution.get_objective_value() < solution.get_objective_value():
-                    solution = new_solution
-            elif neighborhood_number == 3:
-                step_function_type = Step_Function_Type.RANDOM
-                algoritm_result = Local_Search.start_search(initialization_procedure, step_function_type, neighborhood,
-                                                            termination_criterion)
-                new_solution = algoritm_result.get_best_solution()
-                if new_solution.get_objective_value() < solution.get_objective_value():
-                    solution = new_solution
 
-            neighborhood_number += 1
-            process_end = process_time()
-            total_process_time += process_end - process_start
-            process_start = process_end
 
-        return solution
+            current_time = time.time()
+            delta = current_time - starting_time
+            if delta > max_runtime:
+                break
+
+        duration = time.time() - starting_time
+        if duration > max_runtime:
+            logger.info("Runtime limit reached, actual runtime: " + max_runtime)
+
+            duration = max_runtime
+
+        checked_values = solution.slow_objective_values_calculation()
+
+        logger.info("VND search found solution with objective value: " + str(solution.get_objective_value()))
+        logger.info("VND search solution verfification with slow calculation: " + str(checked_values))
+        logger.info("VND Trace:" + str(trace))
+
+        if checked_values[0] != solution.get_objective_value():
+            logger.error("Likely error in delta-evaluation!")
+            quit()
+        if checked_values[0] != trace[len(trace) - 1]:
+            logger.error("Likely error in neighborhood-evaluation!")
+            quit()
+
+        return Result(solution, trace, duration)
