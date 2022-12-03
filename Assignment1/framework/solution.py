@@ -1,6 +1,8 @@
 import logging
 import random
 
+from pathlib import Path
+
 from framework.constants import logger_name
 
 logger = logging.getLogger(logger_name)
@@ -804,6 +806,7 @@ class Solution:
     def write_solution_to_file(self, file_path):
 
         basename = self._instance.get_basename()
+        instance_name = self._instance.get_instance_name()
 
         solution_string = ""
 
@@ -815,24 +818,91 @@ class Solution:
 
         solution_string = solution_string + str(self._hotels[len(self._trips)].get_id())
 
-        print(basename)
+        print(instance_name)
         print(solution_string)
 
         output_file = open(file_path + "/solutions/" + basename + ".txt", "w")
-        output_file.write(basename + "\n")
+        output_file.write(instance_name + "\n")
         output_file.write(solution_string)
 
         output_file.close()
 
-        output_file = open(file_path + "/evaluations_of_solutions/" + basename + "_eval.txt", "w")
 
-        output_file.write("Objective_Value: " + str(self._objective_value) + "\n")
-        output_file.write("Sum_Trips_Value: " + str(self._sum_of_trips) + "\n")
-        output_file.write("Penalties_Value: " + str(self._penalties) + "\n")
-        output_file.write("Hotel_Fees_Value:" + str(self._hotel_fees) + "\n")
-        output_file.write("-----------------\n")
-        output_file.write("C1_Value (Max trip duration):" + str(self._max_trip_length) + "\n")
-        output_file.write("C2_Value (Number of trips):" + str(len(self._trips)) + "\n")
-        output_file.write("C3_Value (Collected Prize):" + str(self._prize) + "\n")
+        path_str = file_path + "/evaluations_of_solutions/analysis.csv"
+        path = Path(path_str)
+
+        add_first_line = False
+        if not path.is_file():
+            add_first_line = True
+
+        output_file = open(file_path + "/evaluations_of_solutions/analysis.csv", "a")
+
+        if add_first_line:
+            output_file.write("Instance_Name,Objective_Value,Sum_of_Trips,Penalties,Hotel_Fees,Max_Trip_Length,Number_Of_Trips,Prize,Time\n")
+
+        output_file.write(str(instance_name) + "," + str(self._objective_value) + "," +  str(self._sum_of_trips) + "," + str(self._penalties) + "," + str(self._hotel_fees) + "," + str(self._max_trip_length) + "," + str(len(self._trips)) + "," + str(self._prize) + "," + "TO-BE-IMPLEMENTED" + "\n")
 
         output_file.close()
+
+
+    def parse_from_str(self, solution_str):
+
+        split = solution_str.split(" ")
+
+        trip_index = 0
+        trip_position_index = 0
+
+        for index in range(1,len(split) - 1):
+
+            obj_id = int(split[index])
+
+            if self._instance._index_is_hotel(obj_id):
+                hotel = self._instance._get_object_from_index(obj_id)
+
+                add = Add(hotel, trip_index, trip_position_index)
+                delta = Delta([add])
+
+                self.change_from_delta(delta)
+
+                trip_index += 1
+                trip_position_index = 0
+            else:
+                customer = self._instance._get_object_from_index(obj_id)
+
+                add = Add(customer, trip_index, trip_position_index)
+                delta = Delta([add])
+
+                self.change_from_delta(delta)
+
+                trip_position_index += 1
+
+
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -67,8 +67,9 @@ class Edge:
 
 class Instance:
 
-    def __init__(self, c1_L, c2_D, c3_P, basename_stem):
+    def __init__(self, c1_L, c2_D, c3_P, basename_stem, instance_name):
         self._basename_stem = basename_stem
+        self._instance_name = instance_name
 
         self._hotels = {}
         self._hotels_list = []
@@ -357,6 +358,9 @@ class Instance:
 
     def get_basename(self):
         return self._basename_stem
+
+    def get_instance_name(self):
+        return self._instance_name
 
     def _index_is_hotel(self, index):
         if index < self._hotel_max_index:

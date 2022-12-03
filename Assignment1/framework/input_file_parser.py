@@ -32,6 +32,10 @@ class Input_File_Parser:
         logger.debug(self._input_file_path)
 
         basename_stem = Path(self._input_file_path).stem
+        instance_name = basename_stem.split("_")
+        instance_name.pop(0)
+        instance_name = ('_'.join(instance_name))
+
 
         input_file = open(self._input_file_path, "r")
 
@@ -56,7 +60,7 @@ class Input_File_Parser:
         logger.debug(c3_P)
 
         # Initialize instance
-        instance = Instance(c1_L, c2_D, c3_P, basename_stem)
+        instance = Instance(c1_L, c2_D, c3_P, basename_stem, instance_name)
 
         self._parse_hotels(input_file, instance, total_hotels)
         self._parse_customers(input_file, instance, num_customers)

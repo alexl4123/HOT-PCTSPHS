@@ -84,6 +84,7 @@ class Insertion_Heuristic_Sum_Of_Trips(Initialization_Procedure):
                                                                                  last_trip_index_position, last_node,
                                                                                  next_trip_index,
                                                                                  next_trip_index_position, next_node)
+
                     (worthiness_hotel, distance_hotel) = self.get_best_hotel_for_edge(solution, avg_trip_distance,
                                                                                       last_trip_index,
                                                                                       last_trip_index_position,
@@ -102,7 +103,7 @@ class Insertion_Heuristic_Sum_Of_Trips(Initialization_Procedure):
                     elif not cur_best and worthiness:
                         cur_best = worthiness
                         cur_best_sum_of_trips = sum_of_trips
-
+                    
                     if cur_best_hotel and worthiness_hotel and distance_hotel > cur_best_distance_hotel:
                         cur_best_hotel = worthiness_hotel
                         cur_best_distance_hotel = distance_hotel
