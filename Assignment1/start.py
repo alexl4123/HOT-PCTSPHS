@@ -131,8 +131,8 @@ class Start_PCTSPHS:
     def start_random_construction_heuristics(self, random_k):
         print("start-random-const..." + str(random_k))
 
-    def start_local_search(self, neighborhood, pre_load):
-        print("start-local-search..." + str(neighborhood))
+    def start_local_search(self, neighborhood_str, pre_load):
+        print("start-local-search..." + str(neighborhood_str))
 
         if pre_load:
             pre_load_files = {}
@@ -145,39 +145,29 @@ class Start_PCTSPHS:
             instance_base_name = instance.get_basename()
 
             if pre_load:
-                pre_load_file_name = pre_load_files[instance_base_name]
-    
-                pre_load_file = open(pre_load + pre_load_file_name, "r")
-
-                # first line is instance name
-                pre_load_file.readline()
-
-
-                solution_str = pre_load_file.readline()
-
-                pre_load_file.close()
-
-                solution = Solution(instance)
-                solution.parse_from_str(solution_str)
-                print("LOADED SOLUTION for: " + str(instance_base_name))
-
-
-
+                solution = self.pre_load_solution_from_path(instance, pre_load, instance_base_name, pre_load_files)
             else:
                 initialization_procedure = Backtracking_Search(instance)
                 solution = initialization_procedure.create_solution()
 
+            if neighborhood_str == 'trip_2_opt':
+                neighborhood = Trip_2_Opt(instance)
+            elif neighborhood_str == 'swap_served_unserved_customer':
+                neighborhood = Swap_Served_Unserved_Customer(instance)
+            elif neighborhood_str == 'interchange_customers':
+                neighborhood = Interchange_Customers(instance)
+            elif neighborhood_str == 'exchange_hotel':
+                neighborhood = Exchange_Hotel(instance)
+            elif neighborhood_str == 'move_hotel':
+                neighborhood = Move_Hotel(instance)
+
             #neighborhood = Remove_Customer(instance)
             #neighborhood = Add_Customer(instance)
-            #neighborhood = Swap_Served_Unserved_Customer(instance)
-            #neighborhood = Trip_2_Opt(instance)
-            neighborhood = Interchange_Customers(instance)
             #neighborhood = Insert_Customer(instance)
 
             #neighborhood = Remove_Hotel(instance)
             #neighborhood = Add_Hotel(instance)
-            #neighborhood = Exchange_Hotel(instance)
-            #neighborhood = Move_Hotel(instance)
+
 
             randomization_k = 0
             search_alg = Local_Search(instance, randomization_k)
@@ -196,6 +186,28 @@ class Start_PCTSPHS:
 
     def start_gvns_search(self, pre_load):
         print("start-gvns-search")
+
+    def pre_load_solution_from_path(self, instance, pre_load, instance_base_name, pre_load_files):
+
+        pre_load_file_name = pre_load_files[instance_base_name]
+
+        pre_load_file = open(pre_load + pre_load_file_name, "r")
+
+        # first line is instance name
+        pre_load_file.readline()
+
+        solution_str = pre_load_file.readline()
+
+        pre_load_file.close()
+
+        solution = Solution(instance)
+        solution.parse_from_str(solution_str)
+        print("LOADED SOLUTION for: " + str(instance_base_name))
+        print(solution.to_string())
+
+        return solution
+
+
 
 
 

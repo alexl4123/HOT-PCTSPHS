@@ -42,7 +42,6 @@ class Interchange_Customers(Neighborhood):
                 number_of_possible_interchanges += int((len(trip) * (len(trip) - 1)) / 2)
 
             self._number_of_solutions = number_of_possible_interchanges
-            print(self._number_of_solutions)
 
         return self._number_of_solutions
 

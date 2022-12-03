@@ -48,7 +48,6 @@ class Add_Customer(Neighborhood):
                 number_of_possible_insertion_positions += len(trip) + 1
 
             self._number_of_solutions = len(self._unserved_customers) * number_of_possible_insertion_positions
-            print(self._number_of_solutions)
 
 
         return self._number_of_solutions

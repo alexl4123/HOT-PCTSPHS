@@ -44,7 +44,6 @@ class Insert_Customer(Neighborhood):
                 number_of_possible_interchanges += len(trip) * (len(trip) - 1)
 
             self._number_of_solutions = number_of_possible_interchanges
-            print(self._number_of_solutions)
 
         return self._number_of_solutions
 
