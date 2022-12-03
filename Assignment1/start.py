@@ -173,6 +173,30 @@ class Start_PCTSPHS:
     def start_random_construction_heuristics(self, random_k):
         print("start-random-const..." + str(random_k))
 
+        for instance in self._instances:
+
+            instance_name = instance.get_instance_name()
+
+            print("<<Start instance:" + instance_name + ">>")
+            
+            initialization_procedure = Combination_Of_Heuristics(instance)
+            retry = 0
+            while retry < 10:
+                result = initialization_procedure.create_solution(random_k)
+                if result.get_best_solution():
+                    break
+            result.get_best_solution().write_solution_to_file(file_path_to_solutions + "random_construction_heuristic")
+
+            solution = result.get_best_solution()
+
+            header_line = ["Instance_Name","Number_Of_Customers","Number_Of_Hotels","Objective_Value","Sum_of_Trips","Penalties","Hotel_Fees","Max_Trip_Length","Number_Of_Trips","Prize","Time","Trace"]
+
+            content_line = [str(instance_name), str(len(instance._customers_list)), str(len(instance._hotels_list)), str(solution._objective_value), str(solution._sum_of_trips), str(solution._penalties), str(solution._hotel_fees), str(solution._max_trip_length), str(len(solution._trips)), str(solution._prize), str(result.get_time()), str(result.get_trace())]
+
+            result.write_result_metadata_to_file(file_path_to_solutions + "random_construction_heuristic", header_line, content_line)
+
+
+
     def start_local_search(self, neighborhood_str, pre_load, step_function):
         print("start-local-search..." + str(neighborhood_str))
 
