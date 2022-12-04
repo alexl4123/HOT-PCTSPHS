@@ -43,6 +43,13 @@ class Grasp(Algorithm):
         if not starting_time:
             starting_time = time.time()
 
+        additional_params = {}
+        additional_params['initial_alphas'] = []
+        additional_params['initial_betas'] = []
+        additional_params['initial_gammas'] = []
+        additional_params['initial_deltas'] = []
+        additional_params['initial_values'] = []
+
 
         instance = self._instance
 
@@ -52,12 +59,22 @@ class Grasp(Algorithm):
             randomized_procedure = Combination_Of_Heuristics(instance)
             retry = 0
             while retry < 10:
-                result = randomized_procedure.create_solution(self._random_k, False)
+                result = randomized_procedure.create_solution(random_k = self._random_k, show_output = False, max_runtime = 4)
                 if result.get_best_solution():
                     break
 
             if not result.get_best_solution():
                 continue
+
+            params_result = result.get_additional_params()
+
+            additional_params['initial_alphas'].append(params_result['alpha'])
+            additional_params['initial_betas'].append(params_result['beta'])
+            additional_params['initial_gammas'].append(params_result['gamma'])
+            additional_params['initial_deltas'].append(params_result['delta'])
+            additional_params['initial_values'].append(result.get_best_solution().get_objective_value())
+
+
 
 
             neighborhoods = [Interchange_Customers(instance),Insert_Customer(instance), Trip_2_Opt(instance), Swap_Served_Unserved_Customer(instance), Remove_Customer(instance), Add_Customer(instance), Remove_Hotel(instance), Add_Hotel(instance),Exchange_Hotel(instance), Move_Hotel(instance)]
@@ -94,6 +111,6 @@ class Grasp(Algorithm):
             logger.error("Likely error in delta-evaluation!")
             quit()
 
-        return Result(solution, trace, duration)
+        return Result(solution, trace, duration, additional_params = additional_params)
 
 

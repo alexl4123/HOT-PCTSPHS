@@ -77,7 +77,6 @@ class Gvns(Algorithm):
             else:
                 iteration += 1
                
-            print(iteration)
             trace.append(result.get_best_solution().get_objective_value()) 
 
 

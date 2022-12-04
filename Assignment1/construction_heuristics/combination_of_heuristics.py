@@ -130,7 +130,7 @@ class Combination_Of_Heuristics(Initialization_Procedure):
             return Result(result.get_best_solution(), result.get_trace(), result.get_time(), additional_params = params)
 
         elif benchmarking:
-            procedure_2 = Backtracking_Search(self._instance, delta, alpha = 1, beta = -0.5, gamma = -0.5, delta = 0.5)
+            procedure_2 = Backtracking_Search(self._instance, delta_evaluation = self._delta, alpha = 1, beta = -0.5, gamma = -0.5, delta = 0.5)
             return procedure_2.create_solution(random_k, show_output, max_runtime)
 
         else:

@@ -61,6 +61,7 @@ class Start_PCTSPHS:
 
         if (args.mode == '1' or args.mode == 'rand-construction') or (args.mode == '3' or args.mode == 'GRASP'):
             parser.add_argument('--randomization-factor',type=int, help='randomization-factor=0 means NO randomization, whereas the higher it is set the higher the randomization', default=0)
+        if (args.mode == '1' or args.mode == 'rand-construction') or (args.mode == '3' or args.mode == 'GRASP') or (args.mode == '5' or args.mode == 'GVNS'):
             parser.add_argument('--runs',type=int, help='specify how many runs shall be made (how often for each instance the algorithm shall be executed)', default=1)
 
         if (args.mode == '2' or args.mode == 'local-search') or (args.mode == '3' or args.mode == 'GRASP'):
@@ -129,13 +130,13 @@ class Start_PCTSPHS:
             elif args.step_function == 'random':
                 step_function = Step_Function_Type.RANDOM
 
-
             if not args.benchmark_all_local_search:
                 self.start_local_search(args.neighborhood_structure, args.preload_starting_solutions_from_path, step_function)
             else:
+
                 step_functions = [Step_Function_Type.FIRST, Step_Function_Type.BEST, Step_Function_Type.RANDOM]
                 neighborhoods = ['remove_customer','add_customer','insert_customer','swap_served_unserved_customer','interchange_customers','trip_2_opt','remove_hotel','add_hotel','exchange_hotel','move_hotel']
-                
+                        
 
                 for step_function in step_functions:
                     for neighborhood in neighborhoods:
@@ -144,6 +145,7 @@ class Start_PCTSPHS:
                         self.start_local_search(neighborhood, args.preload_starting_solutions_from_path, step_function)
 
 
+                
         elif args.mode == '3' or args.mode == 'GRASP':
             self.start_grasp_search(args.randomization_factor,args.neighborhood_structure, args.runs)
 
@@ -151,7 +153,7 @@ class Start_PCTSPHS:
             self.start_vnd_search(args.preload_starting_solutions_from_path)
 
         elif args.mode == '5' or args.mode == 'GVNS':
-            self.start_gvns_search(args.preload_starting_solutions_from_path)
+            self.start_gvns_search(args.preload_starting_solutions_from_path, args.runs)
 
 
     def start_construction_heuristics(self):
@@ -208,7 +210,7 @@ class Start_PCTSPHS:
     def start_random_construction_heuristics(self, random_k, trial_runs):
         print("start-random-const..." + str(random_k))
 
-        max_runtime = 2
+        max_runtime = 4
         for instance in self._instances:
 
             best_result = None
@@ -253,9 +255,9 @@ class Start_PCTSPHS:
 
         # Trip_2_Opt can be used for delta vs. no delta measurements
         with_delta = True
-        delta_measurements = True
+        delta_measurements = False
         #max_runtime = self._max_runtime
-        max_runtime = 10
+        max_runtime = 60
 
         if pre_load:
             pre_load_files = {}
@@ -350,27 +352,45 @@ class Start_PCTSPHS:
             result.write_result_metadata_to_file(file_path_to_solutions + "local_search", header_line, content_line)
 
 
-    def start_grasp_search(self, random_k, neighborhood):
+    def start_grasp_search(self, random_k, neighborhood, trial_runs):
         print("start-grasp-search..." + str(random_k) + "::" + str(neighborhood))
 
 
         for instance in self._instances:
 
-            instance_base_name = instance.get_basename()
+            best_result = None
 
-            grasp = Grasp(instance, random_k)
-            result = grasp.start_search(None, None, None, self._max_runtime)
 
-            result.get_best_solution().write_solution_to_file(file_path_to_solutions + "grasp")
+            for index in range(trial_runs):
 
-            header_line = ["Instance_Name","Number_Of_Customers","Number_Of_Hotels","Objective_Value","Sum_of_Trips","Penalties","Hotel_Fees","Max_Trip_Length","Number_Of_Trips","Prize","Time","Trace"]
+                instance_base_name = instance.get_basename()
 
-            solution = result.get_best_solution()
-            instance_name = instance.get_instance_name()
+                grasp = Grasp(instance, random_k)
+                result = grasp.start_search(None, None, None, self._max_runtime)
 
-            content_line = [str(instance_name), str(len(instance._customers_list)), str(len(instance._hotels_list)), str(solution._objective_value), str(solution._sum_of_trips), str(solution._penalties), str(solution._hotel_fees), str(solution._max_trip_length), str(len(solution._trips)), str(solution._prize), str(result.get_time()), str(result.get_trace())]
+                result.get_best_solution().write_solution_to_file(file_path_to_solutions + "grasp")
 
-            result.write_result_metadata_to_file(file_path_to_solutions + "grasp", header_line, content_line)
+
+                if not best_result or best_result.get_best_solution()._objective_value > solution._objective_value:
+                    best_result = result
+
+
+
+                header_line = ["Instance_Name","Number_Of_Customers","Number_Of_Hotels","Objective_Value","Sum_of_Trips","Penalties","Hotel_Fees","Max_Trip_Length","Number_Of_Trips","Prize","Time","Trace"]
+
+                solution = result.get_best_solution()
+                instance_name = instance.get_instance_name()
+
+                content_line = [str(instance_name), str(len(instance._customers_list)), str(len(instance._hotels_list)), str(solution._objective_value), str(solution._sum_of_trips), str(solution._penalties), str(solution._hotel_fees), str(solution._max_trip_length), str(len(solution._trips)), str(solution._prize), str(result.get_time()), str(result.get_trace())]
+
+
+                for key in result.get_additional_params().keys():
+                    header_line.append(str(key))
+                    content_line.append(str(result.get_additional_params()[key]))
+
+
+
+                result.write_result_metadata_to_file(file_path_to_solutions + "grasp", header_line, content_line)
 
 
 
@@ -412,10 +432,17 @@ class Start_PCTSPHS:
 
             content_line = [str(instance_name), str(len(instance._customers_list)), str(len(instance._hotels_list)), str(solution._objective_value), str(solution._sum_of_trips), str(solution._penalties), str(solution._hotel_fees), str(solution._max_trip_length), str(len(solution._trips)), str(solution._prize), str(result.get_time()), str(result.get_trace())]
 
+            for key in result.get_additional_params().keys():
+                header_line.append(str(key))
+                content_line.append(str(result.get_additional_params()[key]))
+
+
+
+
             result.write_result_metadata_to_file(file_path_to_solutions + "vnd", header_line, content_line)
 
 
-    def start_gvns_search(self, pre_load):
+    def start_gvns_search(self, pre_load, trial_runs):
         print("start-gvns-search")
 
 
@@ -429,32 +456,41 @@ class Start_PCTSPHS:
 
         for instance in self._instances:
 
-            instance_base_name = instance.get_basename()
+            best_result = None
 
-            if pre_load:
-                solution = self.pre_load_solution_from_path(instance, pre_load, instance_base_name, pre_load_files)
-            else:
-                initialization_procedure = Backtracking_Search(instance)
-                solution = initialization_procedure.create_solution().get_best_solution()
+            for index in range(trial_runs):
+
+                instance_base_name = instance.get_basename()
+
+                if pre_load:
+                    solution = self.pre_load_solution_from_path(instance, pre_load, instance_base_name, pre_load_files)
+                else:
+                    initialization_procedure = Backtracking_Search(instance)
+                    solution = initialization_procedure.create_solution().get_best_solution()
 
 
-            gvns = Gvns(instance, 0)
-            result = gvns.start_search(solution, None, None, 10, termination_criterion = iterations)
+                gvns = Gvns(instance, 0)
+                result = gvns.start_search(solution, None, None, 10, termination_criterion = iterations)
 
-            result.get_best_solution().write_solution_to_file(file_path_to_solutions + "gvns")
+                if not best_result or best_result.get_best_solution()._objective_value > solution._objective_value:
+                    best_result = result
 
-            header_line = ["Instance_Name","Number_Of_Customers","Number_Of_Hotels","Objective_Value","Sum_of_Trips","Penalties","Hotel_Fees","Max_Trip_Length","Number_Of_Trips","Prize","Time","Trace"]
 
-            solution = result.get_best_solution()
-            instance_name = instance.get_instance_name()
 
-            content_line = [str(instance_name), str(len(instance._customers_list)), str(len(instance._hotels_list)), str(solution._objective_value), str(solution._sum_of_trips), str(solution._penalties), str(solution._hotel_fees), str(solution._max_trip_length), str(len(solution._trips)), str(solution._prize), str(result.get_time()), str(result.get_trace())]
+                header_line = ["Instance_Name","Number_Of_Customers","Number_Of_Hotels","Objective_Value","Sum_of_Trips","Penalties","Hotel_Fees","Max_Trip_Length","Number_Of_Trips","Prize","Time","Trace"]
 
-            for key in result.get_additional_params().keys():
-                header_line.append(str(key))
-                content_line.append(str(result.get_additional_params()[key]))
+                solution = result.get_best_solution()
+                instance_name = instance.get_instance_name()
 
-            result.write_result_metadata_to_file(file_path_to_solutions + "gvns", header_line, content_line)
+                content_line = [str(instance_name), str(len(instance._customers_list)), str(len(instance._hotels_list)), str(solution._objective_value), str(solution._sum_of_trips), str(solution._penalties), str(solution._hotel_fees), str(solution._max_trip_length), str(len(solution._trips)), str(solution._prize), str(result.get_time()), str(result.get_trace())]
+
+                for key in result.get_additional_params().keys():
+                    header_line.append(str(key))
+                    content_line.append(str(result.get_additional_params()[key]))
+            
+                result.write_result_metadata_to_file(file_path_to_solutions + "gvns", header_line, content_line)
+
+            best_result.get_best_solution().write_solution_to_file(file_path_to_solutions + "gvns")
 
 
     def pre_load_solution_from_path(self, instance, pre_load, instance_base_name, pre_load_files):
