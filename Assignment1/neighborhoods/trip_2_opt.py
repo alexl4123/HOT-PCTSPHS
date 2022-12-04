@@ -6,7 +6,7 @@ from framework.solution import Delta, Solution_Worthiness, Reverse
 
 class Trip_2_Opt(Neighborhood):
 
-    def __init__(self, instance):
+    def __init__(self, instance, with_delta = True):
         self._instance = instance
         self._solution = None
 
@@ -17,6 +17,8 @@ class Trip_2_Opt(Neighborhood):
 
         self._number_of_solutions = None
         self._current_solution_index = 0
+
+        self._delta = with_delta
 
     def set_solution(self, solution):
         self._solution = solution
@@ -95,38 +97,45 @@ class Trip_2_Opt(Neighborhood):
         else:
             vertex_p1 = self._solution._hotels[self._trip_index]
 
-        if self._trip_position_index_2 < len(trip):
-            vertex_p2 = trip[self._trip_position_index_2]
+        if self._trip_position_index_2 < len(trip) - 1:
+            vertex_p2 = trip[self._trip_position_index_2 + 1]
         else:
             vertex_p2 = self._solution._hotels[self._trip_index + 1]
 
         #print("<<<" + str(self._trip_position_index_1) + "::" + str(self._trip_position_index_2) + "::" + str(len(trip)) + ">>>")
+        #print("|||" + str(vertex_p1.get_id()) + "::" + str(vertex_q1.get_id()) + "___" + str(vertex_q2.get_id()) + "::" + str(vertex_p2.get_id()) + "|||")
 
-        current_length = self._instance.get_distance(vertex_p1, vertex_q1) + self._instance.get_distance(vertex_q2,
+        if self._delta:
+            current_length = self._instance.get_distance(vertex_p1, vertex_q1) + self._instance.get_distance(vertex_q2,
+                                                                                                             vertex_p2)
+
+            new_length = self._instance.get_distance(vertex_p1, vertex_q2) + self._instance.get_distance(vertex_q1,
                                                                                                          vertex_p2)
 
-        new_length = self._instance.get_distance(vertex_p1, vertex_q2) + self._instance.get_distance(vertex_q1,
-                                                                                                     vertex_p2)
-
-        # print("2-EXCH-delta_minus:" + str(current_length) + ":delta_plus:" + str(new_length))
+            #print("2-EXCH-delta_minus:" + str(current_length) + ":delta_plus:" + str(new_length))
 
         # Compute necessary operation
         reverse = Reverse(vertex_q1, self._trip_index, self._trip_position_index_1, vertex_q2, self._trip_index,
                           self._trip_position_index_2)
         delta = Delta([reverse])
 
-        # Calculate new solution-worthiness
-        new_trip_length = self._solution._trip_lengths[self._trip_index] - current_length + new_length
+        if self._delta:
+            # Calculate new solution-worthiness
+            new_trip_length = self._solution._trip_lengths[self._trip_index] - current_length + new_length
 
-        if new_trip_length > self._solution._max_trip_length:
-            new_max_trip_length = new_trip_length
+            if new_trip_length > self._solution._max_trip_length:
+                new_max_trip_length = new_trip_length
+            else:
+                new_max_trip_length = self._solution._max_trip_length
+
+            new_objective_value = self._solution.get_objective_value() - current_length + new_length
         else:
-            new_max_trip_length = self._solution._max_trip_length
+            cloned_solution = self._solution.clone()
+            cloned_solution.change_from_delta(delta, False)
+            values = cloned_solution.slow_objective_values_calculation()
 
-        new_objective_value = self._solution.get_objective_value() - current_length + new_length
-
-        if new_objective_value < self._solution.get_objective_value():
-            print("!!!-2-OPT-IS-BETTER!!!" + str(new_objective_value) + "::" + str(self._solution.get_objective_value()))
+            new_objective_value = values[0]
+            new_max_trip_length = values[4]
 
         worthiness = Solution_Worthiness(new_objective_value, new_max_trip_length, self._solution.get_number_of_trips(),
                                          self._solution.get_prize(), delta, Delta([]))

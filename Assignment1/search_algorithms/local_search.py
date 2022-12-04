@@ -62,7 +62,7 @@ class Local_Search(Algorithm):
 
         duration = time.time() - starting_time
         if duration > max_runtime:
-            logger.info("Runtime limit reached, actual runtime: " + max_runtime)
+            logger.info("Runtime limit reached, actual runtime: " + str(max_runtime))
 
             duration = max_runtime
 

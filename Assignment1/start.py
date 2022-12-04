@@ -156,8 +156,8 @@ class Start_PCTSPHS:
         print("start-construction")
 
         # These should not be set by the user, only for report purposes (effect of delta vs. no delta)
-        benchmarking = True
-        with_delta_evaluation = False
+        benchmarking = False
+        with_delta_evaluation = True
 
         for instance in self._instances:
 
@@ -227,6 +227,11 @@ class Start_PCTSPHS:
     def start_local_search(self, neighborhood_str, pre_load, step_function):
         print("start-local-search..." + str(neighborhood_str))
 
+        # Trip_2_Opt can be used for delta vs. no delta measurements
+        with_delta = True
+        delta_measurements = True
+        #max_runtime = self._max_runtime
+        max_runtime = 10
 
         if pre_load:
             pre_load_files = {}
@@ -255,7 +260,7 @@ class Start_PCTSPHS:
             elif neighborhood_str == 'interchange_customers':
                 neighborhood = Interchange_Customers(instance)
             elif neighborhood_str == 'trip_2_opt':
-                neighborhood = Trip_2_Opt(instance)
+                neighborhood = Trip_2_Opt(instance, with_delta)
             elif neighborhood_str == 'remove_hotel':
                 neighborhood = Remove_Hotel(instance)
             elif neighborhood_str == 'add_hotel':
@@ -267,16 +272,49 @@ class Start_PCTSPHS:
 
             randomization_k = 0
             search_alg = Local_Search(instance, randomization_k)
-            result = search_alg.start_search(solution, step_function, [neighborhood], self._max_runtime)
-
-            result.get_best_solution().write_solution_to_file(file_path_to_solutions + "local_search", neighborhood_str + "_" + str(step_function))
-
-            header_line = ["Instance_Name","Number_Of_Customers","Number_Of_Hotels","Objective_Value","Sum_of_Trips","Penalties","Hotel_Fees","Max_Trip_Length","Number_Of_Trips","Prize","Time","Trace", "Neighborhood", "Step_Function"]
+            result = search_alg.start_search(solution, step_function, [neighborhood], max_runtime)
 
             solution = result.get_best_solution()
-            instance_name = instance.get_instance_name()
 
-            content_line = [str(instance_name), str(len(instance._customers_list)), str(len(instance._hotels_list)), str(solution._objective_value), str(solution._sum_of_trips), str(solution._penalties), str(solution._hotel_fees), str(solution._max_trip_length), str(len(solution._trips)), str(solution._prize), str(result.get_time()), str(result.get_trace()), neighborhood_str, str(step_function)]
+            # Necessary e.g. for timeouts!
+            if solution:
+                objective_value = solution._objective_value
+                sum_of_trips = solution._sum_of_trips
+                penalties = solution._penalties
+                hotel_fees = solution._hotel_fees
+                max_trip_length = solution._max_trip_length
+                trips = len(solution._trips)
+                prize = solution._prize
+                trip_lengths = solution._trip_lengths
+            else:
+                objective_value = -1
+                sum_of_trips = -1
+                penalties = -1
+                hotel_fees = -1
+                max_trip_length = -1
+                trips = -1
+                prize = -1
+                trip_lengths = []
+
+            if solution:
+                result.get_best_solution().write_solution_to_file(file_path_to_solutions + "local_search", neighborhood_str + "_" + str(step_function))
+
+            if not delta_measurements:
+                header_line = ["Instance_Name","Number_Of_Customers","Number_Of_Hotels","Objective_Value","Sum_of_Trips","Penalties","Hotel_Fees","Max_Trip_Length","Number_Of_Trips","Prize","Time","Trace", "Neighborhood", "Step_Function"]
+
+                solution = result.get_best_solution()
+                instance_name = instance.get_instance_name()
+
+                content_line = [str(instance_name), str(len(instance._customers_list)), str(len(instance._hotels_list)), str(solution._objective_value), str(solution._sum_of_trips), str(solution._penalties), str(solution._hotel_fees), str(solution._max_trip_length), str(len(solution._trips)), str(solution._prize), str(result.get_time()), str(result.get_trace()), neighborhood_str, str(step_function)]
+            else:
+                header_line = ["Instance_Name","Number_Of_Customers","Number_Of_Hotels","Objective_Value","Sum_of_Trips","Penalties","Hotel_Fees","Max_Trip_Length","Number_Of_Trips","Prize","Time","Trace", "Neighborhood", "Step_Function","Delta-Evaluation"]
+
+                solution = result.get_best_solution()
+                instance_name = instance.get_instance_name()
+
+                content_line = [str(instance_name), str(len(instance._customers_list)), str(len(instance._hotels_list)), str(solution._objective_value), str(solution._sum_of_trips), str(solution._penalties), str(solution._hotel_fees), str(solution._max_trip_length), str(len(solution._trips)), str(solution._prize), str(result.get_time()), str(result.get_trace()), neighborhood_str, str(step_function), str(with_delta)]
+
+
 
 
 

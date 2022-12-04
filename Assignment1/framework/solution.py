@@ -294,8 +294,8 @@ class Solution:
             delta_minus = - inst.get_distance(prev_obj_1, obj_1) - inst.get_distance(obj_2, post_obj_2)
             delta_plus = inst.get_distance(prev_obj_1, obj_2) + inst.get_distance(obj_1, post_obj_2)
 
-            lower_index = start_trip_index_position
-            upper_index = end_trip_index_position
+        lower_index = start_trip_index_position
+        upper_index = end_trip_index_position
 
         while lower_index < upper_index:
             tmp = trip[lower_index]
