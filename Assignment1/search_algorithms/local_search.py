@@ -19,7 +19,8 @@ class Local_Search(Algorithm):
 
         self._random_k = random_k
 
-    def start_search(self, init_solution, step_function_type, neighborhoods, max_runtime, termination_criterion=1000, starting_time = None, output=True):
+    def start_search(self, init_solution, step_function_type, neighborhoods, max_runtime, termination_criterion=1000, starting_time = None, output=True, allow_invalid_solutions = False):
+
 
         neighborhood = neighborhoods[0]
 
@@ -31,6 +32,7 @@ class Local_Search(Algorithm):
 
         trace = [solution.get_objective_value()]
 
+
         step = 0
 
         last_objective_value = 0
@@ -40,7 +42,7 @@ class Local_Search(Algorithm):
             starting_time = time.time()
 
         while step < termination_criterion and (last_objective_value != current_objective_value or step_function_type == Step_Function_Type.RANDOM):
-            new_worthiness = self._step_function(neighborhood, solution, step_function_type)
+            new_worthiness = self._step_function(neighborhood, solution, step_function_type, allow_invalid_solutions = allow_invalid_solutions)
 
             last_objective_value = current_objective_value
             current_objective_value = new_worthiness.get_objective_value()
@@ -74,17 +76,17 @@ class Local_Search(Algorithm):
             logger.info("Local search solution verfification with slow calculation: " + str(checked_values))
             logger.info("Trace:" + str(trace))
 
-        if checked_values[0] != solution.get_objective_value():
-            logger.error("Likely error in delta-evaluation!")
+        if checked_values[0] != solution.get_objective_value() and not allow_invalid_solutions:
+            logger.error("Local Search: Likely error in delta-evaluation!")
             quit()
-        if checked_values[0] != trace[len(trace) - 1]:
-            logger.error("Likely error in neighborhood-evaluation!")
+        if checked_values[0] != trace[len(trace) - 1] and not allow_invalid_solutions:
+            logger.error("Local Search: Likely error in neighborhood-evaluation!")
             quit()
 
 
         return Result(solution, trace, duration)
 
-    def _step_function(self, neighborhood, solution, step_function_type):
+    def _step_function(self, neighborhood, solution, step_function_type, allow_invalid_solutions = False):
 
         neighborhood.set_solution(solution)
         neighborhood.reset_indexes()
@@ -92,6 +94,7 @@ class Local_Search(Algorithm):
         if step_function_type == Step_Function_Type.RANDOM:
             # Inefficient, but does the job
             upper = neighborhood.get_number_possible_solutions() - 1
+
             sol = solution
             if upper > 0:
                 k = random.randint(0, upper)
@@ -108,16 +111,39 @@ class Local_Search(Algorithm):
                                                      solution.get_number_of_trips(), solution.get_prize(), Delta([]),
                                                      Delta([]))
 
+            #print(solution.to_string())
+            #print(current_worthiness._objective_value)
+
+
             k = 0
             number = neighborhood.get_number_possible_solutions()
             while k < number:
                 new_worthiness = neighborhood.next_solution()
 
-                if new_worthiness.get_max_trip_duration() <= self._instance.get_C1() and new_worthiness.get_performed_trips() <= self._instance.get_C2() and new_worthiness.get_collected_prizes() >= self._instance.get_C3():
+                if (new_worthiness.get_max_trip_duration() <= self._instance.get_C1() and new_worthiness.get_collected_prizes() >= self._instance.get_C3() and new_worthiness.get_performed_trips() <= self._instance.get_C2()) or (new_worthiness.get_max_trip_duration() <= self._instance.get_C1() and new_worthiness.get_collected_prizes() >= self._instance.get_C3() and allow_invalid_solutions):
                     if new_worthiness.get_objective_value() < current_worthiness.get_objective_value() and step_function_type == Step_Function_Type.FIRST:
                         return new_worthiness
                     elif new_worthiness.get_objective_value() < current_worthiness.get_objective_value():
                         current_worthiness = new_worthiness
+
+                """
+                elif allow_invalid_solutions:
+                    if current_worthiness.get_collected_prizes() < self._instance.get_C3() and new_worthiness.get_collected_prizes() > current_worthiness.get_collected_prizes():
+                        if step_function_type == Step_Function_Type.FIRST:
+                            return new_worthiness
+                        else:
+                            current_worthiness = new_worthiness
+                    elif current_worthiness.get_max_trip_duration() > self._instance.get_C1() and new_worthiness.get_max_trip_duration() < current_worthiness.get_max_trip_duration():
+                        if step_function_type == Step_Function_Type.FIRST:
+                            return new_worthiness
+                        else:
+                            current_worthiness = new_worthiness
+                    elif current_worthiness.get_performed_trips() > self._instance.get_C2() and new_worthiness.get_performed_trips() < current_worthiness.get_performed_trips():
+                        if step_function_type == Step_Function_Type.FIRST:
+                            return new_worthiness
+                        else:
+                            current_worthiness = new_worthiness
+                """
 
                 k = k + 1
 

@@ -804,9 +804,12 @@ class Solution:
             trip_lengths, avg_trip_length)
 
     def update_values_from_slow_calculation(self, slow_calc = None):
+        """
+            Performs a slow_claculation (if slow_calc is None) and updates the values used for delta-evaluation
+        """
 
         if not slow_calc:
-            slow_calc = self._slow_objective_values_calculation()
+            slow_calc = self.slow_objective_values_calculation()
 
         self._objective_value = slow_calc[0]
         self._sum_of_trips = slow_calc[1]

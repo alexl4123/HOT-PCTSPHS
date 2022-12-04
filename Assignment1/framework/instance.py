@@ -260,6 +260,7 @@ class Instance:
     def get_instance_name(self):
         return self._instance_name
 
+
     def _index_is_hotel(self, index):
         if index < self._hotel_max_index:
             return True

@@ -21,7 +21,7 @@ class Vnd(Algorithm):
 
         self._random_k = random_k
 
-    def start_search(self, init_solution, step_function_type, neighborhoods, max_runtime, termination_criterion=1000, starting_time = None, output=True):
+    def start_search(self, init_solution, step_function_type, neighborhoods, max_runtime, termination_criterion=1000, starting_time = None, output=True, allow_invalid_solutions = False):
 
         neighborhood_number = 0
         max_neighborhood_number = len(neighborhoods) - 1 
@@ -39,7 +39,8 @@ class Vnd(Algorithm):
 
             cur_neighborhood = neighborhoods[neighborhood_number]
             local_search = Local_Search(self._instance, 0)
-            result = local_search.start_search(solution, step_function_type, [cur_neighborhood], termination_criterion, int(max_runtime/10), output=False)
+
+            result = local_search.start_search(solution, step_function_type, [cur_neighborhood], termination_criterion, int(max_runtime/10), output=False, allow_invalid_solutions = allow_invalid_solutions)
 
             if result.get_best_solution().get_objective_value() < old_objective_value:
                 neighborhood_number = 0
@@ -58,7 +59,7 @@ class Vnd(Algorithm):
 
         duration = time.time() - starting_time
         if duration > max_runtime:
-            logger.info("Runtime limit reached, actual runtime: " + max_runtime)
+            logger.info("Runtime limit reached, actual runtime: " + str(max_runtime))
 
             duration = max_runtime
 
@@ -69,8 +70,8 @@ class Vnd(Algorithm):
             logger.info("VND search solution verfification with slow calculation: " + str(checked_values))
             logger.info("VND Trace:" + str(trace))
 
-        if checked_values[0] != solution.get_objective_value():
-            logger.error("Likely error in delta-evaluation!")
+        if checked_values[0] != solution.get_objective_value() and not allow_invalid_solutions:
+            logger.error("VND Likely error in delta-evaluation!")
             quit()
         if checked_values[0] != trace[len(trace) - 1]:
             logger.error("Likely error in neighborhood-evaluation!")
