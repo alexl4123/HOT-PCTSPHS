@@ -16,11 +16,15 @@ class Greedy_Nearest_Neighbor_Initialization(Initialization_Procedure):
     2.) Tries to repair solution, by inserting hotels
     """
 
-    def __init__(self, instance, delta = True):
-        super().__init__(instance)
-        self._delta = delta
+    def __init__(self, instance, alpha=1, beta=-0.5, gamma=-0.5, delta=0.5, delta_evaluation = True):
+        super().__init__(instance, alpha, beta, gamma, delta)
+        self._delta = delta_evaluation
 
-    def create_solution(self, random_k=0, output=True):
+
+    def create_solution(self, random_k=0, output=True, max_runtime = 90):
+        """
+        max_runtime not supported
+        """
 
         inst = self._instance
 
@@ -36,7 +40,7 @@ class Greedy_Nearest_Neighbor_Initialization(Initialization_Procedure):
 
         # Until C3 is satisfied -> insert greedily nearest neighbors
         while not solution.is_c3_satisfied():
-            nearest_unserved_customer = solution.get_nearest_unserved_customer(current_location, random_k)
+            nearest_unserved_customer = self.get_nearest_unserved_customer(current_location, random_k, solution)
             d_n_c = inst.get_distance(current_location, nearest_unserved_customer)
 
             solution.change_from_delta(
@@ -76,7 +80,7 @@ class Greedy_Nearest_Neighbor_Initialization(Initialization_Procedure):
                 index = index - 1
 
                 while index >= lower_index:
-                    nearest_hotel = inst.get_nearest_hotel(greedy_trip[index])
+                    nearest_hotel = self.get_nearest_hotel(greedy_trip[index])
                     d_n_h = inst.get_distance(greedy_trip[index], nearest_hotel)
 
                     if trip_size + d_n_h <= inst.get_C1():
@@ -118,3 +122,8 @@ class Greedy_Nearest_Neighbor_Initialization(Initialization_Procedure):
 
         duration = time.time() - starting_time
         return Result(solution, [solution.get_objective_value()], duration)
+
+
+
+    def to_string(self):
+        return "pure-greedy"

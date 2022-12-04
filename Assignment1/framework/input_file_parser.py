@@ -68,7 +68,7 @@ class Input_File_Parser:
 
         input_file.close()
 
-        instance.precompute_all_nearest_neighbors()
+        #instance.precompute_all_nearest_neighbors()
 
         return instance
 

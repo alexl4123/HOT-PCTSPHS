@@ -194,6 +194,12 @@ class Start_PCTSPHS:
 
             content_line = [str(instance_name), str(len(instance._customers_list)), str(len(instance._hotels_list)), str(objective_value), str(sum_of_trips), str(penalties), str(hotel_fees), str(max_trip_length), str(trips), str(prize), str(result.get_time()), str(result.get_trace()), str(trip_lengths), str(related_statistics[0]),str(with_delta_evaluation)]
 
+            for key in result.get_additional_params().keys():
+                header_line.append(str(key))
+                content_line.append(str(result.get_additional_params()[key]))
+
+
+
             result.write_result_metadata_to_file(file_path_to_solutions + "construction_heuristic", header_line, content_line, instance)
 
 
@@ -306,6 +312,11 @@ class Start_PCTSPHS:
                 instance_name = instance.get_instance_name()
 
                 content_line = [str(instance_name), str(len(instance._customers_list)), str(len(instance._hotels_list)), str(solution._objective_value), str(solution._sum_of_trips), str(solution._penalties), str(solution._hotel_fees), str(solution._max_trip_length), str(len(solution._trips)), str(solution._prize), str(result.get_time()), str(result.get_trace()), neighborhood_str, str(step_function)]
+
+                for key in result.get_additional_params().keys():
+                    header_line.append(str(key))
+                    content_line.append(str(result.get_additional_params()[key]))
+
             else:
                 header_line = ["Instance_Name","Number_Of_Customers","Number_Of_Hotels","Objective_Value","Sum_of_Trips","Penalties","Hotel_Fees","Max_Trip_Length","Number_Of_Trips","Prize","Time","Trace", "Neighborhood", "Step_Function","Delta-Evaluation"]
 

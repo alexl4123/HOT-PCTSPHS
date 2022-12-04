@@ -2,10 +2,13 @@ from pathlib import Path
 
 class Result:
 
-    def __init__(self, best_solution, trace, needed_time):
+    def __init__(self, best_solution, trace, needed_time, additional_params = None):
         self._best_solution = best_solution
         self._trace = trace
         self._needed_time = needed_time
+        self._additional_params = {}
+        if additional_params:
+            self._additional_params = additional_params
 
     def get_best_solution(self):
         return self._best_solution
@@ -15,6 +18,9 @@ class Result:
 
     def get_time(self):
         return self._needed_time
+
+    def get_additional_params(self):
+        return self._additional_params
 
     def write_result_metadata_to_file(self, file_path, header_line, content_line, instance = None):
 

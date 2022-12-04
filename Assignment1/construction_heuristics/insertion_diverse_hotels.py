@@ -43,14 +43,17 @@ class Insertion_Diverse_Hotels(Initialization_Procedure):
     2.) It then adds customers until constraint 1 is violated
     3.) It then tries to add a best fitting hotel at the very last position at the last trip.
     """
-
-    def __init__(self, instance, delta = True):
-        super().__init__(instance)
-        self._delta = delta
-
+    def __init__(self, instance, alpha=1, beta=-0.5, gamma=-0.5, delta=0.5, delta_evaluation = True):
+        super().__init__(instance, alpha, beta, gamma, delta)
+        self._delta = delta_evaluation
 
 
-    def create_solution(self, random_k=0, output = True):
+    def create_solution(self, random_k=0, output = True, max_runtime = 90):
+        """
+        max_runtime not supported
+        """
+
+
 
         self._random_k = random_k
 
@@ -117,7 +120,7 @@ class Insertion_Diverse_Hotels(Initialization_Procedure):
                 trip_index = len(solution._hotels) - 2
                 second_to_last_hotel = solution._hotels[trip_index]
 
-                next_hotels = self._instance.get_all_nearest_hotels(second_to_last_hotel)
+                next_hotels = self.get_all_nearest_hotels(second_to_last_hotel)
                 next_hotel = next_hotels[change_base_index]
 
                 add = Add(next_hotel, trip_index, len(solution._trips[trip_index]))
@@ -271,3 +274,7 @@ class Insertion_Diverse_Hotels(Initialization_Procedure):
             solution.change_from_delta(worthiness.get_reverse_delta())
 
         return (cur_best_total_length, cur_best)
+
+
+    def to_string(self):
+        return "insertion-diverse-hotels"

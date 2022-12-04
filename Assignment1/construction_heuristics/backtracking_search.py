@@ -17,9 +17,9 @@ class Backtracking_Search(Initialization_Procedure):
     Breadth limited means in this context, that it backtracks if it cannot progress further, if it does so it only considers the (randomized) nearest neighbor and the nearest hotel, so in the worst possible outcome we have a branching factor of 2.
     """
 
-    def __init__(self, instance, delta = True):
-        super().__init__(instance)
-        self._delta = delta
+    def __init__(self, instance, alpha=1, beta=-0.5, gamma=-0.5, delta=0.5, delta_evaluation = True):
+        super().__init__(instance, alpha, beta, gamma, delta)
+        self._delta = delta_evaluation
 
     def create_solution(self, random_k=0, output = True, max_runtime = 90):
 
@@ -80,7 +80,10 @@ class Backtracking_Search(Initialization_Procedure):
             index_upper_limit = 1
         # LIMIT-BREADTH
 
-        for nearest in self._instance.get_all_nearest_customers(obj, self._random_k):
+        for nearest in self.get_all_nearest_customers(obj, self._random_k):
+            #print(solution.to_string())
+            #print(nearest.get_id())
+
             if time.time() - starting_time > max_runtime:
                 #print("TIMEOUT")
                 return False
@@ -152,7 +155,7 @@ class Backtracking_Search(Initialization_Procedure):
         # LIMIT-BREADTH
 
         if current_trip_length > 0:
-            for nearest in self._instance.get_all_nearest_hotels(obj):
+            for nearest in self.get_all_nearest_hotels(obj):
                 if time.time() - starting_time > max_runtime:
                     #print("TIMEOUT")
                     return False
@@ -217,3 +220,13 @@ class Backtracking_Search(Initialization_Procedure):
                             break
 
         return False
+
+
+
+    def to_string(self):
+        return "backtracking"
+
+
+
+
+

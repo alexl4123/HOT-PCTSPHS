@@ -45,12 +45,16 @@ class Insertion_Heuristic_Sum_Of_Trips(Initialization_Procedure):
     4.) If also adding hotels doesn't work, try swapping
     """
 
-    def __init__(self, instance, delta = True):
-        super().__init__(instance)
-        self._delta = delta
+    def __init__(self, instance, alpha=1, beta=-0.5, gamma=-0.5, delta=0.5, delta_evaluation = True):
+        super().__init__(instance, alpha, beta, gamma, delta)
+        self._delta = delta_evaluation
 
 
-    def create_solution(self, random_k=0, output=True):
+
+    def create_solution(self, random_k=0, output=True, max_runtime = 90):
+        """
+        max_runtime not supported
+        """
 
         self._random_k = random_k
 
@@ -467,3 +471,6 @@ class Insertion_Heuristic_Sum_Of_Trips(Initialization_Procedure):
             old_item = solution._trips[cur_max_trip_value_index][item_index]
 
     """
+
+    def to_string(self):
+        return "insertion-heuristic-sum-of-trips"

@@ -690,28 +690,6 @@ class Solution:
         else:
             return False
 
-    def get_nearest_unserved_customer(self, location, k):
-
-        remaining = k
-        nearest_list = []
-
-        for nearest in self._instance.get_all_nearest_customers(location):
-            if not self.is_customer_served(nearest) and self._instance.get_distance(location, nearest) > 0 and k == 0:
-                return nearest
-            elif not self.is_customer_served(nearest) and self._instance.get_distance(location, nearest) > 0 and k > 0:
-                remaining = remaining - 1
-                nearest_list.append(nearest)
-
-                if remaining < 0:
-                    break
-
-        picked_index = random.randint(0, len(nearest_list) - 1)
-
-        return nearest_list[picked_index]
-
-        logger.critical("Ran out of nearest unserved customers! May never happen!")
-        quit()
-
     def to_string(self):
         string = "[0,"
 
