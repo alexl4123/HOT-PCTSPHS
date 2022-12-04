@@ -45,6 +45,11 @@ class Insertion_Heuristic_Sum_Of_Trips(Initialization_Procedure):
     4.) If also adding hotels doesn't work, try swapping
     """
 
+    def __init__(self, instance, delta = True):
+        super().__init__(instance)
+        self._delta = delta
+
+
     def create_solution(self, random_k=0, output=True):
 
         self._random_k = random_k

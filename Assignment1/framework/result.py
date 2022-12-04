@@ -16,9 +16,16 @@ class Result:
     def get_time(self):
         return self._needed_time
 
-    def write_result_metadata_to_file(self, file_path, header_line, content_line):
-        basename = self._best_solution._instance.get_basename()
-        instance_name = self._best_solution._instance.get_instance_name()
+    def write_result_metadata_to_file(self, file_path, header_line, content_line, instance = None):
+
+        if self._best_solution:
+            basename = self._best_solution._instance.get_basename()
+            instance_name = self._best_solution._instance.get_instance_name()
+        elif instance:
+            basename = instance.get_basename()
+            instance_name = instance.get_instance_name()
+        else:
+            print("NOT ALLOWED WHILE WRITE METADATA")
 
         # Just for abbrevation purposes
         solution = self._best_solution

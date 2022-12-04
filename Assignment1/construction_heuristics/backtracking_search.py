@@ -17,7 +17,11 @@ class Backtracking_Search(Initialization_Procedure):
     Breadth limited means in this context, that it backtracks if it cannot progress further, if it does so it only considers the (randomized) nearest neighbor and the nearest hotel, so in the worst possible outcome we have a branching factor of 2.
     """
 
-    def create_solution(self, random_k=0, output = True):
+    def __init__(self, instance, delta = True):
+        super().__init__(instance)
+        self._delta = delta
+
+    def create_solution(self, random_k=0, output = True, max_runtime = 90):
 
         self._random_k = random_k
 
@@ -31,7 +35,7 @@ class Backtracking_Search(Initialization_Procedure):
         starting_time = time.time()
 
         result = self.backtracking(solution, starting_hotel, starting_trip_index, starting_trip_index_position,
-                                   starting_trip_length)
+                                   starting_trip_length, starting_time, max_runtime)
 
         duration = time.time() - starting_time
 
@@ -49,20 +53,20 @@ class Backtracking_Search(Initialization_Procedure):
             logger.error("Backtracking could not find a solution!")
             return Result(False, [-1], duration)
 
-    def backtracking(self, solution, obj, trip_index, trip_index_position, current_trip_length):
+    def backtracking(self, solution, obj, trip_index, trip_index_position, current_trip_length, starting_time, max_runtime):
 
         if not solution.is_c3_satisfied() and solution.is_c2_satisfied():
-            return self.backtracking_helper(solution, obj, trip_index, trip_index_position, current_trip_length)
+            return self.backtracking_helper(solution, obj, trip_index, trip_index_position, current_trip_length, starting_time, max_runtime)
         elif solution.is_c2_satisfied():
             if solution.is_c1_satisfied() and solution.is_c2_satisfied() and solution.is_c3_satisfied():
                 return True
             else:
-                return self.backtracking_helper(solution, obj, trip_index, trip_index_position, current_trip_length)
+                return self.backtracking_helper(solution, obj, trip_index, trip_index_position, current_trip_length, starting_time, max_runtime)
                 # return False
 
         return False
 
-    def backtracking_helper(self, solution, obj, trip_index, trip_index_position, current_trip_length):
+    def backtracking_helper(self, solution, obj, trip_index, trip_index_position, current_trip_length, starting_time, max_runtime):
 
         inst = self._instance
 
@@ -77,35 +81,70 @@ class Backtracking_Search(Initialization_Procedure):
         # LIMIT-BREADTH
 
         for nearest in self._instance.get_all_nearest_customers(obj, self._random_k):
+            if time.time() - starting_time > max_runtime:
+                #print("TIMEOUT")
+                return False
+
             # LIMIT-BREADTH
             if index >= index_upper_limit:
                 break
             # LIMIT-BREADTH
 
-            new_dist = inst.get_distance(obj, nearest)
-            if not solution.is_customer_served(nearest) and new_dist > 0:
+            if self._delta:
+                new_dist = inst.get_distance(obj, nearest)
+                if not solution.is_customer_served(nearest) and new_dist > 0:
 
-                # LIMIT-BREADTH
-                index = index + 1
-                # LIMIT-BREADTH
+                    # LIMIT-BREADTH
+                    index = index + 1
+                    # LIMIT-BREADTH
 
-                new_trip_length = new_dist + current_trip_length
+                    new_trip_length = new_dist + current_trip_length
 
-                if new_trip_length <= inst.get_C1():
-                    delta = Delta([Add(nearest, trip_index, trip_index_position)])
+                    if new_trip_length <= inst.get_C1():
+                        delta = Delta([Add(nearest, trip_index, trip_index_position)])
 
-                    worthiness = solution.change_from_delta(delta)
+                        worthiness = solution.change_from_delta(delta)
 
-                    # For Customer
-                    result = self.backtracking(solution, nearest, trip_index, trip_index_position + 1, new_trip_length)
+                        # For Customer
+                        result = self.backtracking(solution, nearest, trip_index, trip_index_position + 1, new_trip_length, starting_time, max_runtime)
 
-                    if result:
-                        return result
+                        if result:
+                            return result
+                        else:
+                            solution.change_from_delta(worthiness.get_reverse_delta())
+
                     else:
-                        solution.change_from_delta(worthiness.get_reverse_delta())
+                        break
+            else: #not self._delta
+                if not solution.is_customer_served(nearest) and obj.get_id() != nearest.get_id():
 
-                else:
-                    break
+                    cloned_solution = solution.clone()
+
+                    index = index + 1
+
+                    delta = Delta([Add(nearest, trip_index, trip_index_position)])
+                    cloned_solution.change_from_delta(delta, False) 
+                    values = cloned_solution.slow_objective_values_calculation()
+
+                    if values[4] <= inst.get_C1():
+                        delta = Delta([Add(nearest, trip_index, trip_index_position)])
+                        worthiness = solution.change_from_delta(delta, False)
+                        solution.update_values_from_slow_calculation(values)
+
+                        trip_lengths = values[7]
+                        new_trip_length = trip_lengths[len(trip_lengths) - 1]
+
+                        # For Customer
+                        result = self.backtracking(solution, nearest, trip_index, trip_index_position + 1, new_trip_length, starting_time, max_runtime)
+
+                        if result:
+                            return result
+                        else:
+                            solution.change_from_delta(worthiness.get_reverse_delta())
+
+                    else:
+                        break
+
 
         # LIMIT-BREADTH
         index = 0
@@ -114,32 +153,67 @@ class Backtracking_Search(Initialization_Procedure):
 
         if current_trip_length > 0:
             for nearest in self._instance.get_all_nearest_hotels(obj):
+                if time.time() - starting_time > max_runtime:
+                    #print("TIMEOUT")
+                    return False
+
+
                 # LIMIT-BREADTH
                 if index >= index_upper_limit:
                     break
                 # LIMIT-BREADTH
 
-                new_dist = inst.get_distance(obj, nearest)
-                if new_dist > 0:
+                if self._delta:
+                    new_dist = inst.get_distance(obj, nearest)
+                    if new_dist > 0:
 
-                    # LIMIT-BREADTH
-                    index = index + 1
-                    # LIMIT-BREADTH
-                    new_trip_length = new_dist + current_trip_length
+                        # LIMIT-BREADTH
+                        index = index + 1
+                        # LIMIT-BREADTH
+                        new_trip_length = new_dist + current_trip_length
 
-                    if new_trip_length <= inst.get_C1():
-                        delta = Delta([Add(nearest, trip_index, trip_index_position)])
+                        if new_trip_length <= inst.get_C1():
+                            delta = Delta([Add(nearest, trip_index, trip_index_position)])
 
-                        worthiness = solution.change_from_delta(delta)
+                            worthiness = solution.change_from_delta(delta)
 
-                        # For Hotel
-                        result = self.backtracking(solution, nearest, trip_index + 1, 0, 0)
+                            # For Hotel
+                            result = self.backtracking(solution, nearest, trip_index + 1, 0, 0, starting_time, max_runtime)
 
-                        if result:
-                            return result
+                            if result:
+                                return result
+                            else:
+                                solution.change_from_delta(worthiness.get_reverse_delta())
                         else:
-                            solution.change_from_delta(worthiness.get_reverse_delta())
-                    else:
-                        break
+                            break
+                else: # not delta
+
+                    if obj.get_id() != nearest.get_id():
+                        cloned_solution = solution.clone()
+
+                        index = index + 1
+
+                        delta = Delta([Add(nearest, trip_index, trip_index_position)])
+                        cloned_solution.change_from_delta(delta, False) 
+                        values = cloned_solution.slow_objective_values_calculation()
+
+                        if values[4] <= inst.get_C1():
+                            delta = Delta([Add(nearest, trip_index, trip_index_position)])
+                            worthiness = solution.change_from_delta(delta, False)
+                            solution.update_values_from_slow_calculation(values)
+
+                            trip_lengths = values[7]
+                            new_trip_length = trip_lengths[len(trip_lengths) - 1]
+
+                            # For Hotel
+                            result = self.backtracking(solution, nearest, trip_index + 1, 0, 0, starting_time, max_runtime)
+
+                            if result:
+                                return result
+                            else:
+                                solution.change_from_delta(worthiness.get_reverse_delta())
+
+                        else:
+                            break
 
         return False

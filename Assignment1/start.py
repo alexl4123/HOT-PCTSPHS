@@ -155,20 +155,46 @@ class Start_PCTSPHS:
     def start_construction_heuristics(self):
         print("start-construction")
 
+        # These should not be set by the user, only for report purposes (effect of delta vs. no delta)
+        benchmarking = True
+        with_delta_evaluation = False
+
         for instance in self._instances:
 
-            initialization_procedure = Combination_Of_Heuristics(instance)
-            result = initialization_procedure.create_solution(0)
-            result.get_best_solution().write_solution_to_file(file_path_to_solutions + "construction_heuristic")
+            initialization_procedure = Combination_Of_Heuristics(instance, with_delta_evaluation)
+            result = initialization_procedure.create_solution(random_k = 0, benchmarking = benchmarking, max_runtime = 10)
+            if result.get_best_solution():
+                result.get_best_solution().write_solution_to_file(file_path_to_solutions + "construction_heuristic")
 
             solution = result.get_best_solution()
+
+            if solution:
+                objective_value = solution._objective_value
+                sum_of_trips = solution._sum_of_trips
+                penalties = solution._penalties
+                hotel_fees = solution._hotel_fees
+                max_trip_length = solution._max_trip_length
+                trips = len(solution._trips)
+                prize = solution._prize
+                trip_lengths = solution._trip_lengths
+            else:
+                objective_value = -1
+                sum_of_trips = -1
+                penalties = -1
+                hotel_fees = -1
+                max_trip_length = -1
+                trips = -1
+                prize = -1
+                trip_lengths = []
+
             instance_name = instance.get_instance_name()
+            related_statistics = self.compute_related_statistics(instance, solution)
 
-            header_line = ["Instance_Name","Number_Of_Customers","Number_Of_Hotels","Objective_Value","Sum_of_Trips","Penalties","Hotel_Fees","Max_Trip_Length","Number_Of_Trips","Prize","Time","Trace"]
+            header_line = ["Instance_Name","Number_Of_Customers","Number_Of_Hotels","Objective_Value","Sum_of_Trips","Penalties","Hotel_Fees","Max_Trip_Length","Number_Of_Trips","Prize","Time","Trace","Trip_Lengths", "Percentate-of-collected-prizes","uses-delta-evaluation"]
 
-            content_line = [str(instance_name), str(len(instance._customers_list)), str(len(instance._hotels_list)), str(solution._objective_value), str(solution._sum_of_trips), str(solution._penalties), str(solution._hotel_fees), str(solution._max_trip_length), str(len(solution._trips)), str(solution._prize), str(result.get_time()), str(result.get_trace())]
+            content_line = [str(instance_name), str(len(instance._customers_list)), str(len(instance._hotels_list)), str(objective_value), str(sum_of_trips), str(penalties), str(hotel_fees), str(max_trip_length), str(trips), str(prize), str(result.get_time()), str(result.get_trace()), str(trip_lengths), str(related_statistics[0]),str(with_delta_evaluation)]
 
-            result.write_result_metadata_to_file(file_path_to_solutions + "construction_heuristic", header_line, content_line)
+            result.write_result_metadata_to_file(file_path_to_solutions + "construction_heuristic", header_line, content_line, instance)
 
 
     def start_random_construction_heuristics(self, random_k):
@@ -346,8 +372,17 @@ class Start_PCTSPHS:
         return solution
 
 
+    def compute_related_statistics(self, instance, solution):
 
+        total_prizes = 0
 
+        for customer in instance.get_list_of_customers():
+            total_prizes += customer.get_prize()
+
+        if not solution:
+            return [0]
+        else:
+            return [solution._prize/total_prizes]
 
 
 main = Start_PCTSPHS()

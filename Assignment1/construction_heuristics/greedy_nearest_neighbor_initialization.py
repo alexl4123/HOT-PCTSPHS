@@ -16,6 +16,10 @@ class Greedy_Nearest_Neighbor_Initialization(Initialization_Procedure):
     2.) Tries to repair solution, by inserting hotels
     """
 
+    def __init__(self, instance, delta = True):
+        super().__init__(instance)
+        self._delta = delta
+
     def create_solution(self, random_k=0, output=True):
 
         inst = self._instance
