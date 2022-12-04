@@ -60,6 +60,7 @@ class Start_PCTSPHS:
 
         if (args.mode == '1' or args.mode == 'rand-construction') or (args.mode == '3' or args.mode == 'GRASP'):
             parser.add_argument('--randomization-factor',type=int, help='randomization-factor=0 means NO randomization, whereas the higher it is set the higher the randomization', default=0)
+            parser.add_argument('--runs',type=int, help='specify how many runs shall be made (how often for each instance the algorithm shall be executed)', default=1)
 
         if (args.mode == '2' or args.mode == 'local-search') or (args.mode == '3' or args.mode == 'GRASP'):
             parser.add_argument('--neighborhood-structure',choices=['remove_customer','add_customer','insert_customer','swap_served_unserved_customer','interchange_customers','trip_2_opt','remove_hotel','add_hotel','exchange_hotel','move_hotel'], help='Choose a neighborhood structure for local search.', default='trip_2_opt')
@@ -116,7 +117,7 @@ class Start_PCTSPHS:
             self.start_construction_heuristics()
 
         elif args.mode == '1' or args.mode == 'rand-construction':
-            self.start_random_construction_heuristics(args.randomization_factor)
+            self.start_random_construction_heuristics(args.randomization_factor, args.runs)
 
         elif args.mode == '2' or args.mode == 'local-search':
 
@@ -143,7 +144,7 @@ class Start_PCTSPHS:
 
 
         elif args.mode == '3' or args.mode == 'GRASP':
-            self.start_grasp_search(args.randomization_factor,args.neighborhood_structure)
+            self.start_grasp_search(args.randomization_factor,args.neighborhood_structure, args.runs)
 
         elif args.mode == '4' or args.mode =='VND':
             self.start_vnd_search(args.preload_starting_solutions_from_path)
@@ -203,31 +204,47 @@ class Start_PCTSPHS:
             result.write_result_metadata_to_file(file_path_to_solutions + "construction_heuristic", header_line, content_line, instance)
 
 
-    def start_random_construction_heuristics(self, random_k):
+    def start_random_construction_heuristics(self, random_k, trial_runs):
         print("start-random-const..." + str(random_k))
 
+        max_runtime = 2
         for instance in self._instances:
 
-            instance_name = instance.get_instance_name()
+            best_result = None
 
-            print("<<Start instance:" + instance_name + ">>")
-            
-            initialization_procedure = Combination_Of_Heuristics(instance)
-            retry = 0
-            while retry < 10:
-                result = initialization_procedure.create_solution(random_k)
-                if result.get_best_solution():
-                    break
-            result.get_best_solution().write_solution_to_file(file_path_to_solutions + "random_construction_heuristic")
+            for index in range(trial_runs):
 
-            solution = result.get_best_solution()
+                instance_name = instance.get_instance_name()
 
-            header_line = ["Instance_Name","Number_Of_Customers","Number_Of_Hotels","Objective_Value","Sum_of_Trips","Penalties","Hotel_Fees","Max_Trip_Length","Number_Of_Trips","Prize","Time","Trace"]
+                
+                initialization_procedure = Combination_Of_Heuristics(instance)
+                retry = 0
+                while retry < 10:
+                    result = initialization_procedure.create_solution(random_k = random_k, max_runtime = max_runtime)
+                    if result.get_best_solution():
+                        break
 
-            content_line = [str(instance_name), str(len(instance._customers_list)), str(len(instance._hotels_list)), str(solution._objective_value), str(solution._sum_of_trips), str(solution._penalties), str(solution._hotel_fees), str(solution._max_trip_length), str(len(solution._trips)), str(solution._prize), str(result.get_time()), str(result.get_trace())]
 
-            result.write_result_metadata_to_file(file_path_to_solutions + "random_construction_heuristic", header_line, content_line)
+                solution = result.get_best_solution()
 
+                if not best_result or best_result.get_best_solution()._objective_value > solution._objective_value:
+                    best_result = result
+
+                header_line = ["Instance_Name","Index","Number_Of_Customers","Number_Of_Hotels","Objective_Value","Sum_of_Trips","Penalties","Hotel_Fees","Max_Trip_Length","Number_Of_Trips","Prize","Time","Trace"]
+
+                content_line = [str(instance_name), str(index), str(len(instance._customers_list)), str(len(instance._hotels_list)), str(solution._objective_value), str(solution._sum_of_trips), str(solution._penalties), str(solution._hotel_fees), str(solution._max_trip_length), str(len(solution._trips)), str(solution._prize), str(result.get_time()), str(result.get_trace())]
+
+
+                for key in result.get_additional_params().keys():
+                    header_line.append(str(key))
+                    content_line.append(str(result.get_additional_params()[key]))
+
+
+
+
+                result.write_result_metadata_to_file(file_path_to_solutions + "random_construction_heuristic", header_line, content_line)
+
+            best_result.get_best_solution().write_solution_to_file(file_path_to_solutions + "random_construction_heuristic")
 
 
     def start_local_search(self, neighborhood_str, pre_load, step_function):

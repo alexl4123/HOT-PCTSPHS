@@ -112,10 +112,10 @@ class Combination_Of_Heuristics(Initialization_Procedure):
             sd_delta = 1
 
 
-            alpha = np.normal(mean_alpha, sd_alpha)
-            beta = np.normal(mean_beta, sd_beta)
-            gamma = np.normal(mean_gamma, sd_gamma)
-            delta = np.normal(mean_delta, sd_delta)
+            alpha = np.random.normal(mean_alpha, sd_alpha)
+            beta = np.random.normal(mean_beta, sd_beta)
+            gamma = np.random.normal(mean_gamma, sd_gamma)
+            delta = np.random.normal(mean_delta, sd_delta)
 
             params = {}
             params['alpha'] = alpha
@@ -123,7 +123,8 @@ class Combination_Of_Heuristics(Initialization_Procedure):
             params['gamma'] = gamma
             params['delta'] = delta
 
-            procedure_2 = Backtracking_Search(self._instance, delta, alpha = alpha, beta = beta, gamma = gamma, delta = delta)
+            procedure_2 = Backtracking_Search(self._instance, delta_evaluation = self._delta, alpha = alpha, beta = beta, gamma = gamma, delta = delta)
+            #max_runtime = 2
             result = procedure_2.create_solution(random_k, show_output, max_runtime)
 
             return Result(result.get_best_solution(), result.get_trace(), result.get_time(), additional_params = params)
