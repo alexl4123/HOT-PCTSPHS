@@ -421,7 +421,7 @@ class Start_PCTSPHS:
             
             vnd = Vnd(instance, 0)
             #vnd = Local_Search(instance, 0)
-            result = vnd.start_search(solution, Step_Function_Type.FIRST, neighborhoods, self._max_runtime)
+            result = vnd.start_search(solution, Step_Function_Type.BEST, neighborhoods, self._max_runtime)
 
             result.get_best_solution().write_solution_to_file(file_path_to_solutions + "vnd")
 

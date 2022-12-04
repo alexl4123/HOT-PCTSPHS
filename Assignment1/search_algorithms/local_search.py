@@ -91,6 +91,11 @@ class Local_Search(Algorithm):
         neighborhood.set_solution(solution)
         neighborhood.reset_indexes()
 
+        current_solution = solution
+        current_worthiness = Solution_Worthiness(solution.get_objective_value(), solution.get_max_trip_length(),
+                                                 solution.get_number_of_trips(), solution.get_prize(), Delta([]),
+                                                 Delta([]))
+
         if step_function_type == Step_Function_Type.RANDOM:
             # Inefficient, but does the job
             upper = neighborhood.get_number_possible_solutions() - 1
@@ -99,17 +104,19 @@ class Local_Search(Algorithm):
             if upper > 0:
                 k = random.randint(0, upper)
                 for i in range(0, k):
-                    sol = neighborhood.next_solution()
+                    new_worthiness = neighborhood.next_solution()
 
                 if k == 0 and neighborhood.get_number_possible_solutions() > 0:
-                    sol = neighborhood.next_solution()
+                    new_worthiness = neighborhood.next_solution()
 
-            return sol
+
+                if (new_worthiness.get_max_trip_duration() <= self._instance.get_C1() and new_worthiness.get_collected_prizes() >= self._instance.get_C3() and new_worthiness.get_performed_trips() <= self._instance.get_C2()) or (new_worthiness.get_max_trip_duration() <= self._instance.get_C1() and new_worthiness.get_collected_prizes() >= self._instance.get_C3() and allow_invalid_solutions):
+                    return new_worthiness
+            
+            return current_worthiness
+
         else:
-            current_solution = solution
-            current_worthiness = Solution_Worthiness(solution.get_objective_value(), solution.get_max_trip_length(),
-                                                     solution.get_number_of_trips(), solution.get_prize(), Delta([]),
-                                                     Delta([]))
+
 
             #print(solution.to_string())
             #print(current_worthiness._objective_value)
