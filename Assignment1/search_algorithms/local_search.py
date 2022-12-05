@@ -76,8 +76,9 @@ class Local_Search(Algorithm):
             logger.info("Local search solution verfification with slow calculation: " + str(checked_values))
             logger.info("Trace:" + str(trace))
 
-        if checked_values[0] != solution.get_objective_value() and not allow_invalid_solutions:
+        if checked_values[0] != solution.get_objective_value():
             logger.error("Local Search: Likely error in delta-evaluation!")
+            print(neighborhoods)
             quit()
         if checked_values[0] != trace[len(trace) - 1] and not allow_invalid_solutions:
             logger.error("Local Search: Likely error in neighborhood-evaluation!")

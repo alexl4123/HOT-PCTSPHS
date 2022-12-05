@@ -454,13 +454,25 @@ class Start_PCTSPHS:
                 basename_stem = Path(pre_load + f).stem
                 pre_load_files[basename_stem] = f
 
+
+            """
+            for instance in self._instances:
+                instance_base_name = instance.get_basename()
+                solution = self.pre_load_solution_from_path(instance, pre_load, instance_base_name, pre_load_files)
+    
+
+                print(solution.get_objective_value())
+            quit()
+            """
+
         for instance in self._instances:
 
             best_result = None
 
+            instance_base_name = instance.get_basename()
+
             for index in range(trial_runs):
 
-                instance_base_name = instance.get_basename()
 
                 if pre_load:
                     solution = self.pre_load_solution_from_path(instance, pre_load, instance_base_name, pre_load_files)
@@ -472,10 +484,8 @@ class Start_PCTSPHS:
                 gvns = Gvns(instance, 0)
                 result = gvns.start_search(solution, None, None, 10, termination_criterion = iterations)
 
-                if not best_result or best_result.get_best_solution()._objective_value > solution._objective_value:
+                if not best_result or best_result.get_best_solution()._objective_value > result.get_best_solution().get_objective_value():
                     best_result = result
-
-
 
                 header_line = ["Instance_Name","Number_Of_Customers","Number_Of_Hotels","Objective_Value","Sum_of_Trips","Penalties","Hotel_Fees","Max_Trip_Length","Number_Of_Trips","Prize","Time","Trace"]
 
@@ -489,6 +499,11 @@ class Start_PCTSPHS:
                     content_line.append(str(result.get_additional_params()[key]))
             
                 result.write_result_metadata_to_file(file_path_to_solutions + "gvns", header_line, content_line)
+            
+            print("<<<<<<<<<<<Best for INSTANCE: " + str(instance_base_name) + ">>>>>>>>>>>>>>>")
+            print(best_result.get_best_solution().get_objective_value())
+            print(best_result.get_best_solution().slow_objective_values_calculation())
+            print("--------------------------------------------")
 
             best_result.get_best_solution().write_solution_to_file(file_path_to_solutions + "gvns")
 
