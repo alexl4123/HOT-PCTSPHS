@@ -29,7 +29,7 @@ class Interchange_Customers(Neighborhood):
 
     def get_number_possible_solutions(self):
         """
-            Should be in O(sum((n*(n-1))/2) in the number of customers currently in the solution (n is the amount of customers per trip, i.e. the sum is over the trips)
+            Should be in O(sum((n*(n-1))/2) in the number of customers currently in the trip (n is the amount of customers per trip, i.e. the sum is over the trips)
         """
 
         if not self._number_of_solutions:
