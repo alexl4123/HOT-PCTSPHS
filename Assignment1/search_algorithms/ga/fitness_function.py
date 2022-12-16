@@ -12,10 +12,96 @@ class Fitness_Function:
         self._gamma_2 = gamma_2
         self._gamma_3 = gamma_3
 
+        # These values are set by ''precompute_necessary_values'' 
+        self._max_dist = 0
+        self._sum_penalties = 0
+        self._sum_prizes = 0
+        self._max_penalty = 0
+        self._min_prize = 0
+        self._max_fee = 0
+
         self._precompute_necessary_values()
 
+        self.g_min = self.compute_g_min()
+        self.g_max = self.compute_g_max()
+
+
+
     def _precompute_necessary_values(self):
-        pass
+
+        max_dist = 0
+
+        customer_list = self._instance.get_list_of_customers()
+        hotel_list = self._instance.get_list_of_hotels()
+
+        # Compute max distance between two vertices:
+        for customer_0_index in range(len(customer_list)):
+
+            customer_0 = customer_list[customer_0_index]
+
+            for customer_1_index in range(customer_0_index + 1, len(customer_list)):
+                customer_1 = customer_list[customer_1_index]
+
+                c_0_1_dist = self._instance.get_distance(customer_0, customer_1)
+
+                if c_0_1_dist > max_dist:
+                    max_dist = c_0_1_dist
+
+            for hotel in hotel_list:
+                dist_0_h = self._instance.get_distance(customer_0, hotel)
+
+                if dist_0_h > max_dist:
+                    max_dist = dist_0_h
+
+        for hotel_0_index in range(len(hotel_list)):
+            hotel_0 = hotel_list[hotel_0_index]
+
+            for hotel_1_index in range(hotel_0_index + 1, len(hotel_list)):
+                hotel_1 = hotel_list[hotel_1_index]
+
+                h_0_1_dist = self._instance.get_distance(hotel_0, hotel_1)
+
+                if h_0_1_dist > max_dist:
+                    max_dist = h_0_1_dist
+
+        self._max_dist = max_dist
+
+        # Compute sum of penalties, max penalty and min prize:
+        sum_penalties = 0
+        max_penalty = 0
+
+        sum_prizes = 0
+        min_prize = -1
+
+        for customer in customer_list:
+
+            p = customer.get_penalty()
+
+            if p > max_penalty:
+                max_penalty = p
+        
+            sum_penalties += p
+
+            prz = customer.get_prize()
+
+            if min_prize == -1 or min_prize > prz:
+                min_prize = prz
+
+            sum_prizes += prz
+
+        self._sum_penalties = sum_penalties
+        self._max_penalty = max_penalty
+        self._min_prize = min_prize
+        self._sum_prizes = sum_prizes
+
+        # Compute max hotel fee:
+        max_fee = 0
+
+        for hotel in self._instance.get_list_of_hotels():
+            if hotel.get_fee() > max_fee:
+                max_fee = hotel.get_fee()
+
+        self._max_fee = max_fee
 
     def compute_g_max(self):
         """
@@ -26,7 +112,20 @@ class Fitness_Function:
             3.) A value s.t. this value is greater than the max constraint 3 violation value
 
         """
-        return 0
+
+
+        # Assuming lockstep between hotels and customers -> this is an upper bound for distance
+        t0 = len(self._instance.get_list_of_customers()) + 1
+        t0 = t0 * (self._max_dist * 2 + self._max_fee)
+        t0 = t0 + self._sum_penalties
+
+        t1 = self.compute_psi_1(self._max_dist *  len(self._instance.get_list_of_customers()) + 1) * self._max_gamma_1
+
+        t2 = self.compute_psi_2(2 * self._instance.get_C2(), t0) * self._max_gamma_2
+
+        t3 = self.compute_psi_3(0) * self._max_gamma_3
+
+        return t0 + t1 + t2 + t3
 
     def compute_g_min(self):
         """
@@ -36,13 +135,31 @@ class Fitness_Function:
 
 
     def compute_psi_1(self, maximum_trip_length):
-        return 0
 
-    def compute_psi_2(self, number_of_trips):
-        return 0
+        if maximum_trip_length <= self._instance.get_C1():
+            return 0
+
+        t0 = (self._max_fee + self._max_dist) * (maximum_trip_length / self._instance.get_C1())
+
+        return t0
+
+    def compute_psi_2(self, number_of_trips, solution_obj_value):
+
+        if number_of_trips <= self._instance.get_C2():
+            return 0
+
+        t0 = (self._max_fee + self._max_dist + solution_obj_value) * (number_of_trips - self._instance.get_C2())
+
+        return t0
 
     def compute_psi_3(self, collected_prize):
-        return 0
+        
+        if collected_prize >= self._instance.get_C3():
+            return 0
+        
+        t0 = ((self._instance.get_C3() - collected_prize) / self._min_prize) * self._max_dist
+
+        return t0
 
 
     def compute_fitness(self, solution):
@@ -52,7 +169,30 @@ class Fitness_Function:
 
             Where
         """
-        return 0
+
+        if solution.get_objective_value() < 0:
+            print("<<<<<!!!!!SET-NEW-MIN-VALUE-FOR-FITNESS-FUNCTION!!!!!!>>>>>>>>")
+            self.g_min = solution.get_objective_value()
+
+        if solution.get_objective_value() > self.g_max:
+            print("<<<<<!!!!!SET-NEW-MAX-VALUE-FOR-FITNESS-FUNCTION!!!!!!>>>>>>>>")
+            self.g_max = solution.get_objective_value()
+
+        t0 = solution.get_objective_value() + self.g_min
+        t1 = self._gamma_1 * self.compute_psi_1(solution._max_trip_length)
+        t2 = self._gamma_2 * self.compute_psi_2(solution._trips_size, solution.get_objective_value())
+        t3 = self._gamma_3 * self.compute_psi_3(solution._prize)
+
+        t4 = self.g_max - (t0 + t1 + t2 + t3)
+
+        print("T0::" + str(t0))
+        print("T1::" + str(t1))
+        print("T2::" + str(t2))
+        print("T3::" + str(t3))
+        print("T4::" + str(t4))
+
+
+        return t4
 
 
 
