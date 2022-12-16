@@ -32,6 +32,8 @@ from neighborhoods.add_hotel import Add_Hotel
 from neighborhoods.exchange_hotel import Exchange_Hotel
 from neighborhoods.move_hotel import Move_Hotel
 
+from search_algorithms.ga.fitness_function import Fitness_Function
+
 
 class Start_PCTSPHS:
 
@@ -53,7 +55,7 @@ class Start_PCTSPHS:
 
         parser = argparse.ArgumentParser(description="The problem ''Prize Collecting Traveling Salesperson Problem with Hotel Selection'' (PCTSPHS) is tackled with several heurstic solving techniques, like local search or variable neighborhood descent.", add_help=True, formatter_class=argparse.RawTextHelpFormatter)  
         parser.add_argument('--instance',type=str, help='Either choose \'benchmark\' to run all instances or specify the file path for the instance', default='tsp_instances/00_test.txt')
-        parser.add_argument('--mode',choices = ['0','construction','1','rand-construction','2','local-search','3','GRASP','4','VND','5','GVNS'], help='Choose the mode, exactly one of (either the int or the name) {0=construction,1=rand-construction,2=local-search,3=GRASP,4=VND,5=GVNS}.\n If mode is (1) or (3), then one can also specify the \'randomization-factor\'; If mode is (2) or (3) one can also specify the \'neighborhood-structure\'; If mode is (2),(4), or (5) one can also specify the \'preload-starting-solutions-from-path\'.', default='construction')
+        parser.add_argument('--mode',choices = ['0','construction','1','rand-construction','2','local-search','3','GRASP','4','VND','5','GVNS', '6', 'GA'], help='Choose the mode, exactly one of (either the int or the name) {0=construction,1=rand-construction,2=local-search,3=GRASP,4=VND,5=GVNS, 6=GA}.\n If mode is (1) or (3), then one can also specify the \'randomization-factor\'; If mode is (2) or (3) one can also specify the \'neighborhood-structure\'; If mode is (2),(4), or (5) one can also specify the \'preload-starting-solutions-from-path\'.', default='construction')
         
         
 
@@ -67,7 +69,7 @@ class Start_PCTSPHS:
         if (args.mode == '2' or args.mode == 'local-search') or (args.mode == '3' or args.mode == 'GRASP'):
             parser.add_argument('--neighborhood-structure',choices=['remove_customer','add_customer','insert_customer','swap_served_unserved_customer','interchange_customers','trip_2_opt','remove_hotel','add_hotel','exchange_hotel','move_hotel'], help='Choose a neighborhood structure for local search.', default='trip_2_opt')
 
-        if (args.mode == '2' or args.mode == 'local-search') or (args.mode == '4' or args.mode == 'VND') or (args.mode == '5' or args.mode == 'GVNS'):
+        if (args.mode == '2' or args.mode == 'local-search') or (args.mode == '4' or args.mode == 'VND') or (args.mode == '5' or args.mode == 'GVNS' or (args.mode == '6' or args.mode == 'GA')):
             parser.add_argument('--preload-starting-solutions-from-path', help='Do you want to preload the starting solution? If so specify a path, where the files are (file name(s) must be exactly as in the instance files!).')
 
         if (args.mode == '2' or args.mode == 'local-search'):
@@ -154,6 +156,11 @@ class Start_PCTSPHS:
 
         elif args.mode == '5' or args.mode == 'GVNS':
             self.start_gvns_search(args.preload_starting_solutions_from_path, args.runs)
+        elif args.mode == '6' or args.mode == 'GA':
+            self.start_ga_search(args.preload_starting_solutions_from_path)
+
+
+
 
 
     def start_construction_heuristics(self):
@@ -506,6 +513,31 @@ class Start_PCTSPHS:
             print("--------------------------------------------")
 
             best_result.get_best_solution().write_solution_to_file(file_path_to_solutions + "gvns")
+
+
+    def start_ga_search(self, pre_load):
+
+        if pre_load:
+            pre_load_files = {}
+            for f in os.listdir(pre_load):
+                basename_stem = Path(pre_load + f).stem
+                pre_load_files[basename_stem] = f
+
+
+        for instance in self._instances:
+
+            if pre_load:
+                solution = self.pre_load_solution_from_path(instance, pre_load, instance_base_name, pre_load_files)
+            else:
+                initialization_procedure = Backtracking_Search(instance)
+                solution = initialization_procedure.create_solution().get_best_solution()
+
+            print(solution.to_string())
+
+            ff = Fitness_Function(instance, 1, 1, 1)
+
+            ff.compute_fitness(solution)
+
 
 
     def pre_load_solution_from_path(self, instance, pre_load, instance_base_name, pre_load_files):
