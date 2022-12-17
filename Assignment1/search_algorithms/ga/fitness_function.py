@@ -170,6 +170,8 @@ class Fitness_Function:
             Where
         """
 
+        
+
         if solution.get_objective_value() < 0:
             print("<<<<<!!!!!SET-NEW-MIN-VALUE-FOR-FITNESS-FUNCTION!!!!!!>>>>>>>>")
             self.g_min = solution.get_objective_value()
@@ -185,11 +187,13 @@ class Fitness_Function:
 
         t4 = self.g_max - (t0 + t1 + t2 + t3)
 
+        """
         print("T0::" + str(t0))
         print("T1::" + str(t1))
         print("T2::" + str(t2))
         print("T3::" + str(t3))
         print("T4::" + str(t4))
+        """
 
 
         return t4

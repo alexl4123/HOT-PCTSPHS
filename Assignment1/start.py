@@ -32,6 +32,7 @@ from neighborhoods.add_hotel import Add_Hotel
 from neighborhoods.exchange_hotel import Exchange_Hotel
 from neighborhoods.move_hotel import Move_Hotel
 
+from search_algorithms.ga.genetic_algorithm import Genetic_Algorithm
 from search_algorithms.ga.fitness_function import Fitness_Function
 
 
@@ -534,6 +535,10 @@ class Start_PCTSPHS:
 
             print(solution.to_string())
 
+
+            ga = Genetic_Algorithm(instance)
+            ga.start_search(solution, None, None, 10)
+            
             ff = Fitness_Function(instance, 1, 1, 1)
 
             ff.compute_fitness(solution)
