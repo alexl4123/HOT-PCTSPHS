@@ -801,8 +801,7 @@ class Solution:
 
         return (
             objective_value, sum_trips, penalties, hotel_fees, max_trip_length, trips_size, collected_prize,
-            trip_lengths, avg_trip_length)
-
+            trip_lengths, avg_trip_length, used) 
     def update_values_from_slow_calculation(self, slow_calc = None):
         """
             Performs a slow_claculation (if slow_calc is None) and updates the values used for delta-evaluation
@@ -819,7 +818,7 @@ class Solution:
         self._trips_size = slow_calc[5]
         self._prize = slow_calc[6]
         self._trip_lengths = slow_calc[7]
-
+        self._is_customer_served = slow_calc[9]
 
     def write_solution_to_file(self, file_path, file_specifier = None):
         """

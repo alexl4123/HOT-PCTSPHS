@@ -24,12 +24,13 @@ class OX_Crossover(Crossover):
             c1_o = GA_Solution(population[0]._instance, fitness_function)
             c1_o.from_pure_list_representation_to_internal(c1)
 
-            c1_o.slow_objective_values_calculation()
+            c1_o.update_values_from_slow_calculation()
             c1_o.compute_fitness_value()
 
             c2_o = GA_Solution(population[0]._instance, fitness_function)
             c2_o.from_pure_list_representation_to_internal(c2)
-            c2_o.slow_objective_values_calculation()
+
+            c2_o.update_values_from_slow_calculation()
             c2_o.compute_fitness_value()
 
             new_pop.append(c1_o)

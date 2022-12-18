@@ -527,6 +527,8 @@ class Start_PCTSPHS:
 
         for instance in self._instances:
 
+            instance_base_name = instance.get_basename()
+
             if pre_load:
                 solution = self.pre_load_solution_from_path(instance, pre_load, instance_base_name, pre_load_files)
             else:
@@ -537,11 +539,29 @@ class Start_PCTSPHS:
 
 
             ga = Genetic_Algorithm(instance)
-            ga.start_search(solution, None, None, 10)
+            result = ga.start_search(solution, None, None, 10)
             
-            ff = Fitness_Function(instance, 1, 1, 1)
+            print("<<<<<<<<<<<Best for INSTANCE: " + str(instance_base_name) + ">>>>>>>>>>>>>>>")
+            print(result.get_best_solution().get_objective_value())
+            print(result.get_best_solution().slow_objective_values_calculation())
+            print(result.get_trace())
+            print("--------------------------------------------")
+            
+            header_line = ["Instance_Name","Number_Of_Customers","Number_Of_Hotels","Objective_Value","Sum_of_Trips","Penalties","Hotel_Fees","Max_Trip_Length","Number_Of_Trips","Prize","Time","Trace"]
 
-            ff.compute_fitness(solution)
+            solution = result.get_best_solution()
+            instance_name = instance.get_instance_name()
+
+            content_line = [str(instance_name), str(len(instance._customers_list)), str(len(instance._hotels_list)), str(solution._objective_value), str(solution._sum_of_trips), str(solution._penalties), str(solution._hotel_fees), str(solution._max_trip_length), str(len(solution._trips)), str(solution._prize), str(result.get_time()), str(result.get_trace())]
+
+            for key in result.get_additional_params().keys():
+                header_line.append(str(key))
+                content_line.append(str(result.get_additional_params()[key]))
+        
+            result.write_result_metadata_to_file(file_path_to_solutions + "ga", header_line, content_line)
+
+            result.get_best_solution().write_solution_to_file(file_path_to_solutions + "ga")
+
 
 
 
