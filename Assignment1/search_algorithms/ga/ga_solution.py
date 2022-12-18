@@ -75,3 +75,6 @@ class GA_Solution(Solution):
 
         return solution
 
+
+    
+

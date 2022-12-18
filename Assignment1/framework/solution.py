@@ -904,32 +904,64 @@ class Solution:
                 trip_position_index += 1
 
 
-            
+    def compute_pure_list_representation(self):
+        """
+            Computes a pure list representation (similar to the hand in files)
+        """
 
+        basename = self._instance.get_basename()
+        instance_name = self._instance.get_instance_name()
 
+        solution_string = ""
 
+        list_representation = []
 
+        for index in range(len(self._trips)):
+            list_representation.append(self._hotels[index])
 
+            for index_2 in range(len(self._trips[index])):
+                list_representation.append(self._trips[index][index_2])
 
+        list_representation.append(self._hotels[len(self._trips)])
+        return list_representation
+           
+    def from_pure_list_representation_to_internal(self, list_representation):
+        """
+            From a pure list representation back to internal representation
+        """
 
+        trip_index = -1
+        trip_position_index = 0
 
+        hotels = []
+        trips = [[]]
 
+        for index in range(0,len(list_representation)):
 
+            obj = list_representation[index]
+            obj_id = obj.get_id()
 
+            if self._instance._index_is_hotel(obj_id):
+                hotel = obj
 
+                hotels.append(hotel)
 
+                if index < (len(list_representation) - 1):
+                    trips.append([])
 
+                trip_index += 1
+                trip_position_index = 0
+            else:
+                customer = obj
 
+                trip = trips[trip_index]
 
+                trip.append(customer)
 
+                trip_position_index += 1
 
-
-
-
-
-
-
-
+        self._hotels = hotels
+        self._trips = trips
 
 
 
