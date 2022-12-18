@@ -15,6 +15,8 @@ class Genetic_Algorithm(Algorithm):
 
     def __init__(self, instance):
         self._instance = instance
+        
+        self._fitness_function = None
 
         self._random_k = 5
 
@@ -72,6 +74,8 @@ class Genetic_Algorithm(Algorithm):
 
                 initial_population.append(ga_solution)
 
+        self._fitness_function = initial_population[0]._fitness_function
+
         return initial_population
 
 
@@ -82,10 +86,9 @@ class Genetic_Algorithm(Algorithm):
 
     def crossover(self, population):
 
-        OX_Crossover.perform_crossover(population)
+        new_population = OX_Crossover.perform_crossover(population, self._fitness_function)
 
-        # TODO -> Mockup
-        return population
+        return new_population
 
     def mutation(self, population):
 

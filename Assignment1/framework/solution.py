@@ -924,7 +924,8 @@ class Solution:
 
         list_representation.append(self._hotels[len(self._trips)])
         return list_representation
-           
+
+
     def from_pure_list_representation_to_internal(self, list_representation):
         """
             From a pure list representation back to internal representation
@@ -934,7 +935,7 @@ class Solution:
         trip_position_index = 0
 
         hotels = []
-        trips = [[]]
+        trips = []
 
         for index in range(0,len(list_representation)):
 
