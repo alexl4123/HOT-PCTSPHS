@@ -55,32 +55,143 @@ class Start_PCTSPHS:
         self._logger = logger
 
         parser = argparse.ArgumentParser(description="The problem ''Prize Collecting Traveling Salesperson Problem with Hotel Selection'' (PCTSPHS) is tackled with several heurstic solving techniques, like local search or variable neighborhood descent.", add_help=True, formatter_class=argparse.RawTextHelpFormatter)  
-        parser.add_argument('--instance',type=str, help='Either choose \'benchmark\' to run all instances or specify the file path for the instance', default='tsp_instances/00_test.txt')
-        parser.add_argument('--mode',choices = ['0','construction','1','rand-construction','2','local-search','3','GRASP','4','VND','5','GVNS', '6', 'GA'], help='Choose the mode, exactly one of (either the int or the name) {0=construction,1=rand-construction,2=local-search,3=GRASP,4=VND,5=GVNS, 6=GA}.\n If mode is (1) or (3), then one can also specify the \'randomization-factor\'; If mode is (2) or (3) one can also specify the \'neighborhood-structure\'; If mode is (2),(4), or (5) one can also specify the \'preload-starting-solutions-from-path\'.', default='construction')
+
+        subparsers = parser.add_subparsers(help="sub-command help", dest='subparser_name')
+
+        self.initialize_construction_parser(subparsers)
+        self.initialize_random_construction_parser(subparsers)
+        self.initialize_local_search_parser(subparsers)
+        self.initialize_grasp_parser(subparsers)
+        self.initialize_vnd_parser(subparsers)
+        self.initialize_gvns_parser(subparsers)
+        self.initialize_ga_parser(subparsers)
+
         
-        
-
-        args,_ = parser.parse_known_args()
-
-        if (args.mode == '1' or args.mode == 'rand-construction') or (args.mode == '3' or args.mode == 'GRASP'):
-            parser.add_argument('--randomization-factor',type=int, help='randomization-factor=0 means NO randomization, whereas the higher it is set the higher the randomization', default=0)
-        if (args.mode == '1' or args.mode == 'rand-construction') or (args.mode == '3' or args.mode == 'GRASP') or (args.mode == '5' or args.mode == 'GVNS'):
-            parser.add_argument('--runs',type=int, help='specify how many runs shall be made (how often for each instance the algorithm shall be executed)', default=1)
-
-        if (args.mode == '2' or args.mode == 'local-search') or (args.mode == '3' or args.mode == 'GRASP'):
-            parser.add_argument('--neighborhood-structure',choices=['remove_customer','add_customer','insert_customer','swap_served_unserved_customer','interchange_customers','trip_2_opt','remove_hotel','add_hotel','exchange_hotel','move_hotel'], help='Choose a neighborhood structure for local search.', default='trip_2_opt')
-
-        if (args.mode == '2' or args.mode == 'local-search') or (args.mode == '4' or args.mode == 'VND') or (args.mode == '5' or args.mode == 'GVNS' or (args.mode == '6' or args.mode == 'GA')):
-            parser.add_argument('--preload-starting-solutions-from-path', help='Do you want to preload the starting solution? If so specify a path, where the files are (file name(s) must be exactly as in the instance files!).')
-
-        if (args.mode == '2' or args.mode == 'local-search'):
-            parser.add_argument('--benchmark-all-local-search', help='Do you want to run all benchmarking instances for local search?', action='store_true')
-            parser.add_argument('--step-function', choices=['first','best','random'], default='first', help='Which step-function?')
-
-        if args.instance != "benchmark":
-            parser.add_argument('--instance-check-necessary-constraints', action='store_true', help='Set this flag to enable a necessary condition check on the instances, i.e. if this test fails the instance cannot be computed.')
-
         args = parser.parse_args()
+
+        if not args.subparser_name:
+            print("You must specify which algorithm you want to use, by adding one of the following choices (the integer or name, both work): {0=construction,1=rand-construction,2=local-search,3=GRASP,4=VND,5=GVNS, 6=GA}. E.g. use: 'start.py 0' for the construction heuristic.")
+            quit()
+
+
+        self.algorithm_selector(args)
+
+
+
+
+    def initialize_construction_parser(self, subparsers):
+        construction_0 = subparsers.add_parser("construction",help="construction-heuristic")
+        construction_1 = subparsers.add_parser("0",help="construction-heuristic")
+
+        self.add_instance_arg(construction_0)
+        self.add_instance_arg(construction_1)
+
+    def initialize_random_construction_parser(self, subparsers):
+        random_construction_0 = subparsers.add_parser("rand-construction",help="randomized construction-heuristic")
+        random_construction_1 = subparsers.add_parser("1",help="randomized construction-heuristic")
+
+        self.add_instance_arg(random_construction_0)
+        self.add_randomization_factor_arg(random_construction_0)
+        self.add_runs_arg(random_construction_0)
+        self.add_instance_arg(random_construction_1)
+        self.add_randomization_factor_arg(random_construction_1)
+        self.add_runs_arg(random_construction_1)
+    
+
+    def initialize_local_search_parser(self, subparsers):
+        local_search_0 = subparsers.add_parser("local-search",help="Start Local Search")
+        local_search_1 = subparsers.add_parser("2",help="Start Local Search")
+
+        self.add_instance_arg(local_search_0)
+        self.add_neighborhood_arg(local_search_0)
+        self.add_preload_starting_solutions_from_file_arg(local_search_0)
+        self.add_special_local_search_args(local_search_0)
+
+        self.add_instance_arg(local_search_1)
+        self.add_neighborhood_arg(local_search_1)
+        self.add_preload_starting_solutions_from_file_arg(local_search_1)
+        self.add_special_local_search_args(local_search_1)
+
+
+    def initialize_grasp_parser(self, subparsers):
+        grasp_0 = subparsers.add_parser("grasp",help="GRASP Search")
+        grasp_1 = subparsers.add_parser("3",help="GRASP Search")
+
+        self.add_instance_arg(grasp_0)
+        self.add_randomization_factor_arg(grasp_0)
+        self.add_runs_arg(grasp_0)
+
+        self.add_instance_arg(grasp_1)
+        self.add_randomization_factor_arg(grasp_1)
+        self.add_runs_arg(grasp_1)
+
+
+
+
+    def initialize_vnd_parser(self, subparsers):
+        vnd_0 = subparsers.add_parser("vnd",help="VND Search")
+        vnd_1 = subparsers.add_parser("4",help="VND Search")
+
+        self.add_instance_arg(vnd_0)
+        self.add_preload_starting_solutions_from_file_arg(vnd_0)
+
+        self.add_instance_arg(vnd_1)
+        self.add_preload_starting_solutions_from_file_arg(vnd_1)
+
+   
+    def initialize_gvns_parser(self, subparsers):
+        gvns_0 = subparsers.add_parser("gvns",help="GVNS Search")
+        gvns_1 = subparsers.add_parser("5",help="GVNS Search")
+
+        self.add_instance_arg(gvns_0)
+        self.add_runs_arg(gvns_0)
+        self.add_preload_starting_solutions_from_file_arg(gvns_0)
+
+        self.add_instance_arg(gvns_1)
+        self.add_runs_arg(gvns_1)
+        self.add_preload_starting_solutions_from_file_arg(gvns_1)
+
+
+    def initialize_ga_parser(self, subparsers):
+        ga_0 = subparsers.add_parser("ga",help="GA Search")
+        ga_1 = subparsers.add_parser("6",help="GA Search")
+
+        self.add_instance_arg(ga_0)
+        self.add_preload_starting_solutions_from_file_arg(ga_0)
+
+        self.add_instance_arg(ga_1)
+        self.add_preload_starting_solutions_from_file_arg(ga_1)
+
+
+    def add_neighborhood_arg(self, parser):
+        parser.add_argument('--neighborhood-structure',choices=['remove_customer','add_customer','insert_customer','swap_served_unserved_customer','interchange_customers','trip_2_opt','remove_hotel','add_hotel','exchange_hotel','move_hotel'], help='Choose a neighborhood structure for local search.', default='trip_2_opt')
+
+    def add_preload_starting_solutions_from_file_arg(self, parser):
+        parser.add_argument('--preload-starting-solutions-from-path', help='Do you want to preload the starting solution? If so specify a path, where the files are (file name(s) must be exactly as in the instance files!).')
+
+    def add_special_local_search_args(self, parser):
+        parser.add_argument('--benchmark-all-local-search', help='Do you want to run all benchmarking instances for local search?', action='store_true')
+        parser.add_argument('--step-function', choices=['first','best','random'], default='first', help='Which step-function?')
+
+
+    def add_instance_arg(self, parser):
+        parser.add_argument('--instance',type=str, help='Either choose \'benchmark\' to run all instances or specify the file path for the instance', default='tsp_instances/00_test.txt')
+        parser.add_argument('--instance_check_necessary_constraints', help='Do you want to check, whether some necessary constraints are fulfilled for this instance?', action='store_true')
+
+    def add_randomization_factor_arg(self, parser):
+        parser.add_argument('--randomization-factor',type=int, help='randomization-factor=0 means NO randomization, whereas the higher it is set the higher the randomization', default=0)
+
+    def add_runs_arg(self, parser):
+        parser.add_argument('--runs',type=int, help='specify how many runs shall be made (how often for each instance the algorithm shall be executed)', default=1)
+
+
+       
+        
+    def algorithm_selector(self, args):
+        logger = self._logger
+        print(args)
+
+        args.mode = args.subparser_name
 
 
         if args.instance != "benchmark":
@@ -150,7 +261,7 @@ class Start_PCTSPHS:
 
                 
         elif args.mode == '3' or args.mode == 'GRASP':
-            self.start_grasp_search(args.randomization_factor,args.neighborhood_structure, args.runs)
+            self.start_grasp_search(args.randomization_factor, args.runs)
 
         elif args.mode == '4' or args.mode =='VND':
             self.start_vnd_search(args.preload_starting_solutions_from_path)
@@ -360,14 +471,11 @@ class Start_PCTSPHS:
             result.write_result_metadata_to_file(file_path_to_solutions + "local_search", header_line, content_line)
 
 
-    def start_grasp_search(self, random_k, neighborhood, trial_runs):
-        print("start-grasp-search..." + str(random_k) + "::" + str(neighborhood))
-
+    def start_grasp_search(self, random_k, trial_runs):
 
         for instance in self._instances:
 
             best_result = None
-
 
             for index in range(trial_runs):
 
@@ -378,11 +486,8 @@ class Start_PCTSPHS:
 
                 result.get_best_solution().write_solution_to_file(file_path_to_solutions + "grasp")
 
-
                 if not best_result or best_result.get_best_solution()._objective_value > solution._objective_value:
                     best_result = result
-
-
 
                 header_line = ["Instance_Name","Number_Of_Customers","Number_Of_Hotels","Objective_Value","Sum_of_Trips","Penalties","Hotel_Fees","Max_Trip_Length","Number_Of_Trips","Prize","Time","Trace"]
 
