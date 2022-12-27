@@ -16,6 +16,7 @@ class Trip_2_Opt(Neighborhood):
         self._trip_position_index_2 = 1
 
         self._number_of_solutions = None
+        self._solutions_per_trip = []
         self._current_solution_index = 0
 
         self._delta = with_delta
@@ -30,6 +31,7 @@ class Trip_2_Opt(Neighborhood):
         self._trip_position_index_2 = 1
 
         self._number_of_solutions = None
+        self._solutions_per_trip = []
         self._current_solution_index = 0
 
     def get_number_possible_solutions(self):
@@ -46,10 +48,45 @@ class Trip_2_Opt(Neighborhood):
                 number_of_possible_exchanges_for_trip = (number_of_relevant_edges * (number_of_relevant_edges + 1)) / 2
 
                 self._number_of_solutions = self._number_of_solutions + number_of_possible_exchanges_for_trip
+                self._solutions_per_trip.append(number_of_possible_exchanges_for_trip)
 
             self._number_of_solutions = int(self._number_of_solutions)
 
         return self._number_of_solutions
+
+    def get_specific_solution(self, position):
+    
+        trip_index = 0
+
+        pos = position
+        for tmp_trip_index in range(len(self._solutions_per_trip)):
+
+            pos -= self._solutions_per_trip[tmp_trip_index]
+
+            if pos < 0:
+                trip_index = tmp_trip_index
+                pos += self._solutions_per_trip[tmp_trip_index]
+                break
+
+
+        trip = self._solution._trips[trip_index]
+        length = len(trip)
+        first_index = 0
+
+        while length > 1:
+
+            possible_solutions_for_remaining_length = length - 1
+
+            if pos < possible_solutions_for_remaining_length:
+                second_index = int(first_index + 1 + pos)
+                break
+            else:
+                first_index += 1
+                pos -= possible_solutions_for_remaining_length
+                length -= 1
+
+        return self.reverse(trip, trip_index, first_index, second_index)
+
 
     def next_solution(self):
 
@@ -91,16 +128,32 @@ class Trip_2_Opt(Neighborhood):
 
         # Calculate cost of exchange
 
+        rev = self.reverse(trip, self._trip_index, self._trip_position_index_1, self._trip_position_index_2)
 
-        if self._trip_position_index_1 > 0:
-            vertex_p1 = trip[self._trip_position_index_1 - 1]
-        else:
-            vertex_p1 = self._solution._hotels[self._trip_index]
+        # Set next solution
+        self._current_solution_index = self._current_solution_index + 1
 
-        if self._trip_position_index_2 < len(trip) - 1:
-            vertex_p2 = trip[self._trip_position_index_2 + 1]
+        self._trip_position_index_2 += 1
+
+        return rev
+
+
+
+
+    def reverse(self, trip, trip_index, trip_position_index_1, trip_position_index_2):
+
+        vertex_q1 = trip[trip_position_index_1]
+        vertex_q2 = trip[trip_position_index_2]
+
+        if trip_position_index_1 > 0:
+            vertex_p1 = trip[trip_position_index_1 - 1]
         else:
-            vertex_p2 = self._solution._hotels[self._trip_index + 1]
+            vertex_p1 = self._solution._hotels[trip_index]
+
+        if trip_position_index_2 < len(trip) - 1:
+            vertex_p2 = trip[trip_position_index_2 + 1]
+        else:
+            vertex_p2 = self._solution._hotels[trip_index + 1]
 
         #print("<<<" + str(self._trip_position_index_1) + "::" + str(self._trip_position_index_2) + "::" + str(len(trip)) + ">>>")
         #print("|||" + str(vertex_p1.get_id()) + "::" + str(vertex_q1.get_id()) + "___" + str(vertex_q2.get_id()) + "::" + str(vertex_p2.get_id()) + "|||")
@@ -115,13 +168,13 @@ class Trip_2_Opt(Neighborhood):
             #print("2-EXCH-delta_minus:" + str(current_length) + ":delta_plus:" + str(new_length))
 
         # Compute necessary operation
-        reverse = Reverse(vertex_q1, self._trip_index, self._trip_position_index_1, vertex_q2, self._trip_index,
-                          self._trip_position_index_2)
+        reverse = Reverse(vertex_q1, trip_index, trip_position_index_1, vertex_q2, trip_index,
+                          trip_position_index_2)
         delta = Delta([reverse])
 
         if self._delta:
             # Calculate new solution-worthiness
-            new_trip_length = self._solution._trip_lengths[self._trip_index] - current_length + new_length
+            new_trip_length = self._solution._trip_lengths[trip_index] - current_length + new_length
 
             if new_trip_length > self._solution._max_trip_length:
                 new_max_trip_length = new_trip_length
@@ -139,10 +192,4 @@ class Trip_2_Opt(Neighborhood):
 
         worthiness = Solution_Worthiness(new_objective_value, new_max_trip_length, self._solution.get_number_of_trips(),
                                          self._solution.get_prize(), delta, Delta([]))
-
-        # Set next solution
-        self._current_solution_index = self._current_solution_index + 1
-
-        self._trip_position_index_2 += 1
-
         return worthiness

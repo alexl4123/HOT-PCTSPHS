@@ -196,11 +196,8 @@ class Genetic_Algorithm(Algorithm):
             sol = solution
             if upper > 0:
                 k = random.randint(0, upper)
-                for i in range(0, k):
-                    new_worthiness = neighborhood.next_solution()
-
-                if k == 0 and neighborhood.get_number_possible_solutions() > 0:
-                    new_worthiness = neighborhood.next_solution()
+               
+                new_worthiness = neighborhood.get_specific_solution(k)
 
                 solution.change_from_delta(new_worthiness.get_delta())
                 solution.compute_fitness_value()

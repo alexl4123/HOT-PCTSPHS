@@ -636,8 +636,9 @@ class Start_PCTSPHS:
         population_size = 100
         tournament_k = 15
         percentage_replaced = 0.2
-        neighborhoods_round_robin = [Trip_2_Opt, Add_Customer]
-        saw_policy = Linear_Sequence_Weights(0,0,1,0.1,0.1,0.1, 10)
+        #neighborhoods_round_robin = [Trip_2_Opt, Add_Customer]
+        neighborhoods_round_robin = [Trip_2_Opt]
+        saw_policy = Linear_Sequence_Weights(0.1,0.1,1,0.1,0.1,0.1, 10)
         iterations = 200
 
 
@@ -660,6 +661,9 @@ class Start_PCTSPHS:
             print("<<<<<<<<<<<Best for INSTANCE: " + str(instance_base_name) + ">>>>>>>>>>>>>>>")
             print(result.get_best_solution().get_objective_value())
             print(result.get_best_solution().slow_objective_values_calculation())
+            print(result.get_best_solution().is_c1_satisfied())
+            print(result.get_best_solution().is_c2_satisfied())
+            print(result.get_best_solution().is_c3_satisfied())
             print(result.get_trace())
             print("--------------------------------------------")
             
