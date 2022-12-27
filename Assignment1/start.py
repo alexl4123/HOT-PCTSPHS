@@ -34,6 +34,8 @@ from neighborhoods.move_hotel import Move_Hotel
 
 from search_algorithms.ga.genetic_algorithm import Genetic_Algorithm
 from search_algorithms.ga.fitness_function import Fitness_Function
+from search_algorithms.ga.constant_weights import Constant_Weights
+from search_algorithms.ga.linear_weights import Linear_Weights
 
 
 class Start_PCTSPHS:
@@ -629,6 +631,13 @@ class Start_PCTSPHS:
                 basename_stem = Path(pre_load + f).stem
                 pre_load_files[basename_stem] = f
 
+        population_size = 100
+        tournament_k = 15
+        percentage_replaced = 0.2
+        neighborhoods_round_robin = [Trip_2_Opt, Add_Customer]
+        saw_policy = Linear_Weights(0,0,1,0.1,0.1,0.1)
+        iterations = 150
+
 
         for instance in self._instances:
 
@@ -644,7 +653,7 @@ class Start_PCTSPHS:
 
 
             ga = Genetic_Algorithm(instance)
-            result = ga.start_search(solution, None, None, 10)
+            result = ga.start_search(solution, None, neighborhoods_round_robin, 10, population_size = population_size, tournament_k = tournament_k, percentage_replaced = percentage_replaced, saw_policy = saw_policy, termination_criterion = iterations)
             
             print("<<<<<<<<<<<Best for INSTANCE: " + str(instance_base_name) + ">>>>>>>>>>>>>>>")
             print(result.get_best_solution().get_objective_value())

@@ -25,7 +25,14 @@ class Fitness_Function:
         self.g_min = self.compute_g_min()
         self.g_max = self.compute_g_max()
 
+    def set_gamma_1(self, gamma_1):
+        self._gamma_1 = gamma_1
+    
+    def set_gamma_2(self, gamma_2):
+        self._gamma_2 = gamma_2
 
+    def set_gamma_3(self, gamma_3):
+        self._gamma_3 = gamma_3
 
     def _precompute_necessary_values(self):
 

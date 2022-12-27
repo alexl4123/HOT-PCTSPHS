@@ -15,6 +15,7 @@ class Add_Customer(Neighborhood):
         self._unserved_customers = []
 
         self._current_solution_index = 0
+        self._number_of_solutions = None
 
     def set_solution(self, solution):
         self._solution = solution

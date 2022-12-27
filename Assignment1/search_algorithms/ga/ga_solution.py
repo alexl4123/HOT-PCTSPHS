@@ -4,20 +4,25 @@ from framework.solution import Solution
 
 class GA_Solution(Solution):
 
-    def __init__(self, instance, fitness_function = None):
+    def __init__(self, instance, fitness_function = None, gamma_1 = 1, gamma_2 = 1, gamma_3 = 1):
         super().__init__(instance)
 
         if not fitness_function:
-            self._fitness_function = Fitness_Function(instance, 1, 1, 1)
+            self._fitness_function = Fitness_Function(instance, gamma_1, gamma_2, gamma_3)
         else:
             self._fitness_function = fitness_function
         
 
         self._fitness_value = self._fitness_function.compute_fitness(self)
 
+    def stepwise_adaption_of_weights(self, gamma_1, gamma_2, gamma_3):
+        self._fitness_function.set_gamma_1(gamma_1)
+        self._fitness_function.set_gamma_2(gamma_2)
+        self._fitness_function.set_gamma_3(gamma_3)
+
     @classmethod
-    def from_solution(cls, solution, fitness_function = None):
-        ga_solution = GA_Solution(solution._instance, fitness_function)
+    def from_solution(cls, solution, fitness_function = None, gamma_1 = 1, gamma_2 = 1, gamma_3 = 1):
+        ga_solution = GA_Solution(solution._instance, fitness_function, gamma_1, gamma_2, gamma_3)
 
         ga_solution._trips = []
         for trip in solution._trips:

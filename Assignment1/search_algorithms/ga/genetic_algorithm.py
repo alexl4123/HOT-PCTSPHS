@@ -17,6 +17,9 @@ from search_algorithms.ga.ox_crossover import OX_Crossover
 from search_algorithms.ga.local_search_ga import Local_Search_GA, Step_Function_Type
 from search_algorithms.ga.vnd_ga import Vnd_GA
 
+from search_algorithms.ga.saw_policy import SAW_Policy
+from search_algorithms.ga.constant_weights import Constant_Weights
+
 from neighborhoods.neighborhood import Neighborhood
 from neighborhoods.trip_2_opt import Trip_2_Opt
 from neighborhoods.remove_customer import Remove_Customer
@@ -42,24 +45,28 @@ class Genetic_Algorithm(Algorithm):
         self._random_k = 5
 
 
-    def start_search(self, init_solution, step_function_type, neighborhoods, max_runtime, termination_criterion=3, starting_time = None, output = True):
+    def start_search(self, init_solution, step_function_type, neighborhoods, max_runtime, termination_criterion=3, starting_time = None, output = True, population_size = 10, tournament_k = 3, percentage_replaced = 0.5, saw_policy = Constant_Weights(1,1,1)):
 
         additional_params = {}
 
+        # Population Size
+        # Which mutation parameters
+        # k for 
+
         max_runtime = 90
-        population_size = 7
         new_pop_size = population_size
-        k = 1
-        termination_criterion = 10
 
         starting_time = time.time()
 
         cur_population = self.initialize_population(population_size)
-
-
+        print("<<<<<<<<<<<INITIALIZATION-FINISHED-NOW-DOING-LOCAL-SEARCH>>>>>>>>>>")
+        #cur_population = self.local_search_test(cur_population)
+        #print("LOCAL-SEARCH-FINISHED")
 
         cur_population = sorted(cur_population, key=lambda individual : individual.get_fitness_value(), reverse = True)
         trace = [cur_population[0].get_objective_value()]
+
+        self.neighborhood_position = 0
 
         counter = 0
         while counter < termination_criterion:
@@ -74,7 +81,7 @@ class Genetic_Algorithm(Algorithm):
             print(">>>>>>>>>>>")
             """
 
-            selected_population = self.selection(cur_population, new_pop_size, k)
+            selected_population = self.selection(cur_population, new_pop_size, tournament_k)
 
             cx_population = self.crossover(selected_population)
 
@@ -89,11 +96,13 @@ class Genetic_Algorithm(Algorithm):
             print(">>>>>>>>>>>")
             """
 
-            mut_population = self.mutation(cx_population)
+            mut_population = self.mutation(cx_population, neighborhoods)
 
-            mut_population = self.local_search_test(mut_population)
+            #mut_population = self.local_search_test(mut_population)
 
-            cur_population = self.replacement(cur_population, mut_population, new_pop_size)
+            cur_population = self.replacement(cur_population, mut_population, new_pop_size, percentage_replaced)
+
+            saw_policy.update_weights(counter, cur_population)
 
             trace.append(cur_population[0].get_objective_value())
 
@@ -147,13 +156,15 @@ class Genetic_Algorithm(Algorithm):
 
         return new_population
 
-    def mutation(self, population):
+    def mutation(self, population, neighborhoods):
+
+        neighborhood_structure = neighborhoods[self.neighborhood_position]
 
         instance = population[0]._instance
 
 
         for solution in population:
-            neighborhood = Trip_2_Opt(instance)
+            neighborhood = neighborhood_structure(instance)
             neighborhood.set_solution(solution)
 
             # Inefficient, but does the job
@@ -171,21 +182,33 @@ class Genetic_Algorithm(Algorithm):
                 solution.change_from_delta(new_worthiness.get_delta())
                 solution.compute_fitness_value()
 
+        self.neighborhood_position += 1
+        if self.neighborhood_position >= len(neighborhoods):
+            self.neighborhood_position = 0
+
         return population
 
-    def replacement(self, cur_population, mut_population, new_length):
+    def replacement(self, cur_population, mut_population, new_length, percentage_replaced):
+        """
+            percentage_replaced in [0,1]
+        """
 
         cur_population = sorted(cur_population, key=lambda individual : individual.get_fitness_value(), reverse = True)
         mut_population = sorted(mut_population, key=lambda individual : individual.get_fitness_value(), reverse = True)
 
+        old_pop_size = int((1 - percentage_replaced) * new_length)
+        new_pop_size = int(percentage_replaced * new_length)
+
+        if old_pop_size + new_pop_size < new_length:
+            new_pop_size = new_length - old_pop_size
+
         new_population = []
 
-        for i in range(new_length):
-            index = int(i / 2)
-            if i % 2 == 0:
-                new_population.append(cur_population[index])
-            else:
-                new_population.append(mut_population[index])
+        for i in range(old_pop_size):
+            new_population.append(cur_population[i])
+
+        for i in range(new_pop_size):
+            new_population.append(mut_population[i])
 
         return new_population
 
