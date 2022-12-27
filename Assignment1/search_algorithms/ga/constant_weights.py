@@ -1,4 +1,5 @@
 
+from search_algorithms.ga.fitness_function import Fitness_Function
 from search_algorithms.ga.saw_policy import SAW_Policy
 
 class Constant_Weights(SAW_Policy):
@@ -14,5 +15,14 @@ class Constant_Weights(SAW_Policy):
         for individual in population:
 
             individual.stepwise_adaption_of_weights(self._gamma_1, self._gamma_2, self._gamma_3)   
+
+
+    def create_appropriate_fitness_function(self, instance, max_iteration):
+
+        ff = Fitness_Function(instance, self._gamma_1, self._gamma_2, self._gamma_3, self._gamma_1, self._gamma_2, self._gamma_3)
+        ff._precompute_necessary_values()
+
+        return ff
+
 
 

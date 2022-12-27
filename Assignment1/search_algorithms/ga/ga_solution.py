@@ -4,11 +4,12 @@ from framework.solution import Solution
 
 class GA_Solution(Solution):
 
-    def __init__(self, instance, fitness_function = None, gamma_1 = 1, gamma_2 = 1, gamma_3 = 1):
+    def __init__(self, instance, fitness_function = None):
         super().__init__(instance)
 
         if not fitness_function:
-            self._fitness_function = Fitness_Function(instance, gamma_1, gamma_2, gamma_3)
+            # Default values for max gamma if not specified
+            self._fitness_function = Fitness_Function(instance, 1, 1, 1)
         else:
             self._fitness_function = fitness_function
         
@@ -21,8 +22,8 @@ class GA_Solution(Solution):
         self._fitness_function.set_gamma_3(gamma_3)
 
     @classmethod
-    def from_solution(cls, solution, fitness_function = None, gamma_1 = 1, gamma_2 = 1, gamma_3 = 1):
-        ga_solution = GA_Solution(solution._instance, fitness_function, gamma_1, gamma_2, gamma_3)
+    def from_solution(cls, solution, fitness_function = None):
+        ga_solution = GA_Solution(solution._instance, fitness_function)
 
         ga_solution._trips = []
         for trip in solution._trips:

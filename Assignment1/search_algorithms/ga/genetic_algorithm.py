@@ -20,6 +20,8 @@ from search_algorithms.ga.vnd_ga import Vnd_GA
 from search_algorithms.ga.saw_policy import SAW_Policy
 from search_algorithms.ga.constant_weights import Constant_Weights
 
+from search_algorithms.ga.ga_initialization_procedure.greedy_nearest_neighbor_initialization import Greedy_Nearest_Neighbor_Initialization
+
 from neighborhoods.neighborhood import Neighborhood
 from neighborhoods.trip_2_opt import Trip_2_Opt
 from neighborhoods.remove_customer import Remove_Customer
@@ -37,12 +39,12 @@ logger = logging.getLogger(logger_name)
 
 class Genetic_Algorithm(Algorithm):
 
-    def __init__(self, instance):
+    def __init__(self, instance, random_k):
         self._instance = instance
         
         self._fitness_function = None
 
-        self._random_k = 5
+        self._random_k = random_k
 
 
     def start_search(self, init_solution, step_function_type, neighborhoods, max_runtime, termination_criterion=3, starting_time = None, output = True, population_size = 10, tournament_k = 3, percentage_replaced = 0.5, saw_policy = Constant_Weights(1,1,1)):
@@ -58,7 +60,13 @@ class Genetic_Algorithm(Algorithm):
 
         starting_time = time.time()
 
-        cur_population = self.initialize_population(population_size)
+        fitness_function = saw_policy.create_appropriate_fitness_function(self._instance, termination_criterion)
+        self._fitness_function = fitness_function
+
+        start_time_2 = time.time() 
+        cur_population = self.initialize_population(population_size, fitness_function)
+        end_time_2 = time.time() 
+        print(f"<<<<<<<<<<<<<<<<<<t-init={end_time_2 - start_time_2}>>>>>>>>>>>>")
         print("<<<<<<<<<<<INITIALIZATION-FINISHED-NOW-DOING-LOCAL-SEARCH>>>>>>>>>>")
         #cur_population = self.local_search_test(cur_population)
         #print("LOCAL-SEARCH-FINISHED")
@@ -70,6 +78,8 @@ class Genetic_Algorithm(Algorithm):
 
         counter = 0
         while counter < termination_criterion:
+            print(f"--> Iter:{counter}/{termination_criterion}")
+
             """
             print("<<<<<<<<<<<<")
             print("COUNTER: " + str(counter))
@@ -81,9 +91,13 @@ class Genetic_Algorithm(Algorithm):
             print(">>>>>>>>>>>")
             """
 
+            st_sel = time.time()
             selected_population = self.selection(cur_population, new_pop_size, tournament_k)
+            et_sel = time.time()
 
+            st_cx = time.time()
             cx_population = self.crossover(selected_population)
+            et_cx = time.time()
 
             """
             print("<<<<<<<<<<<<")
@@ -96,11 +110,17 @@ class Genetic_Algorithm(Algorithm):
             print(">>>>>>>>>>>")
             """
 
+            st_mut = time.time()
             mut_population = self.mutation(cx_population, neighborhoods)
+            et_mut = time.time()
 
             #mut_population = self.local_search_test(mut_population)
 
+            st_repl = time.time()
             cur_population = self.replacement(cur_population, mut_population, new_pop_size, percentage_replaced)
+            et_repl = time.time()
+
+            print(f"Timing-analysis:<selection:{et_sel - st_sel}s>;<cx:{et_cx - st_cx}s>;<mut:{et_mut - st_mut}s -- Mut-Name:{neighborhoods[self.neighborhood_position]}>;<repl:{st_repl - et_repl}s>")
 
             saw_policy.update_weights(counter, cur_population)
 
@@ -129,18 +149,18 @@ class Genetic_Algorithm(Algorithm):
 
         return Result(solution, trace, duration, additional_params = additional_params)
 
-    def initialize_population(self, population_size):
+    def initialize_population(self, population_size, fitness_function):
         initial_population = []
+            
 
-        randomized_procedure = Combination_Of_Heuristics(self._instance)
+        randomized_procedure = Greedy_Nearest_Neighbor_Initialization(self._instance, fitness_function = fitness_function)
+        #randomized_procedure = Combination_Of_Heuristics(self._instance)
         while len(initial_population) < population_size:
-            result = randomized_procedure.create_solution(random_k = self._random_k, show_output = False, max_runtime = 4)
+            result = randomized_procedure.create_solution(random_k = self._random_k, show_output = True, max_runtime = 10)
             if result.get_best_solution():
                 ga_solution = GA_Solution.from_solution(result.get_best_solution())
 
                 initial_population.append(ga_solution)
-
-        self._fitness_function = initial_population[0]._fitness_function
 
         return initial_population
 
@@ -162,6 +182,9 @@ class Genetic_Algorithm(Algorithm):
 
         instance = population[0]._instance
 
+        neighborhood = neighborhood_structure(instance)
+        neighborhood.set_solution(population[0])
+        print(f"<<Neighborhood-possible-pos:{neighborhood.get_number_possible_solutions()}>>")
 
         for solution in population:
             neighborhood = neighborhood_structure(instance)
