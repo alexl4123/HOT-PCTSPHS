@@ -13,6 +13,9 @@ class Remove_Customer(Neighborhood):
         self._trip_position_index = 0
         self._current_solution_index = 0
 
+        self._number_of_solutions = None
+        self._solutions_per_trip = []
+
     def set_solution(self, solution):
         self._solution = solution
 
@@ -22,6 +25,7 @@ class Remove_Customer(Neighborhood):
         self._trip_position_index = 0
         self._current_solution_index = 0
         self._number_of_solutions = None
+        self._solutions_per_trip = []
 
     def get_number_possible_solutions(self):
         """
@@ -35,9 +39,35 @@ class Remove_Customer(Neighborhood):
             for trip in self._solution._trips:
                 self._number_of_solutions += len(trip)
 
+                self._solutions_per_trip.append(len(trip))
+
 
         return self._number_of_solutions
 
+
+    def get_specific_solution(self, position):
+    
+        trip_index = 0
+
+        pos = position
+        for tmp_trip_index in range(len(self._solutions_per_trip)):
+
+            pos -= self._solutions_per_trip[tmp_trip_index]
+
+            if pos < 0:
+                trip_index = tmp_trip_index
+                pos += self._solutions_per_trip[tmp_trip_index]
+                break
+
+
+        trip = self._solution._trips[trip_index]
+        length = len(trip)
+        index = pos
+
+        obj = trip[index]
+        trip_position_index = index
+    
+        return self.add_customer(obj, trip_index, trip_position_index, correct_calculation = False)
 
     def next_solution(self):
 
@@ -74,28 +104,35 @@ class Remove_Customer(Neighborhood):
                 self._trip_index += 1
                 self._trip_position_index = 0
 
+        worthiness = self.add_customer(obj, self._trip_index, self._trip_position_index, correct_calculation = False)
+
+        self._trip_position_index += 1
+        self._current_solution_index += 1
+
+        return worthiness
+
+    def add_customer(self, obj, trip_index, trip_position_index, correct_calculation = False):
 
         # Compute necessary operations
-        rmv = Remove(obj, self._trip_index, self._trip_position_index)
+        rmv = Remove(obj, trip_index, trip_position_index)
         delta = Delta([rmv])
 
 
         # Calculate new solution worthiness
-        left = self._solution.left_neighbor_customer(self._trip_index, self._trip_position_index)
-        right = self._solution.right_neighbor_customer(self._trip_index, self._trip_position_index)
+        left = self._solution.left_neighbor_customer(trip_index, trip_position_index)
+        right = self._solution.right_neighbor_customer(trip_index, trip_position_index)
 
         old_length = self._instance.get_distance(left, obj)  + self._instance.get_distance(obj, right)
         new_length = self._instance.get_distance(left, right)
 
         # Recalculate max_trip_length
-        cur_trip_length = self._solution._trip_lengths[self._trip_index]
+        cur_trip_length = self._solution._trip_lengths[trip_index]
 
         new_cur_trip_length = cur_trip_length - old_length + new_length
 
         new_max_trip_length = self._solution._max_trip_length
 
         if cur_trip_length >= new_max_trip_length and new_cur_trip_length < new_max_trip_length:
-            correct_calculation = False
 
             if not correct_calculation:
                 # If this is executed (can be set above), then the new_max_trip_length is just approximated (leads to a speedup, but only works for valid solution)
@@ -104,8 +141,8 @@ class Remove_Customer(Neighborhood):
                 # Correct recalculation of max trip length, but at reduced speed
                 # Get new max trip length
                 new_max_trip_length = new_cur_trip_length
-                for trip_length_index in range(self._solution._trip_lengths):
-                    if trip_length_index == self._trip_index:
+                for trip_length_index in range(len(self._solution._trip_lengths)):
+                    if trip_length_index == trip_index:
                         continue
                     elif self._solution._trip_lengths[trip_length_index] > new_max_trip_length:
                         new_max_trip_length = self._solution._trip_lengths[trip_length_index]
@@ -119,8 +156,6 @@ class Remove_Customer(Neighborhood):
 
 
         worthiness = Solution_Worthiness(new_objective_value, new_max_trip_length, self._solution.get_number_of_trips(), new_prize, delta, Delta([]))
-
-        self._trip_position_index += 1
-        self._current_solution_index += 1
-
         return worthiness
+
+
