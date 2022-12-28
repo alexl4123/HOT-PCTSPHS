@@ -44,7 +44,10 @@ class Start_PCTSPHS:
     def __init__(self):
 
         self._instances = []
+
         self._benchmark_instances_path = 'tsp_instances/00_batch_1_2/'
+        self._default_instance = 'tsp_instances/00_batch_1_2/00_test.txt'
+
         self._max_runtime = 15*60 #seconds
 
     def start(self):
@@ -178,7 +181,7 @@ class Start_PCTSPHS:
 
 
     def add_instance_arg(self, parser):
-        parser.add_argument('--instance',type=str, help='Either choose \'benchmark\' to run all instances or specify the file path for the instance', default='tsp_instances/00_test.txt')
+        parser.add_argument('--instance',type=str, help='Either choose \'benchmark\' to run all instances or specify the file path for the instance', default=self._default_instance)
         parser.add_argument('--instance_check_necessary_constraints', help='Do you want to check, whether some necessary constraints are fulfilled for this instance?', action='store_true')
 
     def add_randomization_factor_arg(self, parser):
@@ -662,7 +665,7 @@ class Start_PCTSPHS:
 
 
             ga = Genetic_Algorithm(instance, random_k)
-            result = ga.start_search(solution, None, neighborhoods_round_robin, 10, population_size = population_size, tournament_k = tournament_k, percentage_replaced = percentage_replaced, saw_policy = saw_policy, termination_criterion = iterations)
+            result = ga.start_search(solution, None, neighborhoods_round_robin, 10, population_size = population_size, tournament_k = tournament_k, percentage_replaced = percentage_replaced, saw_policy = saw_policy, termination_criterion = iterations, compute_distance_analysis = True)
             
             print("<<<<<<<<<<<Best for INSTANCE: " + str(instance_base_name) + ">>>>>>>>>>>>>>>")
             print(result.get_best_solution().get_objective_value())

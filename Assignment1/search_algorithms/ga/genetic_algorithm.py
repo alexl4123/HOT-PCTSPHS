@@ -5,6 +5,7 @@ import random
 
 from framework.constants import logger_name
 from framework.result import Result
+from framework.distance_measure import Distance_Measure
 
 from construction_heuristics.combination_of_heuristics import Combination_Of_Heuristics
 from search_algorithms.algorithm import Algorithm
@@ -47,7 +48,7 @@ class Genetic_Algorithm(Algorithm):
         self._random_k = random_k
 
 
-    def start_search(self, init_solution, step_function_type, neighborhoods, max_runtime, termination_criterion=3, starting_time = None, output = True, population_size = 10, tournament_k = 3, percentage_replaced = 0.5, saw_policy = Constant_Weights(1,1,1)):
+    def start_search(self, init_solution, step_function_type, neighborhoods, max_runtime, termination_criterion=3, starting_time = None, output = True, population_size = 10, tournament_k = 3, percentage_replaced = 0.5, saw_policy = Constant_Weights(1,1,1), compute_distance_analysis = False):
 
         additional_params = {}
 
@@ -63,13 +64,11 @@ class Genetic_Algorithm(Algorithm):
         fitness_function = saw_policy.create_appropriate_fitness_function(self._instance, termination_criterion)
         self._fitness_function = fitness_function
 
-        start_time_2 = time.time() 
         cur_population = self.initialize_population(population_size, fitness_function)
-        end_time_2 = time.time() 
-        print(f"<<<<<<<<<<<<<<<<<<t-init={end_time_2 - start_time_2}>>>>>>>>>>>>")
-        print("<<<<<<<<<<<INITIALIZATION-FINISHED-NOW-DOING-LOCAL-SEARCH>>>>>>>>>>")
-        #cur_population = self.local_search_test(cur_population)
-        #print("LOCAL-SEARCH-FINISHED")
+
+        if compute_distance_analysis:
+            dist_average_trace = [Distance_Measure.average_distance_of_population(cur_population)]
+            dist_median_trace = [Distance_Measure.median_distance_of_population(cur_population)]
 
         cur_population = sorted(cur_population, key=lambda individual : individual.get_fitness_value(), reverse = True)
         trace = [cur_population[0].get_objective_value()]
@@ -126,6 +125,12 @@ class Genetic_Algorithm(Algorithm):
 
             trace.append(cur_population[0].get_objective_value())
 
+        
+            if compute_distance_analysis:
+                dist_average_trace.append(Distance_Measure.average_distance_of_population(cur_population))
+                dist_median_trace.append(Distance_Measure.median_distance_of_population(cur_population))
+
+
             counter += 1
 
         print("<<<<<<<<<<<<")
@@ -145,6 +150,10 @@ class Genetic_Algorithm(Algorithm):
             logger.info("Runtime limit reached, actual runtime: " + max_runtime)
 
             duration = max_runtime
+
+        if compute_distance_analysis:
+            print(dist_average_trace)
+            print(dist_median_trace)
 
 
         return Result(solution, trace, duration, additional_params = additional_params)
