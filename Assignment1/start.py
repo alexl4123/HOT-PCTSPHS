@@ -44,7 +44,7 @@ class Start_PCTSPHS:
     def __init__(self):
 
         self._instances = []
-        self._benchmark_instances_path = 'tsp_instances/'
+        self._benchmark_instances_path = 'tsp_instances/00_batch_1_2/'
         self._max_runtime = 15*60 #seconds
 
     def start(self):
