@@ -2,7 +2,6 @@
 from neighborhoods.neighborhood import Neighborhood
 from framework.solution import Delta, Solution_Worthiness, Reverse, Remove
 
-
 class Remove_Hotel(Neighborhood):
 
     def __init__(self, instance):
@@ -14,6 +13,7 @@ class Remove_Hotel(Neighborhood):
         
         # Just needed for the Delta-Remove functionality of framework.solution
         self._trip_position_index = 0
+        self._number_of_solutions = None
 
     def set_solution(self, solution):
         self._solution = solution
@@ -39,6 +39,19 @@ class Remove_Hotel(Neighborhood):
 
 
         return self._number_of_solutions
+
+
+    def get_specific_solution(self, position):
+        trip_index = position + 1
+        trip_index_position = 0
+
+        
+        hotels = self._solution._hotels
+        hotel = hotels[self._trip_index]
+
+        worthiness = self.remove_hotel(self._trip_index, self._trip_position_index, hotel)
+
+        return worthiness
 
 
     def next_solution(self):
@@ -68,22 +81,29 @@ class Remove_Hotel(Neighborhood):
 
         hotel = hotels[self._trip_index]
 
+        worthiness = self.remove_hotel(self._trip_index, self._trip_position_index, hotel)
+
+        self._trip_index += 1
+        self._current_solution_index += 1
+
+        return worthiness
+
+    def remove_hotel(self, trip_index, trip_position_index, hotel):
 
         # Compute necessary operations
-        rmv = Remove(hotel, self._trip_index, self._trip_position_index)
+        rmv = Remove(hotel, trip_index, trip_position_index)
         delta = Delta([rmv])
 
-
         # Calculate new solution worthiness
-        left = self._solution.left_neighbor_hotel(self._trip_index)
-        right = self._solution.right_neighbor_hotel(self._trip_index)
+        left = self._solution.left_neighbor_hotel(trip_index)
+        right = self._solution.right_neighbor_hotel(trip_index)
 
         old_length = self._instance.get_distance(left, hotel) + self._instance.get_distance(hotel, right)
         new_length = self._instance.get_distance(left, right)
 
         # Recalculate max_trip_length
-        left_trip = self._solution._trip_lengths[self._trip_index - 1]
-        right_trip = self._solution._trip_lengths[self._trip_index]
+        left_trip = self._solution._trip_lengths[trip_index - 1]
+        right_trip = self._solution._trip_lengths[trip_index]
 
         new_cur_trip_length = left_trip + right_trip - old_length + new_length
 
@@ -97,10 +117,6 @@ class Remove_Hotel(Neighborhood):
 
         new_objective_value = self._solution.get_objective_value() - old_length + new_length - hotel.get_fee()
 
-
         worthiness = Solution_Worthiness(new_objective_value, new_max_trip_length, self._solution.get_number_of_trips(), new_prize, delta, Delta([]))
-
-        self._trip_index += 1
-        self._current_solution_index += 1
 
         return worthiness

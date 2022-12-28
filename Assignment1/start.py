@@ -641,7 +641,9 @@ class Start_PCTSPHS:
         #neighborhoods_round_robin = [Interchange_Customers,Insert_Customer, Trip_2_Opt, Swap_Served_Unserved_Customer, Remove_Customer, Add_Customer, Remove_Hotel, Add_Hotel,Exchange_Hotel, Move_Hotel]
         #neighborhoods_round_robin = [Trip_2_Opt, Remove_Customer, Add_Customer, Remove_Hotel, Add_Hotel]
         #neighborhoods_round_robin = [Add_Customer]
-        neighborhoods_round_robin = [Trip_2_Opt, Remove_Customer, Add_Customer]
+        neighborhoods_round_robin = [Trip_2_Opt, Remove_Customer, Add_Customer, Remove_Hotel, Add_Hotel]
+
+
         saw_policy = Linear_Sequence_Weights(0.1,0.1,1,0.1,0.1,0.1, 10)
         iterations = 200
 
