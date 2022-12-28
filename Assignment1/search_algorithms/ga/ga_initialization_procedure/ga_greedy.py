@@ -48,6 +48,7 @@ class GA_Greedy(GA_Initialization_Procedure):
             current_trip_value = current_trip_value + d_n_c
             current_location = nearest_unserved_customer
 
+        """
         greedy_trip = solution._trips[0].copy()
 
         trip_size = 0
@@ -107,6 +108,7 @@ class GA_Greedy(GA_Initialization_Procedure):
                 index = index + 1
                 trip_index_position = trip_index_position + 1
                 trip_size = trip_size_new
+        """
 
         if show_output:
             logger.info("Check all constraints verified, C1: " + str(solution.is_c1_satisfied()) + ", C2:" + str(
@@ -114,7 +116,7 @@ class GA_Greedy(GA_Initialization_Procedure):
             logger.info("Greedy-CH found solution with fitness-value of " + str(solution.get_fitness_value()))
             #logger.info(
             #    "Greedy-CH solution verified by slow calculation:" + str(solution.slow_objective_values_calculation()))
-            #logger.debug(solution.to_string())
+            logger.info(solution.to_string())
 
         duration = time.time() - starting_time
 

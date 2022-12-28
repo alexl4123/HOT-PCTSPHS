@@ -4,6 +4,7 @@ import time
 from search_algorithms.ga.ga_initialization_procedure.initialization_procedure import GA_Initialization_Procedure
 from search_algorithms.ga.ga_initialization_procedure.ga_insertion_heuristic import GA_Insertion_Heuristic, Shortest_Path_Criterion, Best_Objective_Value_Criterion, Farthest_Distance_Criterion
 from search_algorithms.ga.ga_initialization_procedure.ga_greedy import GA_Greedy
+from search_algorithms.ga.ga_initialization_procedure.ga_repair import GA_Repair
 
 class Construction_Builder(GA_Initialization_Procedure):
 
@@ -30,12 +31,16 @@ class Construction_Builder(GA_Initialization_Procedure):
                 quit()
             
             result = ga_insertion.create_solution(random_k = random_k, show_output = show_output, max_runtime = max_runtime)
+
+
         elif iteration % 3 == 2:
             # TODO -> Here comes Minimum-Spanning-Tree!
 
             ga_greedy = GA_Greedy(self._instance, alpha = self._alpha, beta = self._beta, gamma = self._gamma, delta = self._delta_param)
 
             result = ga_greedy.create_solution(random_k = random_k, show_output = show_output, max_runtime = max_runtime)
+
+        result = GA_Repair.repair(result.get_best_solution()._instance, result.get_best_solution())
 
         return result
 
