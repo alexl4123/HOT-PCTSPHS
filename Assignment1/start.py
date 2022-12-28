@@ -655,14 +655,14 @@ class Start_PCTSPHS:
 
             instance_base_name = instance.get_basename()
 
+            """
             if pre_load:
                 solution = self.pre_load_solution_from_path(instance, pre_load, instance_base_name, pre_load_files)
             else:
                 initialization_procedure = Backtracking_Search(instance)
                 solution = initialization_procedure.create_solution().get_best_solution()
-
-            print(solution.to_string())
-
+            """
+            solution = None
 
             ga = Genetic_Algorithm(instance, random_k)
             result = ga.start_search(solution, None, neighborhoods_round_robin, 10, population_size = population_size, tournament_k = tournament_k, percentage_replaced = percentage_replaced, saw_policy = saw_policy, termination_criterion = iterations, compute_distance_analysis = True)

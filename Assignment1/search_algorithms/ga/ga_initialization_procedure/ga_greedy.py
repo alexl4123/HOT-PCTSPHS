@@ -2,7 +2,7 @@ import logging
 import time
 
 from framework.result import Result
-from framework.solution import Solution, Delta, Add, Remove, Reverse
+from framework.solution import Delta, Add, Remove, Reverse
 from search_algorithms.ga.ga_initialization_procedure.initialization_procedure import GA_Initialization_Procedure
 from search_algorithms.ga.ga_solution import GA_Solution
 from framework.constants import logger_name
@@ -10,7 +10,7 @@ from framework.constants import logger_name
 logger = logging.getLogger(logger_name)
 
 
-class Greedy_Nearest_Neighbor_Initialization(GA_Initialization_Procedure):
+class GA_Greedy(GA_Initialization_Procedure):
     """
     Greedy nearest neighbor initialization procedure.
     1.) Constructs a greedy-nearest-neighbor-tour while ignoring all constraints

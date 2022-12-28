@@ -21,7 +21,7 @@ from search_algorithms.ga.vnd_ga import Vnd_GA
 from search_algorithms.ga.saw_policy import SAW_Policy
 from search_algorithms.ga.constant_weights import Constant_Weights
 
-from search_algorithms.ga.ga_initialization_procedure.greedy_nearest_neighbor_initialization import Greedy_Nearest_Neighbor_Initialization
+from search_algorithms.ga.ga_initialization_procedure.construction_builder import Construction_Builder
 
 from neighborhoods.neighborhood import Neighborhood
 from neighborhoods.trip_2_opt import Trip_2_Opt
@@ -69,6 +69,10 @@ class Genetic_Algorithm(Algorithm):
         if compute_distance_analysis:
             dist_average_trace = [Distance_Measure.average_distance_of_population(cur_population)]
             dist_median_trace = [Distance_Measure.median_distance_of_population(cur_population)]
+       
+        print(dist_average_trace) 
+        print(dist_median_trace) 
+        quit()
 
         cur_population = sorted(cur_population, key=lambda individual : individual.get_fitness_value(), reverse = True)
         trace = [cur_population[0].get_objective_value()]
@@ -162,14 +166,20 @@ class Genetic_Algorithm(Algorithm):
         initial_population = []
             
 
-        randomized_procedure = Greedy_Nearest_Neighbor_Initialization(self._instance, fitness_function = fitness_function)
+        #randomized_procedure = Greedy_Nearest_Neighbor_Initialization(self._instance, fitness_function = fitness_function)
         #randomized_procedure = Combination_Of_Heuristics(self._instance)
+
+        randomized_procedure = Construction_Builder(self._instance, fitness_function = fitness_function)
+
+        iteration = 0
         while len(initial_population) < population_size:
-            result = randomized_procedure.create_solution(random_k = self._random_k, show_output = True, max_runtime = 10)
+            result = randomized_procedure.create_solution(iteration, random_k = self._random_k, show_output = True, max_runtime = 10)
             if result.get_best_solution():
                 ga_solution = GA_Solution.from_solution(result.get_best_solution())
 
                 initial_population.append(ga_solution)
+
+            iteration += 1
 
         return initial_population
 
