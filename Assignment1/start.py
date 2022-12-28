@@ -635,10 +635,10 @@ class Start_PCTSPHS:
                 basename_stem = Path(pre_load + f).stem
                 pre_load_files[basename_stem] = f
 
-        random_k = 5
-        population_size = 100
-        tournament_k = 15
-        percentage_replaced = 0.2
+        random_k = 15
+        population_size = 50
+        tournament_k = 5
+        percentage_replaced = 0.05
         #neighborhoods_round_robin = [Trip_2_Opt, Add_Customer]
         #neighborhoods_round_robin = [Trip_2_Opt]
         #neighborhoods_round_robin = [Interchange_Customers,Insert_Customer, Trip_2_Opt, Swap_Served_Unserved_Customer, Remove_Customer, Add_Customer, Remove_Hotel, Add_Hotel,Exchange_Hotel, Move_Hotel]
@@ -648,6 +648,7 @@ class Start_PCTSPHS:
 
 
         saw_policy = Linear_Sequence_Weights(0.1,0.1,1,0.1,0.1,0.1, 10)
+        saw_policy = Constant_Weights(2,2,2)
         iterations = 200
 
 
@@ -665,7 +666,7 @@ class Start_PCTSPHS:
             solution = None
 
             ga = Genetic_Algorithm(instance, random_k)
-            result = ga.start_search(solution, None, neighborhoods_round_robin, 10, population_size = population_size, tournament_k = tournament_k, percentage_replaced = percentage_replaced, saw_policy = saw_policy, termination_criterion = iterations, compute_distance_analysis = True)
+            result = ga.start_search(solution, None, neighborhoods_round_robin, 10, population_size = population_size, tournament_k = tournament_k, percentage_replaced = percentage_replaced, saw_policy = saw_policy, termination_criterion = iterations, compute_distance_analysis = False)
             
             print("<<<<<<<<<<<Best for INSTANCE: " + str(instance_base_name) + ">>>>>>>>>>>>>>>")
             print(result.get_best_solution().get_objective_value())

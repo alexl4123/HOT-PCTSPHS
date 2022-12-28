@@ -1,6 +1,10 @@
 
 class Fitness_Function:
 
+    g_max = 0
+    g_min = 0
+
+
     def __init__(self, instance, max_gamma_1, max_gamma_2, max_gamma_3, gamma_1 = 1, gamma_2 = 1, gamma_3 = 1):
         self._instance = instance
 
@@ -22,8 +26,8 @@ class Fitness_Function:
 
         self._precompute_necessary_values()
 
-        self.g_min = self.compute_g_min()
-        self.g_max = self.compute_g_max()
+        Fitness_Function.g_min = self.compute_g_min()
+        Fitness_Function.g_max = self.compute_g_max()
 
     def set_gamma_1(self, gamma_1):
         self._gamma_1 = gamma_1
@@ -181,18 +185,21 @@ class Fitness_Function:
 
         if solution.get_objective_value() < 0:
             print("<<<<<!!!!!SET-NEW-MIN-VALUE-FOR-FITNESS-FUNCTION!!!!!!>>>>>>>>")
-            self.g_min = solution.get_objective_value()
+            Fitness_Function.g_min = solution.get_objective_value()
 
-        if solution.get_objective_value() > self.g_max:
+        if solution.get_objective_value() > Fitness_Function.g_max:
             print("<<<<<!!!!!SET-NEW-MAX-VALUE-FOR-FITNESS-FUNCTION!!!!!!>>>>>>>>")
-            self.g_max = solution.get_objective_value()
+            Fitness_Function.g_max = solution.get_objective_value()
 
-        t0 = solution.get_objective_value() + self.g_min
+        t0 = solution.get_objective_value() + Fitness_Function.g_min
         t1 = self._gamma_1 * self.compute_psi_1(solution._max_trip_length)
         t2 = self._gamma_2 * self.compute_psi_2(solution._trips_size, solution.get_objective_value())
         t3 = self._gamma_3 * self.compute_psi_3(solution._prize)
 
-        t4 = self.g_max - (t0 + t1 + t2 + t3)
+        if (t0 + t1 + t2 + t3) > Fitness_Function.g_max:
+            Fitness_Function.g_max = (t0 + t1 + t2 + t3)
+
+        t4 = Fitness_Function.g_max - (t0 + t1 + t2 + t3)
 
         """
         print("T0::" + str(t0))

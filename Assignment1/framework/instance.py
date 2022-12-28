@@ -64,6 +64,9 @@ class Edge:
     def get_weight(self):
         return self._weight
 
+    def to_string(self):
+        return f"<EDGE:{self._vertex_a.get_id()} -> {self._vertex_b.get_id()}:w={self._weight}>"
+
 
 class Instance:
 

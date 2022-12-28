@@ -69,13 +69,20 @@ class Genetic_Algorithm(Algorithm):
         if compute_distance_analysis:
             dist_average_trace = [Distance_Measure.average_distance_of_population(cur_population)]
             dist_median_trace = [Distance_Measure.median_distance_of_population(cur_population)]
-       
-        print(dist_average_trace) 
-        print(dist_median_trace) 
-        quit()
+      
+        for individual in cur_population:
+            individual._fitness_function._precompute_necessary_values()
+            val = individual.compute_fitness_value()
 
+        for individual in cur_population:
+            individual._fitness_function._precompute_necessary_values()
+            val = individual.compute_fitness_value()
+ 
         cur_population = sorted(cur_population, key=lambda individual : individual.get_fitness_value(), reverse = True)
         trace = [cur_population[0].get_objective_value()]
+        fitness_trace = [cur_population[0].get_fitness_value()]
+
+
 
         self.neighborhood_position = 0
 
@@ -128,6 +135,7 @@ class Genetic_Algorithm(Algorithm):
             saw_policy.update_weights(counter, cur_population)
 
             trace.append(cur_population[0].get_objective_value())
+            fitness_trace.append(cur_population[0].get_fitness_value())
 
         
             if compute_distance_analysis:
@@ -137,6 +145,7 @@ class Genetic_Algorithm(Algorithm):
 
             counter += 1
 
+        """
         print("<<<<<<<<<<<<")
         print("FIN")
         for individual in cur_population:
@@ -145,7 +154,9 @@ class Genetic_Algorithm(Algorithm):
             print(individual.get_fitness_value())
             print("--<")
         print(">>>>>>>>>>>")
+        """
 
+        print(fitness_trace)
         solution = cur_population[0]
 
 
@@ -173,7 +184,7 @@ class Genetic_Algorithm(Algorithm):
 
         iteration = 0
         while len(initial_population) < population_size:
-            result = randomized_procedure.create_solution(iteration, random_k = self._random_k, show_output = True, max_runtime = 10)
+            result = randomized_procedure.create_solution(iteration, random_k = self._random_k, show_output = False, max_runtime = 600)
             if result.get_best_solution():
                 ga_solution = GA_Solution.from_solution(result.get_best_solution())
 
