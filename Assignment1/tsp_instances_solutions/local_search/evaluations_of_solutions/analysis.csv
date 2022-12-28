@@ -1,0 +1,10 @@
+Instance_Name,Number_Of_Customers,Number_Of_Hotels,Objective_Value,Sum_of_Trips,Penalties,Hotel_Fees,Max_Trip_Length,Number_Of_Trips,Prize,Time,Trace,Neighborhood,Step_Function
+test,3,2,1280,480,800,0,480,1,1000,9.775161743164062e-06,[1280, 1280],trip_2_opt,Step_Function_Type.FIRST
+test,3,2,1280,480,800,0,480,1,1000,9.059906005859375e-06,[1280, 1280],trip_2_opt,Step_Function_Type.FIRST
+test,3,2,1280,480,800,0,480,1,1000,9.059906005859375e-06,[1280, 1280],trip_2_opt,Step_Function_Type.FIRST
+rc101_1,10,2,100299,299,0,100000,223,2,1000,0.0004792213439941406,[100303, 100301, 100299, 100299],trip_2_opt,Step_Function_Type.FIRST
+rc101_1,10,2,100299,299,0,100000,223,2,1000,0.00035691261291503906,[100303, 100301, 100299, 100299],trip_2_opt,Step_Function_Type.FIRST
+rc101_1,10,2,100299,299,0,100000,223,2,1000,0.0003516674041748047,[100303, 100301, 100299, 100299],trip_2_opt,Step_Function_Type.FIRST
+eil51_1,50,1,500,307,193,0,307,1,584,0.012597799301147461,[539, 534, 529, 528, 523, 520, 519, 515, 509, 505, 500, 500],trip_2_opt,Step_Function_Type.FIRST
+test,3,2,1280,480,800,0,480,1,1000,4.124641418457031e-05,[1280, 1280],add_customer,Step_Function_Type.FIRST
+test,3,2,1280,480,800,0,480,1,1000,1.9550323486328125e-05,[1280, 1280],remove_customer,Step_Function_Type.FIRST
