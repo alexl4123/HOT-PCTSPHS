@@ -13,11 +13,27 @@ class OX_Crossover(Crossover):
         for individual in population:
             pop_list_rep.append(individual.compute_pure_list_representation())
 
+        # Create pairs for Ordered Crossover        
+        pairs = []
+        length = len(pop_list_rep)
+
+        pop_list_rep_tmp = pop_list_rep.copy()
+
+        while(length > 1):
+            second_index = random.randint(1, length - 1)
+
+            pairs.append((pop_list_rep_tmp[0], pop_list_rep_tmp[second_index]))
+            
+            length -= 2
+
+            pop_list_rep_tmp.pop(second_index)
+            pop_list_rep_tmp.pop(0)
+
+        # Do the crossover
         new_pop = []
 
-        for i in range(0,len(pop_list_rep) - 1,2):
-            p1 = pop_list_rep[i]
-            p2 = pop_list_rep[i+1]
+        for pair in pairs:
+            p1, p2 = pair
 
             (c1, c2) = OX_Crossover.perform_ox_crossover_algorithm(p1, p2)
 
@@ -36,11 +52,13 @@ class OX_Crossover(Crossover):
             new_pop.append(c1_o)
             new_pop.append(c2_o)
 
+        # If uneven, fill to even with not used one
         if len(pop_list_rep) % 2 ==  1:
-            new_pop.append(population[len(pop_list_rep) - 1])
+            c0_o = GA_Solution(population[0]._instance, fitness_function)
+            c0_o.from_pure_list_representation_to_internal(pop_list_rep_tmp[0])
+            new_pop.append(c0_o)
 
         return new_pop
-
 
     @classmethod
     def perform_ox_crossover_algorithm(cls, p1, p2):
