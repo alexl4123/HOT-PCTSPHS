@@ -67,7 +67,7 @@ class Remove_Customer(Neighborhood):
         obj = trip[index]
         trip_position_index = index
     
-        return self.add_customer(obj, trip_index, trip_position_index, correct_calculation = False)
+        return self.remove_customer(obj, trip_index, trip_position_index, correct_calculation = False)
 
     def next_solution(self):
 
@@ -104,14 +104,14 @@ class Remove_Customer(Neighborhood):
                 self._trip_index += 1
                 self._trip_position_index = 0
 
-        worthiness = self.add_customer(obj, self._trip_index, self._trip_position_index, correct_calculation = False)
+        worthiness = self.remove_customer(obj, self._trip_index, self._trip_position_index, correct_calculation = False)
 
         self._trip_position_index += 1
         self._current_solution_index += 1
 
         return worthiness
 
-    def add_customer(self, obj, trip_index, trip_position_index, correct_calculation = False):
+    def remove_customer(self, obj, trip_index, trip_position_index, correct_calculation = False):
 
         # Compute necessary operations
         rmv = Remove(obj, trip_index, trip_position_index)

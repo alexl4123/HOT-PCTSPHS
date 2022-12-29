@@ -122,11 +122,16 @@ class Genetic_Algorithm(Algorithm):
 
             st_mut = time.time()
             mut_population = self.mutation(cx_population, neighborhoods)
+            mut_population_2 = self.mutation(selected_population, neighborhoods)
+
+            self.neighborhood_position += 1
+            if self.neighborhood_position >= len(neighborhoods):
+                self.neighborhood_position = 0
             et_mut = time.time()
 
 
             st_repl = time.time()
-            cur_population = self.replacement(cur_population, mut_population, new_pop_size, percentage_replaced)
+            cur_population = self.replacement(cur_population, mut_population, mut_population_2, new_pop_size, percentage_replaced)
             et_repl = time.time()
 
             print(f"Timing-analysis:<selection:{et_sel - st_sel}s>;<cx:{et_cx - st_cx}s>;<mut:{et_mut - st_mut}s -- Mut-Name:{neighborhoods[self.neighborhood_position]}>;<repl:{st_repl - et_repl}s>")
@@ -213,7 +218,7 @@ class Genetic_Algorithm(Algorithm):
 
         neighborhood = neighborhood_structure(instance)
         neighborhood.set_solution(population[0])
-        print(f"<<Neighborhood-possible-pos:{neighborhood.get_number_possible_solutions()}>>")
+        #print(f"<<Neighborhood-possible-pos:{neighborhood.get_number_possible_solutions()}>>")
 
         for solution in population:
             neighborhood = neighborhood_structure(instance)
@@ -230,28 +235,25 @@ class Genetic_Algorithm(Algorithm):
 
                 solution.change_from_delta(new_worthiness.get_delta())
                 solution.compute_fitness_value()
-
-        self.neighborhood_position += 1
-        if self.neighborhood_position >= len(neighborhoods):
-            self.neighborhood_position = 0
-
         return population
 
-    def replacement(self, cur_population, mut_population, new_length, percentage_replaced):
+    def replacement(self, cur_population, mut_population, mut_population_2, new_length, percentage_replaced):
         """
             percentage_replaced in [0,1]
         """
 
         cur_population = sorted(cur_population, key=lambda individual : individual.get_fitness_value(), reverse = True)
         mut_population = sorted(mut_population, key=lambda individual : individual.get_fitness_value(), reverse = True)
+        mut_population_2 = sorted(mut_population_2, key=lambda individual : individual.get_fitness_value(), reverse = True)
 
         #mut_population[0] = (self.local_search_test([mut_population[0]]))[0]
 
         old_pop_size = int((1 - percentage_replaced) * new_length)
-        new_pop_size = int(percentage_replaced * new_length)
+        new_pop_size = int(percentage_replaced * new_length / 2)
+        new_pop_size_2 = int(percentage_replaced * new_length / 2)
 
-        if old_pop_size + new_pop_size < new_length:
-            new_pop_size = new_length - old_pop_size
+        if old_pop_size + new_pop_size + new_pop_size_2 < new_length:
+            new_pop_size_2 = new_length - old_pop_size - new_pop_size
 
         new_population = []
 
@@ -261,6 +263,9 @@ class Genetic_Algorithm(Algorithm):
         for i in range(new_pop_size):
             new_population.append(mut_population[i])
 
+        for i in range(new_pop_size_2):
+            new_population.append(mut_population_2[i])
+        
         return new_population
 
     def local_search_test(self, population):

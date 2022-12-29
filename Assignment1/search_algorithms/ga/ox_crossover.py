@@ -53,10 +53,12 @@ class OX_Crossover(Crossover):
             new_pop.append(c2_o)
 
         # If uneven, fill to even with not used one
+        """
         if len(pop_list_rep) % 2 ==  1:
             c0_o = GA_Solution(population[0]._instance, fitness_function)
             c0_o.from_pure_list_representation_to_internal(pop_list_rep_tmp[0])
             new_pop.append(c0_o)
+        """
 
         return new_pop
 

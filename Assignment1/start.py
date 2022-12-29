@@ -650,9 +650,9 @@ class Start_PCTSPHS:
                 pre_load_files[basename_stem] = f
 
         random_k = 15
-        population_size = 50
-        tournament_k = 5
-        percentage_replaced = 0.05
+        population_size = 75
+        tournament_k = 7
+        percentage_replaced = 0.1
         #neighborhoods_round_robin = [Trip_2_Opt, Add_Customer]
         #neighborhoods_round_robin = [Trip_2_Opt]
         #neighborhoods_round_robin = [Interchange_Customers,Insert_Customer, Trip_2_Opt, Swap_Served_Unserved_Customer, Remove_Customer, Add_Customer, Remove_Hotel, Add_Hotel,Exchange_Hotel, Move_Hotel]
@@ -661,9 +661,9 @@ class Start_PCTSPHS:
         neighborhoods_round_robin = [Trip_2_Opt, Remove_Customer, Add_Customer, Remove_Hotel, Add_Hotel]
 
 
-        saw_policy = Linear_Sequence_Weights(0.1,0.1,1,0.1,0.1,0.1, 10)
-        saw_policy = Constant_Weights(2,2,2)
-        iterations = 200
+        #saw_policy = Linear_Sequence_Weights(1.5,1.5,1.5,0.1,0.1,0.1,300)
+        saw_policy = Constant_Weights(3,3,3)
+        iterations = 300
 
 
         for instance in self._instances:
