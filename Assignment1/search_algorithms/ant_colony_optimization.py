@@ -56,7 +56,6 @@ class Ant_Colony_Optimization(Algorithm):
 
     def start_search(self, init_solution, step_function_type, neighborhoods, max_runtime, termination_criterion=3, starting_time = None, output = True, population_size = 10, saw_policy = Constant_Weights(1,1,1), compute_distance_analysis = False):
         print("START ACO")
-
         additional_params = {}
 
         trace = []
@@ -101,12 +100,21 @@ class Ant_Colony_Optimization(Algorithm):
 
         fitness_function = saw_policy.create_appropriate_fitness_function(self._instance, termination_criterion)
 
+        # Min-Max-Ants
+        p = 0.5
+        mmas = True
+        t_max = 10 * (1 / (self.rho)) * (fitness_function.g_max)
+        t_min = (t_max * (1 - p ** (1/max_tour_length))) / (((max_tour_length / 2) - 1) * (p ** (1/max_tour_length)))
+
+        t_med = (t_max + t_min) / 2
+
+
         best_solution = None        
         
         #local_inf_mat_2 = np.sum(local_inf_mat)
         #print(local_inf_mat_2)
 
-        tau = (np.ones(eta.shape))
+        tau = (np.ones(eta.shape)) + t_med
 
         counter = 0
         while counter < termination_criterion:
@@ -152,10 +160,10 @@ class Ant_Colony_Optimization(Algorithm):
                         list_representations[j].append(obj)
                     else:
                         break
-
             print("-------------------")
             print(f"ITER:{counter}")
             print(table)
+
             population = []
             for lst in list_representations:
                 sol = GA_Solution(self._instance, fitness_function)
@@ -163,29 +171,21 @@ class Ant_Colony_Optimization(Algorithm):
                 sol.update_values_from_slow_calculation()
                 sol.compute_fitness_value()
                 population.append(sol)
-
+    
+                """
                 print(sol.to_string())
                 print(sol.get_fitness_value())
                 print(sol.get_objective_value())
                 print(sol.is_c1_satisfied())
                 print(sol.is_c2_satisfied())
                 print(sol.is_c3_satisfied())
+                """
 
-            print("-------------------")
-
-            delta_tau = np.zeros((dimensions, dimensions))
-            for j in range(population_size):  
-                individual_lst = list_representations[j]
-                individual = population[j]
-
-                for k in range(len(individual_lst)):  
-                    n1, n2 = table[j, k], table[j, k + 1]  
-                    delta_tau[n1, n2] += 1 / individual.get_fitness_value()
-
-            tau = (1 - self.rho) * tau + delta_tau
-
+            #print("-------------------")
             cur_best = None
+            cur_best_j = 0
 
+            counter_2 = 0
             for individual in population:
                 if not best_solution:
                     best_solution = individual.clone()
@@ -194,12 +194,52 @@ class Ant_Colony_Optimization(Algorithm):
 
                 if not cur_best:
                     cur_best = individual.clone()
+                    cur_best_j = counter_2
                 elif individual.get_fitness_value() > cur_best.get_fitness_value():
                     cur_best = individual.clone()
+                    cur_best_j = counter_2
+
+                counter_2 += 1
+
+        
 
             trace.append(cur_best.get_fitness_value())
-
             counter += 1
+
+            if mmas:
+                delta_tau = np.zeros((dimensions, dimensions))
+
+                for j in range(population_size):  
+                    individual_lst = list_representations[j]
+                    individual = population[j]
+
+                    for k in range(len(individual_lst)):  
+                        n1, n2 = table[j, k], table[j, k + 1]  
+                        delta_tau[n1, n2] += individual.get_fitness_value()
+            
+                        if j == cur_best_j:
+                            delta_tau[n1, n2] += 2 * individual.get_fitness_value()
+    
+
+                tau = (1 - self.rho) * tau + delta_tau
+
+                tau[tau < t_min] = t_min
+                tau[tau > t_max] = t_max
+
+            elif not mmas:
+                delta_tau = np.zeros((dimensions, dimensions))
+                for j in range(population_size):  
+                    individual_lst = list_representations[j]
+                    individual = population[j]
+
+                    for k in range(len(individual_lst)):  
+                        n1, n2 = table[j, k], table[j, k + 1]  
+                        delta_tau[n1, n2] += individual.get_fitness_value()
+
+                tau = (1 - self.rho) * tau + delta_tau
+
+
+
 
         print("<<<<<<<<<<<<<<>>>>>>>>>>>>>>>")
         print("<<<<<<<<<<<<<<>>>>>>>>>>>>>>>")
