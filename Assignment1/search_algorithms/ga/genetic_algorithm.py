@@ -124,7 +124,6 @@ class Genetic_Algorithm(Algorithm):
             mut_population = self.mutation(cx_population, neighborhoods)
             et_mut = time.time()
 
-            #mut_population = self.local_search_test(mut_population)
 
             st_repl = time.time()
             cur_population = self.replacement(cur_population, mut_population, new_pop_size, percentage_replaced)
@@ -186,7 +185,7 @@ class Genetic_Algorithm(Algorithm):
         while len(initial_population) < population_size:
             result = randomized_procedure.create_solution(iteration, random_k = self._random_k, show_output = False, max_runtime = 600)
             if result.get_best_solution():
-                ga_solution = GA_Solution.from_solution(result.get_best_solution())
+                ga_solution = GA_Solution.from_solution(result.get_best_solution(), fitness_function = fitness_function)
 
                 initial_population.append(ga_solution)
 
@@ -245,6 +244,8 @@ class Genetic_Algorithm(Algorithm):
 
         cur_population = sorted(cur_population, key=lambda individual : individual.get_fitness_value(), reverse = True)
         mut_population = sorted(mut_population, key=lambda individual : individual.get_fitness_value(), reverse = True)
+
+        #mut_population[0] = (self.local_search_test([mut_population[0]]))[0]
 
         old_pop_size = int((1 - percentage_replaced) * new_length)
         new_pop_size = int(percentage_replaced * new_length)

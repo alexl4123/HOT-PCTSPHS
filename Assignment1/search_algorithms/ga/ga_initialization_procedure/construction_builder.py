@@ -17,20 +17,20 @@ class Construction_Builder(GA_Initialization_Procedure):
     def create_solution(self, iteration, random_k = 0, show_output = True, max_runtime = 90):
 
         if iteration % 50 == 0:
-            ga_mst = GA_MST(self._instance, alpha = self._alpha, beta = self._beta, gamma = self._gamma, delta = self._delta_param)
+            ga_mst = GA_MST(self._instance, alpha = self._alpha, beta = self._beta, gamma = self._gamma, delta = self._delta_param, fitness_function = self._fitness_function)
 
             result = ga_mst.create_solution(random_k = random_k, show_output = show_output, max_runtime = max_runtime)
         elif iteration % 2 == 0:
-            ga_greedy = GA_Greedy(self._instance, alpha = self._alpha, beta = self._beta, gamma = self._gamma, delta = self._delta_param)
+            ga_greedy = GA_Greedy(self._instance, alpha = self._alpha, beta = self._beta, gamma = self._gamma, delta = self._delta_param, fitness_function = self._fitness_function)
 
             result = ga_greedy.create_solution(random_k = random_k, show_output = show_output, max_runtime = max_runtime)
         elif iteration % 2 == 1:
             if iteration % 6 == 1:
-                ga_insertion = GA_Insertion_Heuristic(self._instance, alpha = self._alpha, beta = self._beta, gamma = self._gamma, delta = self._delta_param, insertion_criterion = Shortest_Path_Criterion)
+                ga_insertion = GA_Insertion_Heuristic(self._instance, alpha = self._alpha, beta = self._beta, gamma = self._gamma, delta = self._delta_param, insertion_criterion = Shortest_Path_Criterion, fitness_function = self._fitness_function)
             elif iteration % 6 == 3:
-                ga_insertion = GA_Insertion_Heuristic(self._instance, alpha = self._alpha, beta = self._beta, gamma = self._gamma, delta = self._delta_param, insertion_criterion = Best_Objective_Value_Criterion)
+                ga_insertion = GA_Insertion_Heuristic(self._instance, alpha = self._alpha, beta = self._beta, gamma = self._gamma, delta = self._delta_param, insertion_criterion = Best_Objective_Value_Criterion, fitness_function = self._fitness_function)
             elif iteration % 6 == 5:
-                ga_insertion = GA_Insertion_Heuristic(self._instance, alpha = self._alpha, beta = self._beta, gamma = self._gamma, delta = self._delta_param, insertion_criterion = Farthest_Distance_Criterion)
+                ga_insertion = GA_Insertion_Heuristic(self._instance, alpha = self._alpha, beta = self._beta, gamma = self._gamma, delta = self._delta_param, insertion_criterion = Farthest_Distance_Criterion, fitness_function = self._fitness_function)
             else:
                 print("ILLEGAL-VALUE!!!")
                 quit()

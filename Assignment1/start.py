@@ -549,7 +549,8 @@ class Start_PCTSPHS:
                 initialization_procedure = Backtracking_Search(instance)
                 solution = initialization_procedure.create_solution().get_best_solution()
 
-            neighborhoods = [Interchange_Customers(instance),Insert_Customer(instance), Trip_2_Opt(instance), Swap_Served_Unserved_Customer(instance), Remove_Customer(instance), Add_Customer(instance), Remove_Hotel(instance), Add_Hotel(instance),Exchange_Hotel(instance), Move_Hotel(instance)]
+            #neighborhoods = [Interchange_Customers(instance),Insert_Customer(instance), Trip_2_Opt(instance), Swap_Served_Unserved_Customer(instance), Remove_Customer(instance), Add_Customer(instance), Remove_Hotel(instance), Add_Hotel(instance),Exchange_Hotel(instance), Move_Hotel(instance)]
+            neighborhoods = [Interchange_Customers(instance),Insert_Customer(instance), Trip_2_Opt(instance), Swap_Served_Unserved_Customer(instance), Remove_Customer(instance), Add_Customer(instance),Exchange_Hotel(instance), Move_Hotel(instance), Remove_Hotel(instance), Add_Hotel(instance)]
             
             vnd = Vnd(instance, 0)
             #vnd = Local_Search(instance, 0)

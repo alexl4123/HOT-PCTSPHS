@@ -63,6 +63,8 @@ class Vnd_GA(Algorithm):
 
             duration = max_runtime
 
+       
+        """ 
         checked_values = solution.slow_objective_values_calculation()
 
         if output:
@@ -76,5 +78,6 @@ class Vnd_GA(Algorithm):
         if checked_values[0] != trace[len(trace) - 1]:
             logger.error("Likely error in neighborhood-evaluation!")
             quit()
+        """
 
         return Result(solution, trace, duration)
