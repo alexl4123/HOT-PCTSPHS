@@ -38,6 +38,8 @@ from search_algorithms.ga.constant_weights import Constant_Weights
 from search_algorithms.ga.linear_weights import Linear_Weights
 from search_algorithms.ga.linear_sequence_weights import Linear_Sequence_Weights
 
+from hyper_parameter_tuning.hyper_parameter_tuning import Hyper_Parameter_Tuning
+
 
 class Start_PCTSPHS:
 
@@ -164,9 +166,12 @@ class Start_PCTSPHS:
         ga_1 = subparsers.add_parser("6",help="GA Search")
 
         self.add_instance_arg(ga_0)
+        self.add_hpt_arg(ga_0)
+
         self.add_preload_starting_solutions_from_file_arg(ga_0)
 
         self.add_instance_arg(ga_1)
+        self.add_hpt_arg(ga_1)
         self.add_preload_starting_solutions_from_file_arg(ga_1)
 
     def initialize_aco_parser(self, subparsers):
@@ -174,11 +179,12 @@ class Start_PCTSPHS:
         aco_1 = subparsers.add_parser("7",help="ACO Search")
 
         self.add_instance_arg(aco_0)
+        self.add_hpt_arg(aco_0)
         self.add_preload_starting_solutions_from_file_arg(aco_0)
 
         self.add_instance_arg(aco_1)
+        self.add_hpt_arg(aco_1)
         self.add_preload_starting_solutions_from_file_arg(aco_1)
-
 
     def add_neighborhood_arg(self, parser):
         parser.add_argument('--neighborhood-structure',choices=['remove_customer','add_customer','insert_customer','swap_served_unserved_customer','interchange_customers','trip_2_opt','remove_hotel','add_hotel','exchange_hotel','move_hotel'], help='Choose a neighborhood structure for local search.', default='trip_2_opt')
@@ -201,7 +207,8 @@ class Start_PCTSPHS:
     def add_runs_arg(self, parser):
         parser.add_argument('--runs',type=int, help='specify how many runs shall be made (how often for each instance the algorithm shall be executed)', default=1)
 
-
+    def add_hpt_arg(self, parser):
+        parser.add_argument('--perform-hyper-parameter-tuning', help='Do you want to run hyper-parameter-tuning on this algorithm?', action='store_true')
        
         
     def algorithm_selector(self, args):
@@ -221,7 +228,6 @@ class Start_PCTSPHS:
             if args.instance_check_necessary_constraints:
                 parsed_file = Input_file_Parser(args.instance)
                 instance = parsed_file.load_and_parse_input_file()
-                instance.precompute_all_nearest_neighbors()
 
                 if instance.is_instance_not_computable():
                     logger.error("The given instance is not computable according to the necessary constraints!")
@@ -286,12 +292,15 @@ class Start_PCTSPHS:
         elif args.mode == '5' or args.mode == 'GVNS':
             self.start_gvns_search(args.preload_starting_solutions_from_path, args.runs)
         elif args.mode == '6' or args.mode == 'GA':
-            self.start_ga_search(args.preload_starting_solutions_from_path)
+            if not args.perform_hyper_parameter_tuning:
+                self.start_ga_search(args.preload_starting_solutions_from_path)
+            else:
+                self.start_ga_hpt()
         elif args.mode == '7' or args.mode == 'ACO':
-            self.start_aco_search(args.preload_starting_solutions_from_path)
-
-
-
+            if not args.perform_hyper_parameter_tuning:
+                self.start_aco_search(args.preload_starting_solutions_from_path)
+            else:
+                self.start_aco_hpt()
 
 
     def start_construction_heuristics(self):
@@ -706,6 +715,25 @@ class Start_PCTSPHS:
 
             result.get_best_solution().write_solution_to_file(file_path_to_solutions + "ga")
 
+    def start_ga_hpt(self):
+        hpt = Hyper_Parameter_Tuning()
+
+
+        neighborhoods_round_robin = [Trip_2_Opt, Remove_Customer, Add_Customer, Remove_Hotel, Add_Hotel]
+
+        arguments = {}
+        arguments["saw_policy"] = [Constant_Weights(3,3,3)]
+        arguments["percentage_replaced"] = [0.1,0.5]
+        arguments["population_size"] = [10]
+        arguments["neighborhoods"] = [neighborhoods_round_robin]
+        arguments["tournament_k"] = [2]
+        arguments["random_k"] = [5]
+        arguments["termination_criterion"] = [10,20]
+        
+
+
+        hpt.perform(Genetic_Algorithm, arguments)
+
 
     def start_aco_search(self, pre_load):
 
@@ -766,6 +794,9 @@ class Start_PCTSPHS:
             result.get_best_solution().write_solution_to_file(file_path_to_solutions + "aco")
 
 
+    def start_aco_hpt(self):
+        hpt = Hyper_Parameter_Tuning()
+        hpt.perform()
 
 
 
