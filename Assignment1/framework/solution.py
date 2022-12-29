@@ -802,6 +802,7 @@ class Solution:
         return (
             objective_value, sum_trips, penalties, hotel_fees, max_trip_length, trips_size, collected_prize,
             trip_lengths, avg_trip_length, used) 
+
     def update_values_from_slow_calculation(self, slow_calc = None):
         """
             Performs a slow_claculation (if slow_calc is None) and updates the values used for delta-evaluation
@@ -962,6 +963,7 @@ class Solution:
 
         self._hotels = hotels
         self._trips = trips
+        self._trips_size = len(trips)
 
 
 

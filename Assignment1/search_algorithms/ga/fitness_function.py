@@ -168,7 +168,7 @@ class Fitness_Function:
         if collected_prize >= self._instance.get_C3():
             return 0
         
-        t0 = ((self._instance.get_C3() - collected_prize) / self._min_prize) * self._max_dist
+        t0 = ((self._instance.get_C3() - collected_prize) / self._min_prize) * (self._max_dist * self._max_fee)
 
         return t0
 

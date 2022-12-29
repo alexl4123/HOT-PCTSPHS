@@ -11,11 +11,6 @@ from framework.input_file_parser import Input_File_Parser
 from framework.solution import Solution, Delta
 from framework.test_instances import Tester
 
-from search_algorithms.local_search import Local_Search, Step_Function_Type
-from search_algorithms.vnd import Vnd
-from search_algorithms.grasp import Grasp
-from search_algorithms.gvns import Gvns
-
 from construction_heuristics.greedy_nearest_neighbor_initialization import Greedy_Nearest_Neighbor_Initialization
 from construction_heuristics.backtracking_search import Backtracking_Search
 from construction_heuristics.combination_of_heuristics import Combination_Of_Heuristics
@@ -32,6 +27,11 @@ from neighborhoods.add_hotel import Add_Hotel
 from neighborhoods.exchange_hotel import Exchange_Hotel
 from neighborhoods.move_hotel import Move_Hotel
 
+from search_algorithms.local_search import Local_Search, Step_Function_Type
+from search_algorithms.vnd import Vnd
+from search_algorithms.grasp import Grasp
+from search_algorithms.gvns import Gvns
+from search_algorithms.ant_colony_optimization import Ant_Colony_Optimization
 from search_algorithms.ga.genetic_algorithm import Genetic_Algorithm
 from search_algorithms.ga.fitness_function import Fitness_Function
 from search_algorithms.ga.constant_weights import Constant_Weights
@@ -71,12 +71,13 @@ class Start_PCTSPHS:
         self.initialize_vnd_parser(subparsers)
         self.initialize_gvns_parser(subparsers)
         self.initialize_ga_parser(subparsers)
+        self.initialize_aco_parser(subparsers)
 
         
         args = parser.parse_args()
 
         if not args.subparser_name:
-            print("You must specify which algorithm you want to use, by adding one of the following choices (the integer or name, both work): {0=construction,1=rand-construction,2=local-search,3=GRASP,4=VND,5=GVNS, 6=GA}. E.g. use: 'start.py 0' for the construction heuristic.")
+            print("You must specify which algorithm you want to use, by adding one of the following choices (the integer or name, both work): {0=construction,1=rand-construction,2=local-search,3=GRASP,4=VND,5=GVNS, 6=GA, 7=ACO}. E.g. use: 'start.py 0' for the construction heuristic.")
             quit()
 
 
@@ -167,6 +168,16 @@ class Start_PCTSPHS:
 
         self.add_instance_arg(ga_1)
         self.add_preload_starting_solutions_from_file_arg(ga_1)
+
+    def initialize_aco_parser(self, subparsers):
+        aco_0 = subparsers.add_parser("aco",help="ACO Search")
+        aco_1 = subparsers.add_parser("7",help="ACO Search")
+
+        self.add_instance_arg(aco_0)
+        self.add_preload_starting_solutions_from_file_arg(aco_0)
+
+        self.add_instance_arg(aco_1)
+        self.add_preload_starting_solutions_from_file_arg(aco_1)
 
 
     def add_neighborhood_arg(self, parser):
@@ -276,6 +287,8 @@ class Start_PCTSPHS:
             self.start_gvns_search(args.preload_starting_solutions_from_path, args.runs)
         elif args.mode == '6' or args.mode == 'GA':
             self.start_ga_search(args.preload_starting_solutions_from_path)
+        elif args.mode == '7' or args.mode == 'ACO':
+            self.start_aco_search(args.preload_starting_solutions_from_path)
 
 
 
@@ -691,6 +704,66 @@ class Start_PCTSPHS:
             result.write_result_metadata_to_file(file_path_to_solutions + "ga", header_line, content_line)
 
             result.get_best_solution().write_solution_to_file(file_path_to_solutions + "ga")
+
+
+    def start_aco_search(self, pre_load):
+
+        if pre_load:
+            pre_load_files = {}
+            for f in os.listdir(pre_load):
+                basename_stem = Path(pre_load + f).stem
+                pre_load_files[basename_stem] = f
+
+        #tournament_k = 5
+        #percentage_replaced = 0.05
+        #saw_policy = Linear_Sequence_Weights(0.1,0.1,1,0.1,0.1,0.1, 10)
+
+        random_k = 5
+        population_size = 25
+        saw_policy = Constant_Weights(2,2,2)
+        iterations = 100
+
+
+        for instance in self._instances:
+
+            instance_base_name = instance.get_basename()
+
+            """
+            if pre_load:
+                solution = self.pre_load_solution_from_path(instance, pre_load, instance_base_name, pre_load_files)
+            else:
+                initialization_procedure = Backtracking_Search(instance)
+                solution = initialization_procedure.create_solution().get_best_solution()
+            """
+            solution = None
+        
+            aco = Ant_Colony_Optimization(instance, random_k)
+            result = aco.start_search(solution, None, None, 100, population_size = population_size, saw_policy = saw_policy, termination_criterion = iterations, compute_distance_analysis = False)
+            
+            print("<<<<<<<<<<<Best for INSTANCE: " + str(instance_base_name) + ">>>>>>>>>>>>>>>")
+            print(result.get_best_solution().get_objective_value())
+            print(result.get_best_solution().slow_objective_values_calculation())
+            print(result.get_best_solution().is_c1_satisfied())
+            print(result.get_best_solution().is_c2_satisfied())
+            print(result.get_best_solution().is_c3_satisfied())
+            print(result.get_trace())
+            print("--------------------------------------------")
+            
+            header_line = ["Instance_Name","Number_Of_Customers","Number_Of_Hotels","Objective_Value","Sum_of_Trips","Penalties","Hotel_Fees","Max_Trip_Length","Number_Of_Trips","Prize","Time","Trace"]
+
+            solution = result.get_best_solution()
+            instance_name = instance.get_instance_name()
+
+            content_line = [str(instance_name), str(len(instance._customers_list)), str(len(instance._hotels_list)), str(solution._objective_value), str(solution._sum_of_trips), str(solution._penalties), str(solution._hotel_fees), str(solution._max_trip_length), str(len(solution._trips)), str(solution._prize), str(result.get_time()), str(result.get_trace())]
+
+            for key in result.get_additional_params().keys():
+                header_line.append(str(key))
+                content_line.append(str(result.get_additional_params()[key]))
+        
+            result.write_result_metadata_to_file(file_path_to_solutions + "aco", header_line, content_line)
+
+            result.get_best_solution().write_solution_to_file(file_path_to_solutions + "aco")
+
 
 
 
