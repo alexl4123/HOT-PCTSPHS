@@ -698,6 +698,7 @@ class Start_PCTSPHS:
             print(result.get_best_solution().is_c2_satisfied())
             print(result.get_best_solution().is_c3_satisfied())
             print(result.get_trace())
+            print(result.get_best_solution().to_string())
             print("--------------------------------------------")
             
             header_line = ["Instance_Name","Number_Of_Customers","Number_Of_Hotels","Objective_Value","Sum_of_Trips","Penalties","Hotel_Fees","Max_Trip_Length","Number_Of_Trips","Prize","Time","Trace"]
@@ -723,12 +724,12 @@ class Start_PCTSPHS:
 
         arguments = {}
         arguments["saw_policy"] = [Constant_Weights(3,3,3)]
-        arguments["percentage_replaced"] = [0.1,0.5]
-        arguments["population_size"] = [10]
+        arguments["percentage_replaced"] = [0.1]
+        arguments["population_size"] = [2,100]
         arguments["neighborhoods"] = [neighborhoods_round_robin]
         arguments["tournament_k"] = [2]
         arguments["random_k"] = [5]
-        arguments["termination_criterion"] = [10,20]
+        arguments["termination_criterion"] = [1,200]
         
 
 

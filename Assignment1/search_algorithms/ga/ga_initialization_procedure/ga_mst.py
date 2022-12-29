@@ -96,8 +96,8 @@ class GA_MST(GA_Initialization_Procedure):
         solution._trips.pop(0)
         solution._trips.append(trip)
 
-        print(sol)
-        print(solution.to_string())
+        #print(sol)
+        #print(solution.to_string())
 
         solution.update_values_from_slow_calculation()
         solution.compute_fitness_value()

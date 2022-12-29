@@ -24,6 +24,9 @@ class Hyper_Parameter_Tuning:
         instance = parser.load_and_parse_input_file()
         self.instances = [instance]
 
+        self.alpha = 0.05
+        self.iterations_per_alg = 5
+
 
         """
         self.tuning_instances_path = "tsp_instances/01_tuning_instances"
@@ -43,6 +46,7 @@ class Hyper_Parameter_Tuning:
 
     def perform(self, algorithm, args):
 
+        # Generate configurations
         args_lists = {}
     
         for key in args.keys():
@@ -52,7 +56,6 @@ class Hyper_Parameter_Tuning:
             for val in vals:    
                 local = {key : val}
                 args_lists[key].append(local)
-        print(args_lists)
 
         keys = list(args_lists.keys())
         product = args_lists[keys[0]]
@@ -68,7 +71,7 @@ class Hyper_Parameter_Tuning:
             for item in product:
                 i0 = item[0]
                 i1 = item[1]
-                n = i0
+                n = i0.copy()
 
                 i1_keys = list(i1.keys())
                 if len(i1_keys) > 1:
@@ -84,10 +87,20 @@ class Hyper_Parameter_Tuning:
             product = npi
 
 
+        # Perform Racing (F-RACE)
+
         configurations = product
-           
+
         # F-Race: 
-        for i in range(1):
+        for i in range(2):
+            if len(configurations) < 3:
+                # As otherwise Friedman test doesn't work anymore
+                break
+        
+            print(f">>>RACE-ITERATION-{i}")
+            print(f">>>CURRENT-CONFIGURATIONS:{len(configurations)}")
+            print(configurations)
+
             instance_index = random.randint(0, len(self.instances) - 1)
             instance = self.instances[instance_index]
 
@@ -97,35 +110,67 @@ class Hyper_Parameter_Tuning:
                 config = configurations[config_index]
 
                 config_results = []
+
+                print("Cur-Config:")
+                print(config)
     
-                for j in range(2):
+                for j in range(self.iterations_per_alg):
                     alg = algorithm(instance, config["random_k"])
 
                     kwargs = config.copy()
                     del kwargs["random_k"]
                     del kwargs["neighborhoods"]
 
-                    result = alg.start_search(None, None, config["neighborhoods"], 9000,**kwargs) 
+                    result = alg.start_search(None, None, config["neighborhoods"], 9000, output = False, **kwargs) 
+                    sol = result.get_best_solution()
+
+                    print(sol.get_objective_value())
+                    print(sol.slow_objective_values_calculation())
+                    print(sol.get_fitness_value())
+                    print(sol.to_string())
 
                     config_results.append(result.get_best_solution().get_fitness_value())
 
                 results.append(config_results)
 
-                       
+       
  
             stats_result = stats.friedmanchisquare(*[r for r in results])
 
-            data = np.array(results)
-            
-            stats_result_2 = sp.posthoc_nemenyi_friedman(data.T)
-
-
-            print(results)
             print(stats_result)
-            print(stats_result.pvalue)
 
-            print(stats_result_2)
+            if stats_result.pvalue < self.alpha:
+                data = np.array(results) 
+                
+                stats_result_2 = sp.posthoc_nemenyi_friedman(data.T)
+            
+                print(stats_result_2)
 
+                highest_index_avg = -1
+                highest_avg = None
+
+                for index in range(len(results)):
+                    s = results[index]
+                    avg = sum(s)/len(s)
+
+                    if not highest_avg:
+                        highest_avg = avg
+                        highest_index_avg = index
+                    elif avg > highest_avg:
+                        highest_avg = avg
+                        highest_index_avg = index
+
+
+                for index in range(len(results)):
+                    if index == highest_index_avg:
+                        continue
+                    
+                    val = stats_result_2[highest_index_avg][index]
+
+                    if val < self.alpha:
+                        configurations.pop(index)
+                        
+        print(configurations)
 
             
 

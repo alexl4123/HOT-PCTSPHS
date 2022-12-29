@@ -38,7 +38,7 @@ class Construction_Builder(GA_Initialization_Procedure):
             result = ga_insertion.create_solution(random_k = random_k, show_output = show_output, max_runtime = max_runtime)
 
 
-        print(f"Needed time:{result.get_time()}")
+        #print(f"Needed time:{result.get_time()}")
         result = GA_Repair.repair(result.get_best_solution()._instance, result.get_best_solution())
 
         return result

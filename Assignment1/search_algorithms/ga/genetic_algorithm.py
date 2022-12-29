@@ -88,7 +88,8 @@ class Genetic_Algorithm(Algorithm):
 
         counter = 0
         while counter < termination_criterion:
-            print(f"--> Iter:{counter}/{termination_criterion}")
+            if output:
+                print(f"--> Iter:{counter}/{termination_criterion}")
 
             """
             print("<<<<<<<<<<<<")
@@ -134,7 +135,8 @@ class Genetic_Algorithm(Algorithm):
             cur_population = self.replacement(cur_population, mut_population, mut_population_2, new_pop_size, percentage_replaced)
             et_repl = time.time()
 
-            print(f"Timing-analysis:<selection:{et_sel - st_sel}s>;<cx:{et_cx - st_cx}s>;<mut:{et_mut - st_mut}s -- Mut-Name:{neighborhoods[self.neighborhood_position]}>;<repl:{st_repl - et_repl}s>")
+            if output:
+                print(f"Timing-analysis:<selection:{et_sel - st_sel}s>;<cx:{et_cx - st_cx}s>;<mut:{et_mut - st_mut}s -- Mut-Name:{neighborhoods[self.neighborhood_position]}>;<repl:{st_repl - et_repl}s>")
 
             saw_policy.update_weights(counter, cur_population)
 
@@ -160,7 +162,8 @@ class Genetic_Algorithm(Algorithm):
         print(">>>>>>>>>>>")
         """
 
-        print(fitness_trace)
+        if output:
+            print(fitness_trace)
         solution = cur_population[0]
 
 
@@ -241,6 +244,16 @@ class Genetic_Algorithm(Algorithm):
         """
             percentage_replaced in [0,1]
         """
+
+        for individual in cur_population:
+            individual.update_values_from_slow_calculation()
+            individual.compute_fitness_value()
+        for individual in mut_population:
+            individual.update_values_from_slow_calculation()
+            individual.compute_fitness_value()
+        for individual in mut_population_2:
+            individual.update_values_from_slow_calculation()
+            individual.compute_fitness_value()
 
         cur_population = sorted(cur_population, key=lambda individual : individual.get_fitness_value(), reverse = True)
         mut_population = sorted(mut_population, key=lambda individual : individual.get_fitness_value(), reverse = True)

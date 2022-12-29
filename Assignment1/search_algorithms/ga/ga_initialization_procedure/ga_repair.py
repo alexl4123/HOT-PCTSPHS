@@ -50,8 +50,8 @@ class GA_Repair:
                 
 
 
-        print(solution.to_string())
-        print(hotel.get_id())
+        #print(solution.to_string())
+        #print(hotel.get_id())
 
         end_time = time.time()
 
