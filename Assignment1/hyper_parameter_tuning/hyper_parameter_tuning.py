@@ -2,6 +2,9 @@ import os
 import itertools
 import random
 
+from functools import partial
+from multiprocessing import Pool
+
 from scipy import stats
 import scikit_posthocs as sp
 import numpy as np
@@ -11,6 +14,8 @@ from pathlib import Path
 
 
 from framework.input_file_parser import Input_File_Parser
+
+from search_algorithms.ga.ga_solution import GA_Solution
 
 class Hyper_Parameter_Tuning:
 
@@ -116,32 +121,13 @@ class Hyper_Parameter_Tuning:
 
             for config_index in range(len(configurations)):
                 config = configurations[config_index]
-
                 config_results = []
 
-                print("Cur-Config:")
-                print(config)
-    
-                for j in range(self.iterations_per_alg):
-                    alg = algorithm(instance, config["random_k"])
 
-                    kwargs = config.copy()
-                    del kwargs["random_k"]
-                    del kwargs["neighborhoods"]
-
-                    result = alg.start_search(None, None, config["neighborhoods"], 9000, output = False, **kwargs) 
-                    sol = result.get_best_solution()
-
-                    print(sol.get_objective_value())
-                    print(sol.slow_objective_values_calculation())
-                    print(sol.get_fitness_value())
-                    print(sol.to_string())
-
-                    config_results.append(result.get_best_solution().get_fitness_value())
+                with Pool(self.iterations_per_alg + 1) as p:
+                    config_results = p.map(partial(self.pool_function, config = config, algorithm = algorithm, instance = instance), range(self.iterations_per_alg))
 
                 results.append(config_results)
-
-       
  
             stats_result = stats.friedmanchisquare(*[r for r in results])
 
@@ -235,7 +221,75 @@ class Hyper_Parameter_Tuning:
 
         return string
 
+    def pool_function(self, j, config = None, algorithm = None, instance = None):
+        
+        config_results = None
+
+
+        if config["type"] == "algorithm":
+            alg = algorithm(instance, config["random_k"])
+
+            kwargs = config.copy()
+            del kwargs["random_k"]
+            del kwargs["neighborhoods"]
+
+            result = alg.start_search(None, None, config["neighborhoods"], 9000, output = False, **kwargs) 
+            sol = result.get_best_solution()
+
+            print(sol.get_objective_value())
+            print(sol.slow_objective_values_calculation())
+            print(sol.get_fitness_value())
+            print(sol.to_string())
+
+            config_results = (result.get_best_solution().get_fitness_value())
+        elif config["type"] == "initialization":
+
+            saw_policy = config["saw_policy"]
+            termination_criterion = config["termination_criterion"]
+
+            fitness_function = saw_policy.create_appropriate_fitness_function(instance, termination_criterion)
+
+
+            population_size = config["population_size"]
+
+            random_k = config["random_k"]
+
+            cur_results = []
+
+            randomized_procedure = algorithm(instance, fitness_function = fitness_function, alpha = config["alpha"], beta = config["beta"], gamma = config["gamma"], delta = config["delta"])
+
+            iteration_2 = 0
+            while len(cur_results) < population_size:
+                result = randomized_procedure.create_solution(iteration_2, random_k = random_k, show_output = False, max_runtime = 600)
+                if result.get_best_solution():
+                    ga_solution = GA_Solution.from_solution(result.get_best_solution(), fitness_function = fitness_function)
+
+                    cur_results.append(ga_solution.get_fitness_value())
+
+                iteration_2 += 1
+
+            average = sum(cur_results)/len(cur_results)
+
+            config_results = (average)
+
+        return config_results
     
+    def configs_equal(self, prev_configs, configurations):
+
+        equals = True
+
+        for config_0 in configurations:
+
+            found = False
+
+            for config_1 in prev_configs:
+                if config_0 == config_1: #As the objects should have the same reference, this should work
+                    found = True
+                    break
+
+            equals = equals & found
+
+        return equals
 
               
 
