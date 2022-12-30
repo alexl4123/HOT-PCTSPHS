@@ -316,7 +316,7 @@ class Start_PCTSPHS:
             if not args.perform_hyper_parameter_tuning:
                 self.start_aco_search(args.preload_starting_solutions_from_path)
             else:
-                self.start_aco_hpt()
+                self.start_aco_hpt(args.path_to_repository)
 
 
     def start_construction_heuristics(self):
@@ -733,25 +733,23 @@ class Start_PCTSPHS:
             result.get_best_solution().write_solution_to_file(file_path_to_solutions + "ga")
 
     def start_ga_init_hpt(self, path_to_repository):
-        print("PAATH")
-        print(path_to_repository)
-        hpt = Hyper_Parameter_Tuning(path_to_repository = path_to_repository, output_path = "ga_init.csv")
+        hpt = Hyper_Parameter_Tuning(path_to_repository = path_to_repository, output_path = "init.csv")
 
         arguments = {}
         arguments["type"] = ["initialization"]
         arguments["saw_policy"] = [Constant_Weights(3,3,3)]
         arguments["termination_criterion"] = [0]
-        #arguments["random_k"] = [1,5,10,15]
-        arguments["random_k"] = [5]
-        #arguments["population_size"] = [50,75,100,200]
-        arguments["population_size"] = [100]
+        arguments["random_k"] = [1,5,10,15]
+        #arguments["random_k"] = [5]
+        arguments["population_size"] = [25,50,75,100,200]
+        #arguments["population_size"] = [100]
         arguments["show_output"] = [False]
-        #arguments["alpha"] = [0.5,1,1.5]
-        arguments["alpha"] = [1]
-        #arguments["beta"] = [0,-0.5,-1,0.2]
-        arguments["beta"] = [-0.5]
-        arguments["gamma"] = [0,-0.5,-1,0.2]
-        arguments["delta"] = [0,0.5]
+        arguments["alpha"] = [0.5,1,1.5]
+        #arguments["alpha"] = [1]
+        arguments["beta"] = [0,-0.5,-1,0.2,0.3,-0.2]
+        #arguments["beta"] = [-0.5]
+        arguments["gamma"] = [0,-0.5,-1,0.2,0.3,-0.2]
+        arguments["delta"] = [0,0.5,-0.5]
 
         hpt.perform(Construction_Builder, arguments)
 
@@ -837,13 +835,22 @@ class Start_PCTSPHS:
 
             result.get_best_solution().write_solution_to_file(file_path_to_solutions + "aco")
 
+    def start_aco_hpt(self, path_to_repository):
+        hpt = Hyper_Parameter_Tuning(path_to_repository = path_to_repository, output_path = "aco.csv")
 
-    def start_aco_hpt(self):
-        print("TODO -> ACO - HTP")
-        #hpt = Hyper_Parameter_Tuning()
-        #hpt.perform()
-
-
+        arguments = {}
+        arguments["type"] = ["algorithm"]
+        arguments["saw_policy"] = [Constant_Weights(3,3,3)]
+        arguments["population_size"] = [50,100]
+        arguments["random_k"] = [5]
+        arguments["alpha"] = [1,10,0.10,0.5,2]
+        arguments["beta"] = [1,10,0.10,0.5,2]
+        arguments["rho"] = [0.02,0.07,0.20,0.50]
+        arguments["p"] = [0.5,0.75,0.25] # For min-max-ants
+        arguments["min_max_ant_system"] = [True]
+        arguments["termination_criterion"] = [100,200,400]
+        
+        hpt.perform(Ant_Colony_Optimization, arguments)
 
     def pre_load_solution_from_path(self, instance, pre_load, instance_base_name, pre_load_files):
 

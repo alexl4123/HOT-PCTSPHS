@@ -49,13 +49,11 @@ class Ant_Colony_Optimization(Algorithm):
 
         self._random_k = random_k
 
-        self.alpha = 1
-        self.beta = 1
-        self.rho = 0.02
+    def start_search(self, init_solution, step_function_type, neighborhoods, max_runtime, termination_criterion=3, starting_time = None, output = True, population_size = 10, saw_policy = Constant_Weights(1,1,1), compute_distance_analysis = False, alpha = 1, beta = 1, rho = 0.02, p=0.5, min_max_ant_system = True):
 
+        mmas = min_max_ant_system
 
-    def start_search(self, init_solution, step_function_type, neighborhoods, max_runtime, termination_criterion=3, starting_time = None, output = True, population_size = 10, saw_policy = Constant_Weights(1,1,1), compute_distance_analysis = False):
-        print("START ACO")
+        #print("START ACO")
         additional_params = {}
 
         trace = []
@@ -89,21 +87,21 @@ class Ant_Colony_Optimization(Algorithm):
 
         np_distance_array = np.array(nested_distance_array)
 
-        print(nested_distance_array)
+        #print(nested_distance_array)
 
 
         dimensions = len(total_list)
         max_tour_length = 3 * dimensions
 
+        np_distance_array[np_distance_array == 0] = -1
         eta = (1 / np_distance_array)
-        eta[eta == np.inf] = 0
+        eta[eta == -1] = 0
 
         fitness_function = saw_policy.create_appropriate_fitness_function(self._instance, termination_criterion)
 
         # Min-Max-Ants
-        p = 0.5
-        mmas = True
-        t_max = 10 * (1 / (self.rho)) * (fitness_function.g_max)
+
+        t_max = 10 * (1 / (rho)) * (fitness_function.g_max)
         t_min = (t_max * (1 - p ** (1/max_tour_length))) / (((max_tour_length / 2) - 1) * (p ** (1/max_tour_length)))
 
         t_med = (t_max + t_min) / 2
@@ -123,7 +121,7 @@ class Ant_Colony_Optimization(Algorithm):
             table = (-1) * table
 
 
-            prob_matrix = (tau ** self.alpha) * (eta ** self.beta)  # Calc general prob.-matrix
+            prob_matrix = (tau ** alpha) * (eta ** beta)  # Calc general prob.-matrix
             # Evaluate each ant (O(pop * n))
             for j in range(population_size):  # For each ant
                 table[j, 0] = 0  #
@@ -160,9 +158,12 @@ class Ant_Colony_Optimization(Algorithm):
                         list_representations[j].append(obj)
                     else:
                         break
+
+            """
             print("-------------------")
             print(f"ITER:{counter}")
             print(table)
+            """
 
             population = []
             for lst in list_representations:
@@ -221,7 +222,7 @@ class Ant_Colony_Optimization(Algorithm):
                             delta_tau[n1, n2] += 2 * individual.get_fitness_value()
     
 
-                tau = (1 - self.rho) * tau + delta_tau
+                tau = (1 - rho) * tau + delta_tau
 
                 tau[tau < t_min] = t_min
                 tau[tau > t_max] = t_max
@@ -236,11 +237,12 @@ class Ant_Colony_Optimization(Algorithm):
                         n1, n2 = table[j, k], table[j, k + 1]  
                         delta_tau[n1, n2] += individual.get_fitness_value()
 
-                tau = (1 - self.rho) * tau + delta_tau
+                tau = (1 - rho) * tau + delta_tau
 
 
 
 
+        """
         print("<<<<<<<<<<<<<<>>>>>>>>>>>>>>>")
         print("<<<<<<<<<<<<<<>>>>>>>>>>>>>>>")
         print("<<<<<<<<<<<<<<>>>>>>>>>>>>>>>")
@@ -250,6 +252,7 @@ class Ant_Colony_Optimization(Algorithm):
         print(best_solution.is_c1_satisfied())
         print(best_solution.is_c2_satisfied())
         print(best_solution.is_c3_satisfied())
+        """
 
         duration = time.time() - start_time
 

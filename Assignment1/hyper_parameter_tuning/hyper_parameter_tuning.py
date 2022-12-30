@@ -21,26 +21,24 @@ class Hyper_Parameter_Tuning:
 
 
     def __init__(self, path_to_repository = "./", output_path = "hpt.csv"):
-        
 
+        
         """
         self.tuning_instances_path = path_to_repository + "tsp_instances/00_batch_1_2/00_test.txt"
-
         path = Path(self.tuning_instances_path)
-
         parser = Input_File_Parser(path)
         instance = parser.load_and_parse_input_file()
         self.instances = [instance]
         """
+
         self.output_path = output_path
         self.alpha = 0.05
-        self.iterations_per_alg = 5
+        self.iterations_per_alg = 10
 
 
         self.tuning_instances_path = path_to_repository + "tsp_instances/01_tuning_instances"
 
         self.instances = []
-        
         for f in os.listdir(self.tuning_instances_path):
             path = Path(join(self.tuning_instances_path, f))
 
@@ -48,9 +46,6 @@ class Hyper_Parameter_Tuning:
             parser = Input_File_Parser(path)
             instance = parser.load_and_parse_input_file()
             self.instances.append(instance)
-
-
-            break
 
     def perform(self, algorithm, args):
 
@@ -103,7 +98,7 @@ class Hyper_Parameter_Tuning:
         self.initialize_csv_file(csv_file, configurations)
 
         # F-Race: 
-        max_iterations = 2
+        max_iterations = 40 # Double of the size of the tuning-instances
         iteration = 0
         while iteration < max_iterations:
             if len(configurations) < 3:
@@ -112,7 +107,7 @@ class Hyper_Parameter_Tuning:
         
             print(f">>>RACE-ITERATION-{iteration}")
             print(f">>>CURRENT-CONFIGURATIONS:{len(configurations)}")
-            print(configurations)
+            #print(configurations)
 
 
             instance_index = random.randint(0, len(self.instances) - 1)
@@ -129,6 +124,11 @@ class Hyper_Parameter_Tuning:
 
                 with Pool(self.iterations_per_alg + 1) as p:
                     config_results = p.map(partial(self.pool_function, config = config, algorithm = algorithm, instance = instance), range(self.iterations_per_alg))
+
+                """
+                for j in range(self.iterations_per_alg):
+                    config_results.append(self.pool_function(j, config = config, algorithm = algorithm, instance = instance))
+                """
 
                 results.append(config_results)
  
@@ -158,6 +158,7 @@ class Hyper_Parameter_Tuning:
                         highest_index_avg = index
 
 
+                pop_list = []
                 for index in range(len(results)):
                     if index == highest_index_avg:
                         continue
@@ -165,7 +166,15 @@ class Hyper_Parameter_Tuning:
                     val = stats_result_2[highest_index_avg][index]
 
                     if val < self.alpha:
-                        configurations.pop(index)
+                        pop_list.append(index)
+
+                # Descending
+                pop_list.sort(reverse = True)
+                print(pop_list)
+
+
+                for index in pop_list:
+                    configurations.pop(index)
 
             iteration += 1
 
@@ -232,12 +241,19 @@ class Hyper_Parameter_Tuning:
         if config["type"] == "algorithm":
             alg = algorithm(instance, config["random_k"])
 
-            kwargs = config.copy()
-            del kwargs["random_k"]
-            del kwargs["neighborhoods"]
-            del kwargs["type"]
+            neighborhoods = None
 
-            result = alg.start_search(None, None, config["neighborhoods"], 9000, output = False, **kwargs) 
+            kwargs = config.copy()
+            if "random_k" in kwargs:
+                del kwargs["random_k"]
+            if "neighborhoods" in kwargs:
+                neighborhoods = kwargs["neighborhoods"]
+                del kwargs["neighborhoods"]
+            if "type" in kwargs:
+                del kwargs["type"]
+
+
+            result = alg.start_search(None, None, neighborhoods, 9000, output = False, **kwargs) 
             sol = result.get_best_solution()
 
             config_results = (result.get_best_solution().get_fitness_value())

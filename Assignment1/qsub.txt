@@ -1,0 +1,7 @@
+Starting commands:
+- GA_INIT: qsub -N hpt-test-2 -l h_vmem=2G -r y -e ~/init_ga_00.txt -o ~/init_ga_01.txt ~/HOTWS22/Assignment1/hpt_ga_init.sh
+- GA: qsub -N hpt-test-2 -l h_vmem=2G -r y -e ~/ga_00.txt -o ~/ga_01.txt ~/HOTWS22/Assignment1/hpt_ga.sh
+- ACO: qsub -N hpt-test-2 -l h_vmem=2G -r y -e ~/aco_00.txt -o ~/aco_01.txt ~/HOTWS22/Assignment1/hpt_aco.sh
+
+
+
