@@ -182,7 +182,7 @@ class Hyper_Parameter_Tuning:
 
 
         print(configurations)
-        self.write_configurations_to_file(csv_file, configurations, i)
+        self.write_configurations_to_file(csv_file, configurations, iteration)
         csv_file.close()
 
     def initialize_csv_file(self, f, configurations):
@@ -219,10 +219,19 @@ class Hyper_Parameter_Tuning:
         for index in range(len(keys)):
             key = keys[index]
 
-            if index < len(keys) - 1:
-                string += str(configuration[key]) + ","
+            if key == "saw_policy":
+                string += configuration[key].to_string() 
+            elif key == "neighborhoods":
+                string += "["
+                for neighborhood in configuration[key]:
+                    string += neighborhood.to_string() + ";"
+
+                string += "]"
             else:
-                string += str(configuration[key]) 
+                string += str(configuration[key])
+
+            if index < len(keys) - 1:
+                string += ","
 
         return string
 

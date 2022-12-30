@@ -24,5 +24,6 @@ class Constant_Weights(SAW_Policy):
 
         return ff
 
-
+    def to_string(self):
+        return f"Constant-Weights(Gamma-1:{self._gamma_1};Gamma-2:{self._gamma_2};Gamma-3:{self._gamma_3})"
 

@@ -36,3 +36,6 @@ class Linear_Sequence_Weights(SAW_Policy):
         return ff
 
 
+    def to_string(self):
+        return f"Linear-Sequence-Weights(Gamma-1:{self._gamma_1};Gamma-2:{self._gamma_2};Gamma-3:{self._gamma_3};Alpha-Gamma-1:{self._alpha_gamma_1};Alpha-Gamma-2:{self._alpha_gamma_2};Alpha-Gamma-3:{self._alpha_gamma_3};Sequence-Length:{self._sequence_length})"
+

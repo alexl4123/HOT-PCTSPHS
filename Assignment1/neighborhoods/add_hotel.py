@@ -176,3 +176,7 @@ class Add_Hotel(Neighborhood):
         return worthiness
 
 
+    @classmethod
+    def to_string(cls):
+        return "add_hotel"
+

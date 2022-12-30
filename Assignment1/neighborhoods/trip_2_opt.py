@@ -193,3 +193,9 @@ class Trip_2_Opt(Neighborhood):
         worthiness = Solution_Worthiness(new_objective_value, new_max_trip_length, self._solution.get_number_of_trips(),
                                          self._solution.get_prize(), delta, Delta([]))
         return worthiness
+
+
+    @classmethod
+    def to_string(cls):
+        return "trip_2_opt"
+
