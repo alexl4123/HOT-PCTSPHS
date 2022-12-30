@@ -21,21 +21,23 @@ class Hyper_Parameter_Tuning:
 
 
     def __init__(self, path_to_repository = "./", output_path = "hpt.csv"):
+        
+
+        """
         self.tuning_instances_path = path_to_repository + "tsp_instances/00_batch_1_2/00_test.txt"
 
-        self.output_path = output_path
-
         path = Path(self.tuning_instances_path)
+
         parser = Input_File_Parser(path)
         instance = parser.load_and_parse_input_file()
         self.instances = [instance]
-
+        """
+        self.output_path = output_path
         self.alpha = 0.05
         self.iterations_per_alg = 5
 
 
-        """
-        self.tuning_instances_path = "tsp_instances/01_tuning_instances"
+        self.tuning_instances_path = path_to_repository + "tsp_instances/01_tuning_instances"
 
         self.instances = []
         
@@ -46,9 +48,9 @@ class Hyper_Parameter_Tuning:
             parser = Input_File_Parser(path)
             instance = parser.load_and_parse_input_file()
             self.instances.append(instance)
-            break
 
-        """
+
+            break
 
     def perform(self, algorithm, args):
 
@@ -112,10 +114,11 @@ class Hyper_Parameter_Tuning:
             print(f">>>CURRENT-CONFIGURATIONS:{len(configurations)}")
             print(configurations)
 
-            self.write_configurations_to_file(csv_file, configurations, iteration)
 
             instance_index = random.randint(0, len(self.instances) - 1)
             instance = self.instances[instance_index]
+
+            self.write_configurations_to_file(csv_file, configurations, iteration, instance)
 
             results = []
 
@@ -168,7 +171,7 @@ class Hyper_Parameter_Tuning:
 
 
         print(configurations)
-        self.write_configurations_to_file(csv_file, configurations, iteration)
+        self.write_configurations_to_file(csv_file, configurations, iteration, instance)
         csv_file.close()
 
     def initialize_csv_file(self, f, configurations):
@@ -182,18 +185,18 @@ class Hyper_Parameter_Tuning:
 
             string += str(key) + ","
 
-        string += "iteration\n"
+        string += "iteration,instance\n"
 
         f.write(string)
 
 
-    def write_configurations_to_file(self, f, configurations, iteration):
+    def write_configurations_to_file(self, f, configurations, iteration, instance):
 
         for configuration in configurations:
 
             string = self.configuration_to_csv_row(configuration)
 
-            f.write(string + ',' + str(iteration) + '\n')
+            f.write(string + ',' + str(iteration) + ',' + str(instance.get_instance_name()) + '\n')
 
         
     def configuration_to_csv_row(self, configuration):
@@ -232,14 +235,10 @@ class Hyper_Parameter_Tuning:
             kwargs = config.copy()
             del kwargs["random_k"]
             del kwargs["neighborhoods"]
+            del kwargs["type"]
 
             result = alg.start_search(None, None, config["neighborhoods"], 9000, output = False, **kwargs) 
             sol = result.get_best_solution()
-
-            print(sol.get_objective_value())
-            print(sol.slow_objective_values_calculation())
-            print(sol.get_fitness_value())
-            print(sol.to_string())
 
             config_results = (result.get_best_solution().get_fitness_value())
         elif config["type"] == "initialization":

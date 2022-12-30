@@ -37,6 +37,7 @@ from search_algorithms.ga.fitness_function import Fitness_Function
 from search_algorithms.ga.constant_weights import Constant_Weights
 from search_algorithms.ga.linear_weights import Linear_Weights
 from search_algorithms.ga.linear_sequence_weights import Linear_Sequence_Weights
+from search_algorithms.ga.ga_initialization_procedure.construction_builder import Construction_Builder
 
 from hyper_parameter_tuning.hyper_parameter_tuning import Hyper_Parameter_Tuning
 
@@ -167,12 +168,14 @@ class Start_PCTSPHS:
 
         self.add_instance_arg(ga_0)
         self.add_hpt_arg(ga_0)
+        self.add_hpt_init_arg(ga_0)
         self.add_path_to_repository(ga_0)
 
         self.add_preload_starting_solutions_from_file_arg(ga_0)
 
         self.add_instance_arg(ga_1)
         self.add_hpt_arg(ga_1)
+        self.add_hpt_init_arg(ga_1)
         self.add_path_to_repository(ga_1)
         self.add_preload_starting_solutions_from_file_arg(ga_1)
 
@@ -213,6 +216,9 @@ class Start_PCTSPHS:
 
     def add_hpt_arg(self, parser):
         parser.add_argument('--perform-hyper-parameter-tuning', help='Do you want to run hyper-parameter-tuning on this algorithm?', action='store_true')
+ 
+    def add_hpt_init_arg(self, parser):
+        parser.add_argument('--perform-hyper-parameter-tuning-for-initialization-procedure', help='Do you want to run hyper-parameter-tuning on the initialization-procedure for GA? -> This command overules all others', action='store_true')
  
     def add_path_to_repository(self, parser):
         parser.add_argument('--path-to-repository', help='Specify a path to the repository, if e.g. one executes this on the cluster.', default='./')
@@ -300,7 +306,9 @@ class Start_PCTSPHS:
         elif args.mode == '5' or args.mode == 'GVNS':
             self.start_gvns_search(args.preload_starting_solutions_from_path, args.runs)
         elif args.mode == '6' or args.mode == 'GA':
-            if not args.perform_hyper_parameter_tuning:
+            if args.perform_hyper_parameter_tuning_for_initialization_procedure:
+                self.start_ga_init_hpt(args.path_to_repository)
+            elif not args.perform_hyper_parameter_tuning:
                 self.start_ga_search(args.preload_starting_solutions_from_path)
             else:
                 self.start_ga_hpt(args.path_to_repository)
@@ -724,6 +732,32 @@ class Start_PCTSPHS:
 
             result.get_best_solution().write_solution_to_file(file_path_to_solutions + "ga")
 
+    def start_ga_init_hpt(self, path_to_repository):
+        print("PAATH")
+        print(path_to_repository)
+        hpt = Hyper_Parameter_Tuning(path_to_repository = path_to_repository, output_path = "ga_init.csv")
+
+        arguments = {}
+        arguments["type"] = ["initialization"]
+        arguments["saw_policy"] = [Constant_Weights(3,3,3)]
+        arguments["termination_criterion"] = [0]
+        #arguments["random_k"] = [1,5,10,15]
+        arguments["random_k"] = [5]
+        #arguments["population_size"] = [50,75,100,200]
+        arguments["population_size"] = [100]
+        arguments["show_output"] = [False]
+        #arguments["alpha"] = [0.5,1,1.5]
+        arguments["alpha"] = [1]
+        #arguments["beta"] = [0,-0.5,-1,0.2]
+        arguments["beta"] = [-0.5]
+        arguments["gamma"] = [0,-0.5,-1,0.2]
+        arguments["delta"] = [0,0.5]
+
+        hpt.perform(Construction_Builder, arguments)
+
+
+
+
     def start_ga_hpt(self, path_to_repository):
         hpt = Hyper_Parameter_Tuning(path_to_repository = path_to_repository, output_path = "ga.csv")
 
@@ -731,6 +765,7 @@ class Start_PCTSPHS:
         neighborhoods_round_robin = [Trip_2_Opt, Remove_Customer, Add_Customer, Remove_Hotel, Add_Hotel]
 
         arguments = {}
+        arguments["type"] = ["algorithm"]
         arguments["saw_policy"] = [Constant_Weights(3,3,3)]
         arguments["percentage_replaced"] = [0.1]
         arguments["population_size"] = [2,100]
