@@ -167,11 +167,13 @@ class Start_PCTSPHS:
 
         self.add_instance_arg(ga_0)
         self.add_hpt_arg(ga_0)
+        self.add_path_to_repository(ga_0)
 
         self.add_preload_starting_solutions_from_file_arg(ga_0)
 
         self.add_instance_arg(ga_1)
         self.add_hpt_arg(ga_1)
+        self.add_path_to_repository(ga_1)
         self.add_preload_starting_solutions_from_file_arg(ga_1)
 
     def initialize_aco_parser(self, subparsers):
@@ -180,10 +182,12 @@ class Start_PCTSPHS:
 
         self.add_instance_arg(aco_0)
         self.add_hpt_arg(aco_0)
+        self.add_path_to_repository(aco_0)
         self.add_preload_starting_solutions_from_file_arg(aco_0)
 
         self.add_instance_arg(aco_1)
         self.add_hpt_arg(aco_1)
+        self.add_path_to_repository(aco_1)
         self.add_preload_starting_solutions_from_file_arg(aco_1)
 
     def add_neighborhood_arg(self, parser):
@@ -209,6 +213,10 @@ class Start_PCTSPHS:
 
     def add_hpt_arg(self, parser):
         parser.add_argument('--perform-hyper-parameter-tuning', help='Do you want to run hyper-parameter-tuning on this algorithm?', action='store_true')
+ 
+    def add_path_to_repository(self, parser):
+        parser.add_argument('--path-to-repository', help='Specify a path to the repository, if e.g. one executes this on the cluster.', default='./')
+
        
         
     def algorithm_selector(self, args):
@@ -295,7 +303,7 @@ class Start_PCTSPHS:
             if not args.perform_hyper_parameter_tuning:
                 self.start_ga_search(args.preload_starting_solutions_from_path)
             else:
-                self.start_ga_hpt()
+                self.start_ga_hpt(args.path_to_repository)
         elif args.mode == '7' or args.mode == 'ACO':
             if not args.perform_hyper_parameter_tuning:
                 self.start_aco_search(args.preload_starting_solutions_from_path)
@@ -716,8 +724,8 @@ class Start_PCTSPHS:
 
             result.get_best_solution().write_solution_to_file(file_path_to_solutions + "ga")
 
-    def start_ga_hpt(self):
-        hpt = Hyper_Parameter_Tuning()
+    def start_ga_hpt(self, path_to_repository):
+        hpt = Hyper_Parameter_Tuning(path_to_repository = path_to_repository, output_path = "ga.csv")
 
 
         neighborhoods_round_robin = [Trip_2_Opt, Remove_Customer, Add_Customer, Remove_Hotel, Add_Hotel]
@@ -796,8 +804,9 @@ class Start_PCTSPHS:
 
 
     def start_aco_hpt(self):
-        hpt = Hyper_Parameter_Tuning()
-        hpt.perform()
+        print("TODO -> ACO - HTP")
+        #hpt = Hyper_Parameter_Tuning()
+        #hpt.perform()
 
 
 

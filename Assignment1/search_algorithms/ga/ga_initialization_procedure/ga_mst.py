@@ -3,6 +3,8 @@ import time
 import random
 
 import networkx as nx
+#from networkx.algorithms.approximation import travelling_salesman_problem, christofides
+#import networkx.approximation as naa
 
 from framework.result import Result
 from framework.instance import Edge
@@ -57,6 +59,7 @@ class GA_MST(GA_Initialization_Procedure):
             G.add_edge(edge.get_vertex_a().get_id(), edge.get_vertex_b().get_id(), weight=edge.get_weight())
             G.add_edge(edge.get_vertex_b().get_id(), edge.get_vertex_a().get_id(), weight=edge.get_weight())
 
+        #sol = naa.traveling_salesman_problem(G,cycle = False, method=naa.christofides)
         sol = nx.approximation.traveling_salesman_problem(G,cycle = False, method=nx.approximation.christofides)
 
         trip = []

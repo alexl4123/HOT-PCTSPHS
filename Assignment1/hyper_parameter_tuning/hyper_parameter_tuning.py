@@ -15,9 +15,10 @@ from framework.input_file_parser import Input_File_Parser
 class Hyper_Parameter_Tuning:
 
 
-    def __init__(self):
-        self.tuning_instances_path = "tsp_instances/00_batch_1_2/00_test.txt"
+    def __init__(self, path_to_repository = "./", output_path = "hpt.csv"):
+        self.tuning_instances_path = path_to_repository + "tsp_instances/00_batch_1_2/00_test.txt"
 
+        self.output_path = output_path
 
         path = Path(self.tuning_instances_path)
         parser = Input_File_Parser(path)
@@ -91,15 +92,22 @@ class Hyper_Parameter_Tuning:
 
         configurations = product
 
+        csv_file = open(self.output_path, "w")
+        self.initialize_csv_file(csv_file, configurations)
+
         # F-Race: 
-        for i in range(2):
+        max_iterations = 2
+        iteration = 0
+        while iteration < max_iterations:
             if len(configurations) < 3:
                 # As otherwise Friedman test doesn't work anymore
                 break
         
-            print(f">>>RACE-ITERATION-{i}")
+            print(f">>>RACE-ITERATION-{iteration}")
             print(f">>>CURRENT-CONFIGURATIONS:{len(configurations)}")
             print(configurations)
+
+            self.write_configurations_to_file(csv_file, configurations, iteration)
 
             instance_index = random.randint(0, len(self.instances) - 1)
             instance = self.instances[instance_index]
@@ -169,10 +177,56 @@ class Hyper_Parameter_Tuning:
 
                     if val < self.alpha:
                         configurations.pop(index)
-                        
-        print(configurations)
 
-            
+            iteration += 1
+
+
+        print(configurations)
+        self.write_configurations_to_file(csv_file, configurations, i)
+        csv_file.close()
+
+    def initialize_csv_file(self, f, configurations):
+        configuration = configurations[0]
+
+        keys = list(configuration.keys())
+
+        string = ""
+        for index in range(len(keys)):
+            key = keys[index]
+
+            string += str(key) + ","
+
+        string += "iteration\n"
+
+        f.write(string)
+
+
+    def write_configurations_to_file(self, f, configurations, iteration):
+
+        for configuration in configurations:
+
+            string = self.configuration_to_csv_row(configuration)
+
+            f.write(string + ',' + str(iteration) + '\n')
+
+        
+    def configuration_to_csv_row(self, configuration):
+
+        string = ""
+
+        keys = list(configuration.keys())
+
+        for index in range(len(keys)):
+            key = keys[index]
+
+            if index < len(keys) - 1:
+                string += str(configuration[key]) + ","
+            else:
+                string += str(configuration[key]) 
+
+        return string
+
+    
 
               
 
