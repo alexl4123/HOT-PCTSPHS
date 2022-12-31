@@ -733,22 +733,22 @@ class Start_PCTSPHS:
             result.get_best_solution().write_solution_to_file(file_path_to_solutions + "ga")
 
     def start_ga_init_hpt(self, path_to_repository):
-        hpt = Hyper_Parameter_Tuning(path_to_repository = path_to_repository, output_path = "init.csv")
+        hpt = Hyper_Parameter_Tuning(path_to_repository = path_to_repository, output_path = "m_init.csv")
 
         arguments = {}
         arguments["type"] = ["initialization"]
         arguments["saw_policy"] = [Constant_Weights(3,3,3)]
         arguments["termination_criterion"] = [0]
-        arguments["random_k"] = [1,5,10,15]
+        arguments["random_k"] = [5,10]
         #arguments["random_k"] = [5]
-        arguments["population_size"] = [25,50,75,100,200]
+        arguments["population_size"] = [100]
         #arguments["population_size"] = [100]
         arguments["show_output"] = [False]
-        arguments["alpha"] = [0.5,1,1.5]
+        arguments["alpha"] = [0,0.5,1]
         #arguments["alpha"] = [1]
-        arguments["beta"] = [0,-0.5,-1,0.2,0.3,-0.2]
+        arguments["beta"] = [0,-0.5,-1,0.5]
         #arguments["beta"] = [-0.5]
-        arguments["gamma"] = [0,-0.5,-1,0.2,0.3,-0.2]
+        arguments["gamma"] = [0,-0.5,-1,0.5]
         arguments["delta"] = [0,0.5,-0.5]
 
         hpt.perform(Construction_Builder, arguments)
@@ -843,12 +843,19 @@ class Start_PCTSPHS:
         arguments["saw_policy"] = [Constant_Weights(3,3,3)]
         arguments["population_size"] = [50,100]
         arguments["random_k"] = [5]
-        arguments["alpha"] = [1,10,0.10,0.5,2]
-        arguments["beta"] = [1,10,0.10,0.5,2]
-        arguments["rho"] = [0.02,0.07,0.20,0.50]
+        #arguments["alpha"] = [1,10,0.10,0.5,2]
+        arguments["alpha"] = [1,0.5]
+        #arguments["beta"] = [1,10,0.10,0.5,2]
+        arguments["beta"] = [1,0.5]
+        #arguments["rho"] = [0.02,0.07,0.20,0.50]
+        arguments["rho"] = [0.02,0.06,0.12,0.24]
+        #arguments["p"] = [0.5,0.75,0.25] # For min-max-ants
         arguments["p"] = [0.5,0.75,0.25] # For min-max-ants
+
+        arguments["local_information"] = ["objective_value","distance"] # For different local information
+
         arguments["min_max_ant_system"] = [True]
-        arguments["termination_criterion"] = [100,200,400]
+        arguments["termination_criterion"] = [400]
         
         hpt.perform(Ant_Colony_Optimization, arguments)
 

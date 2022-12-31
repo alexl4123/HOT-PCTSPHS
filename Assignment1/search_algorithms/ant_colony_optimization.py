@@ -49,7 +49,7 @@ class Ant_Colony_Optimization(Algorithm):
 
         self._random_k = random_k
 
-    def start_search(self, init_solution, step_function_type, neighborhoods, max_runtime, termination_criterion=3, starting_time = None, output = True, population_size = 10, saw_policy = Constant_Weights(1,1,1), compute_distance_analysis = False, alpha = 1, beta = 1, rho = 0.02, p=0.5, min_max_ant_system = True):
+    def start_search(self, init_solution, step_function_type, neighborhoods, max_runtime, termination_criterion=3, starting_time = None, output = True, population_size = 10, saw_policy = Constant_Weights(1,1,1), compute_distance_analysis = False, alpha = 1, beta = 1, rho = 0.02, p=0.5, min_max_ant_system = True, local_information = "objective_value"):
 
         mmas = min_max_ant_system
 
@@ -60,38 +60,79 @@ class Ant_Colony_Optimization(Algorithm):
         start_time = time.time()
 
 
-        total_list = []
+        if local_information == "distance":
 
-        hotels_list = self._instance.get_list_of_hotels()
-        customers_list = self._instance.get_list_of_customers()
+            hotels_list = self._instance.get_list_of_hotels()
+            customers_list = self._instance.get_list_of_customers()
 
-        hotels_list.sort(key = lambda h:h.get_id())
-        customers_list.sort(key = lambda c:c.get_id())
+            hotels_list.sort(key = lambda h:h.get_id())
+            customers_list.sort(key = lambda c:c.get_id())
 
-        total_list = hotels_list + customers_list
+            total_list = hotels_list + customers_list
 
-        nested_distance_array = []
+            nested_distance_array = []
+            
+            for index_0 in range(len(total_list)):
+
+                nested_distance_array.append([])
         
-        for index_0 in range(len(total_list)):
+                for index_1 in range(len(total_list)):
 
-            nested_distance_array.append([])
-    
-            for index_1 in range(len(total_list)):
+                    obj_0 = total_list[index_0]
+                    obj_1 = total_list[index_1]
 
-                obj_0 = total_list[index_0]
-                obj_1 = total_list[index_1]
+                    dist = self._instance.get_distance(obj_0, obj_1)
 
-                dist = self._instance.get_distance(obj_0, obj_1)
+                    nested_distance_array[index_0].append(dist)
 
-                nested_distance_array[index_0].append(dist)
+            np_distance_array = np.array(nested_distance_array)
+        elif local_information == "objective_value":
 
-        np_distance_array = np.array(nested_distance_array)
+            hotels_list = self._instance.get_list_of_hotels()
+            customers_list = self._instance.get_list_of_customers()
 
-        #print(nested_distance_array)
+            hotels_list.sort(key = lambda h:h.get_id())
+            customers_list.sort(key = lambda c:c.get_id())
+
+            total_list = hotels_list + customers_list
+
+            nested_distance_array = []
+            
+            for index_0 in range(len(total_list)):
+
+                nested_distance_array.append([])
+        
+                for index_1 in range(len(total_list)):
+
+                    obj_0 = total_list[index_0]
+                    obj_1 = total_list[index_1]
+
+                    dist = self._instance.get_distance(obj_0, obj_1)
+                    if self._instance.obj_is_hotel(obj_1):
+                        _p = obj_1.get_fee()
+                    else:
+                        _p = (-1) * obj_1.get_penalty()
+
+                    nested_distance_array[index_0].append(dist + _p)
+
+            np_distance_array = np.array(nested_distance_array)
+
+            min_val = np.amin(np_distance_array)
+
+
+            if min_val < 0:
+                np_distance_array = np_distance_array - min_val + 1
+
+
+            np.fill_diagonal(np_distance_array, 0)
+            
+        else:
+            print("local_information " + str(local_information) + " not supported by ACO-algorithm!")
+            quit()
 
 
         dimensions = len(total_list)
-        max_tour_length = 3 * dimensions
+        max_tour_length = 4 * dimensions
 
         np_distance_array[np_distance_array == 0] = -1
         eta = (1 / np_distance_array)
@@ -102,7 +143,7 @@ class Ant_Colony_Optimization(Algorithm):
         # Min-Max-Ants
 
         t_max = 10 * (1 / (rho)) * (fitness_function.g_max)
-        t_min = (t_max * (1 - p ** (1/max_tour_length))) / (((max_tour_length / 2) - 1) * (p ** (1/max_tour_length)))
+        t_min = (t_max * (1 - (p ** (1/max_tour_length)))) / (((max_tour_length / 2) - 1) * (p ** (1/max_tour_length)))
 
         t_med = (t_max + t_min) / 2
 
@@ -126,7 +167,7 @@ class Ant_Colony_Optimization(Algorithm):
             for j in range(population_size):  # For each ant
                 table[j, 0] = 0  #
                 allow_list = list(set(range(dimensions)))
-                for k in range(max_tour_length - 1):  # Construct a path
+                for k in range(max_tour_length - 3):  # Construct a path
                     #taboo_set = set(table[j, :k + 1])  
                     #allow_list = list(set(range(dimensions)) - taboo_set)  
 
@@ -135,7 +176,7 @@ class Ant_Colony_Optimization(Algorithm):
                     g = table[j, k]
 
                     prob = prob_matrix[g, allow_list]
-                    prob = prob / prob.sum()  # 概率归一化
+                    prob = prob / prob.sum()  
                     next_point = np.random.choice(allow_list, size=1, p=prob)[0]
                     table[j, k + 1] = next_point
           
@@ -145,6 +186,9 @@ class Ant_Colony_Optimization(Algorithm):
                     if next_point == 0:
                         break
 
+                if (k == max_tour_length - 3 or k == max_tour_length - 4) and (table[j,k] != 0):
+                    # Complete the tour, if the random procedure didn't find it
+                    table[j,k+1] = 0
 
             list_representations = []
             for j in range(population_size):
@@ -152,7 +196,6 @@ class Ant_Colony_Optimization(Algorithm):
                 row = table[j,:]
                 for k in range(len(row)):
                     if table[j,k] != -1:
-                        # TODO -> Get object here, instead of numpy obj
                         val = int(table[j,k])
                         obj = self._instance._get_object_from_index(val)
                         list_representations[j].append(obj)
@@ -215,6 +258,10 @@ class Ant_Colony_Optimization(Algorithm):
                     individual = population[j]
 
                     for k in range(len(individual_lst)):  
+                        if k >= max_tour_length - 1:
+                            # Catch possible out of bounds
+                            continue
+
                         n1, n2 = table[j, k], table[j, k + 1]  
                         delta_tau[n1, n2] += individual.get_fitness_value()
             

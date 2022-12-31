@@ -1,6 +1,9 @@
 import os
 import itertools
 import random
+import time
+
+from datetime import datetime
 
 from functools import partial
 from multiprocessing import Pool
@@ -48,6 +51,7 @@ class Hyper_Parameter_Tuning:
             self.instances.append(instance)
 
     def perform(self, algorithm, args):
+        print("---Starting HPT")
 
         # Generate configurations
         args_lists = {}
@@ -96,6 +100,7 @@ class Hyper_Parameter_Tuning:
 
         csv_file = open(self.output_path, "w")
         self.initialize_csv_file(csv_file, configurations)
+        csv_file.close()
 
         # F-Race: 
         max_iterations = 40 # Double of the size of the tuning-instances
@@ -112,13 +117,20 @@ class Hyper_Parameter_Tuning:
 
             instance_index = random.randint(0, len(self.instances) - 1)
             instance = self.instances[instance_index]
-
-            self.write_configurations_to_file(csv_file, configurations, iteration, instance)
-
+            print(f">>>CURRENT-INSTANCE:{instance.get_instance_name()}")
+            str_time = (datetime.now()).strftime("%Y%m%d:%H:%M:%S")
+            print(f">>>CURRENT-TIME:{str_time}")
             results = []
 
             for config_index in range(len(configurations)):
                 config = configurations[config_index]
+
+                csv_file = open(self.output_path, "a")
+                str_time = (datetime.now()).strftime("%Y%m%d:%H:%M:%S")
+                self.write_configuration_to_file(csv_file, config, iteration, instance, str_time)
+                csv_file.close()
+
+
                 config_results = []
 
 
@@ -180,7 +192,9 @@ class Hyper_Parameter_Tuning:
 
 
         print(configurations)
-        self.write_configurations_to_file(csv_file, configurations, iteration, instance)
+        csv_file = open(self.output_path, "a")
+        str_time = (datetime.now()).strftime("%Y%m%d:%H:%M:%S")
+        self.write_configurations_to_file(csv_file, configurations, iteration, instance, str_time)
         csv_file.close()
 
     def initialize_csv_file(self, f, configurations):
@@ -194,18 +208,25 @@ class Hyper_Parameter_Tuning:
 
             string += str(key) + ","
 
-        string += "iteration,instance\n"
+        string += "iteration,instance,starting-time\n"
 
         f.write(string)
 
 
-    def write_configurations_to_file(self, f, configurations, iteration, instance):
+    def write_configurations_to_file(self, f, configurations, iteration, instance, time):
 
         for configuration in configurations:
 
             string = self.configuration_to_csv_row(configuration)
 
-            f.write(string + ',' + str(iteration) + ',' + str(instance.get_instance_name()) + '\n')
+            f.write(string + ',' + str(iteration) + ',' + str(instance.get_instance_name()) + ',' + str(time) + '\n')
+
+    def write_configuration_to_file(self, f, configuration, iteration, instance, time):
+
+        string = self.configuration_to_csv_row(configuration)
+
+        f.write(string + ',' + str(iteration) + ',' + str(instance.get_instance_name()) + ',' + str(time) + '\n')
+
 
         
     def configuration_to_csv_row(self, configuration):
