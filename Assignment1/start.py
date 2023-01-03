@@ -830,10 +830,12 @@ class Start_PCTSPHS:
         #percentage_replaced = 0.05
         #saw_policy = Linear_Sequence_Weights(0.1,0.1,1,0.1,0.1,0.1, 10)
 
+        """
         random_k = 5
         population_size = 25
         saw_policy = Constant_Weights(2,2,2)
         iterations = 100
+        """
 
 
         for instance in self._instances:
@@ -848,9 +850,22 @@ class Start_PCTSPHS:
                 solution = initialization_procedure.create_solution().get_best_solution()
             """
             solution = None
-        
+ 
+            saw_policy = Constant_Weights(3,3,3)
+            population_size = 50
+            random_k = 5
+            alpha = 1
+            beta = 1
+            rho = 0.24
+            p = 0.25 # For min-max-ants
+
+            local_information = "objective_value" # For different local information
+
+            min_max_ant_system = True
+            termination_criterion = 400
+               
             aco = Ant_Colony_Optimization(instance, random_k)
-            result = aco.start_search(solution, None, None, 100, population_size = population_size, saw_policy = saw_policy, termination_criterion = iterations, compute_distance_analysis = False)
+            result = aco.start_search(solution, None, None, 100, population_size = population_size, saw_policy = saw_policy, termination_criterion = termination_criterion, compute_distance_analysis = False, alpha = alpha, beta = beta, rho = rho, p = p, local_information = local_information, min_max_ant_system = min_max_ant_system)
             
             print("<<<<<<<<<<<Best for INSTANCE: " + str(instance_base_name) + ">>>>>>>>>>>>>>>")
             print(result.get_best_solution().get_objective_value())
