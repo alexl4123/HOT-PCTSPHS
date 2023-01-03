@@ -41,6 +41,7 @@ from search_algorithms.ga.ga_initialization_procedure.construction_builder impor
 
 from hyper_parameter_tuning.hyper_parameter_tuning import Hyper_Parameter_Tuning
 from statistical_test.statistical_test import Statistical_Test
+from benchmark.benchmark import Benchmark
 
 class Start_PCTSPHS:
 
@@ -956,6 +957,27 @@ class Start_PCTSPHS:
     def start_aco_benchmark_population_style(self, path_to_repository):
         print("aco-benchmark")
         print(path_to_repository)
+
+
+        benchmark = Benchmark(path_to_repository, "benchmark_aco.csv")
+
+        arguments = {}
+        arguments["type"] = "algorithm"
+        arguments["saw_policy"] = Constant_Weights(3,3,3)
+        arguments["population_size"] = 50
+        arguments["random_k"] = 5
+        arguments["alpha"] = 1
+        arguments["beta"] = 1
+        arguments["rho"] = 0.24
+        arguments["p"] = 0.25 # For min-max-ants
+
+        arguments["local_information"] = "objective_value" # For different local information
+
+        arguments["min_max_ant_system"] = True
+        arguments["termination_criterion"] = 400
+        
+        benchmark.perform(Ant_Colony_Optimization, arguments, "aco")
+
 
 
     def pre_load_solution_from_path(self, instance, pre_load, instance_base_name, pre_load_files):
