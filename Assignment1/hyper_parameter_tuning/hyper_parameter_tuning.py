@@ -105,8 +105,10 @@ class Hyper_Parameter_Tuning:
         # F-Race: 
         max_iterations = 40 # Double of the size of the tuning-instances
         iteration = 0
+        partial_hpt = True # If partial_hpt is true -> then no racing, just evaluation 
+
         while iteration < max_iterations:
-            if len(configurations) < 3:
+            if len(configurations) < 3 and not partial_hpt: # If partial_hpt -> then no racing
                 # As otherwise Friedman test doesn't work anymore
                 break
         
@@ -145,50 +147,50 @@ class Hyper_Parameter_Tuning:
 
 
 
- 
-            stats_result = stats.friedmanchisquare(*[r for r in results])
+            if not partial_hpt: # If partial_hpt -> then no racing
+                stats_result = stats.friedmanchisquare(*[r for r in results])
 
-            print(stats_result)
+                print(stats_result)
 
-            if stats_result.pvalue < self.alpha:
-                data = np.array(results) 
-                
-                stats_result_2 = sp.posthoc_nemenyi_friedman(data.T)
-            
-                print(stats_result_2)
-
-                highest_index_avg = -1
-                highest_avg = None
-
-                for index in range(len(results)):
-                    s = results[index]
-                    avg = sum(s)/len(s)
-
-                    if not highest_avg:
-                        highest_avg = avg
-                        highest_index_avg = index
-                    elif avg > highest_avg:
-                        highest_avg = avg
-                        highest_index_avg = index
-
-
-                pop_list = []
-                for index in range(len(results)):
-                    if index == highest_index_avg:
-                        continue
+                if stats_result.pvalue < self.alpha:
+                    data = np.array(results) 
                     
-                    val = stats_result_2[highest_index_avg][index]
+                    stats_result_2 = sp.posthoc_nemenyi_friedman(data.T)
+                
+                    print(stats_result_2)
 
-                    if val < self.alpha:
-                        pop_list.append(index)
+                    highest_index_avg = -1
+                    highest_avg = None
 
-                # Descending
-                pop_list.sort(reverse = True)
-                print(pop_list)
+                    for index in range(len(results)):
+                        s = results[index]
+                        avg = sum(s)/len(s)
+
+                        if not highest_avg:
+                            highest_avg = avg
+                            highest_index_avg = index
+                        elif avg > highest_avg:
+                            highest_avg = avg
+                            highest_index_avg = index
 
 
-                for index in pop_list:
-                    configurations.pop(index)
+                    pop_list = []
+                    for index in range(len(results)):
+                        if index == highest_index_avg:
+                            continue
+                        
+                        val = stats_result_2[highest_index_avg][index]
+
+                        if val < self.alpha:
+                            pop_list.append(index)
+
+                    # Descending
+                    pop_list.sort(reverse = True)
+                    print(pop_list)
+
+
+                    for index in pop_list:
+                        configurations.pop(index)
 
             iteration += 1
 

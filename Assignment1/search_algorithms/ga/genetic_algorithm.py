@@ -178,8 +178,8 @@ class Genetic_Algorithm(Algorithm):
         solution = cur_population[0]
 
 
-        """
         duration = time.time() - starting_time
+        """
         if duration > max_runtime:
             logger.info("Runtime limit reached, actual runtime: " + str(max_runtime))
 
@@ -189,7 +189,6 @@ class Genetic_Algorithm(Algorithm):
         if compute_distance_analysis:
             print(dist_average_trace)
             print(dist_median_trace)
-
 
         return Result(solution, trace, duration, additional_params = additional_params)
 

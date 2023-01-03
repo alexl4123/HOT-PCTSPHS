@@ -751,22 +751,18 @@ class Start_PCTSPHS:
         arguments["type"] = ["initialization"]
         arguments["saw_policy"] = [Constant_Weights(3,3,3)]
         arguments["termination_criterion"] = [0]
-        arguments["random_k"] = [5,10]
-        #arguments["random_k"] = [5]
+        #arguments["random_k"] = [5,10]
+        arguments["random_k"] = [5]
         arguments["population_size"] = [100]
-        #arguments["population_size"] = [100]
         arguments["show_output"] = [False]
-        arguments["alpha"] = [0,0.5,1]
-        #arguments["alpha"] = [1]
-        arguments["beta"] = [0,-0.5,-1,0.5]
-        #arguments["beta"] = [-0.5]
-        arguments["gamma"] = [0,-0.5,-1,0.5]
-        arguments["delta"] = [0,0.5,-0.5]
+        #arguments["alpha"] = [0,0.5,1]
+        arguments["alpha"] = [0.5]
+        #arguments["beta"] = [0,-0.5,-1,0.5]
+        arguments["beta"] = [-1]
+        arguments["gamma"] = [-1]
+        arguments["delta"] = [0.5,-0.5]
 
         hpt.perform(Construction_Builder, arguments)
-
-
-
 
     def start_ga_hpt(self, path_to_repository):
         hpt = Hyper_Parameter_Tuning(path_to_repository = path_to_repository, output_path = "m_ga.csv")
@@ -908,7 +904,7 @@ class Start_PCTSPHS:
         print("ACO test-stat-diff")
         print(path_to_repository)
 
-        stat = Statistical_Test(path_to_repository, "aco_stat_test.csv")
+        stat = Statistical_Test(path_to_repository, "stat_aco.csv")
 
         arguments = {}
         arguments["type"] = "algorithm"
