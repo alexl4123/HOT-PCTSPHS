@@ -40,7 +40,7 @@ from search_algorithms.ga.linear_sequence_weights import Linear_Sequence_Weights
 from search_algorithms.ga.ga_initialization_procedure.construction_builder import Construction_Builder
 
 from hyper_parameter_tuning.hyper_parameter_tuning import Hyper_Parameter_Tuning
-
+from statistical_test.statistical_test import Statistical_Test
 
 class Start_PCTSPHS:
 
@@ -169,6 +169,7 @@ class Start_PCTSPHS:
         self.add_instance_arg(ga_0)
         self.add_hpt_arg(ga_0)
         self.add_hpt_init_arg(ga_0)
+        self.add_stat_diff_arg(ga_0)
         self.add_path_to_repository(ga_0)
 
         self.add_preload_starting_solutions_from_file_arg(ga_0)
@@ -177,6 +178,7 @@ class Start_PCTSPHS:
         self.add_hpt_arg(ga_1)
         self.add_hpt_init_arg(ga_1)
         self.add_path_to_repository(ga_1)
+        self.add_stat_diff_arg(ga_1)
         self.add_preload_starting_solutions_from_file_arg(ga_1)
 
     def initialize_aco_parser(self, subparsers):
@@ -186,11 +188,13 @@ class Start_PCTSPHS:
         self.add_instance_arg(aco_0)
         self.add_hpt_arg(aco_0)
         self.add_path_to_repository(aco_0)
+        self.add_stat_diff_arg(aco_0)
         self.add_preload_starting_solutions_from_file_arg(aco_0)
 
         self.add_instance_arg(aco_1)
         self.add_hpt_arg(aco_1)
         self.add_path_to_repository(aco_1)
+        self.add_stat_diff_arg(aco_1)
         self.add_preload_starting_solutions_from_file_arg(aco_1)
 
     def add_neighborhood_arg(self, parser):
@@ -216,6 +220,10 @@ class Start_PCTSPHS:
 
     def add_hpt_arg(self, parser):
         parser.add_argument('--perform-hyper-parameter-tuning', help='Do you want to run hyper-parameter-tuning on this algorithm?', action='store_true')
+
+    def add_stat_diff_arg(self, parser):
+        parser.add_argument('--perform-statistical-test', help='Do you want to run "generate data for statistical tests" on this algorithm?', action='store_true')
+
  
     def add_hpt_init_arg(self, parser):
         parser.add_argument('--perform-hyper-parameter-tuning-for-initialization-procedure', help='Do you want to run hyper-parameter-tuning on the initialization-procedure for GA? -> This command overules all others', action='store_true')
@@ -306,14 +314,18 @@ class Start_PCTSPHS:
         elif args.mode == '5' or args.mode == 'GVNS':
             self.start_gvns_search(args.preload_starting_solutions_from_path, args.runs)
         elif args.mode == '6' or args.mode == 'GA':
-            if args.perform_hyper_parameter_tuning_for_initialization_procedure:
+            if args.perform_statistical_test:
+                self.start_ga_test_statistical_difference(args.path_to_repository)
+            elif args.perform_hyper_parameter_tuning_for_initialization_procedure:
                 self.start_ga_init_hpt(args.path_to_repository)
             elif not args.perform_hyper_parameter_tuning:
                 self.start_ga_search(args.preload_starting_solutions_from_path)
             else:
                 self.start_ga_hpt(args.path_to_repository)
         elif args.mode == '7' or args.mode == 'ACO':
-            if not args.perform_hyper_parameter_tuning:
+            if args.perform_statistical_test:
+                self.start_aco_test_statistical_difference(args.path_to_repository)
+            elif not args.perform_hyper_parameter_tuning:
                 self.start_aco_search(args.preload_starting_solutions_from_path)
             else:
                 self.start_aco_hpt(args.path_to_repository)
@@ -757,24 +769,57 @@ class Start_PCTSPHS:
 
 
     def start_ga_hpt(self, path_to_repository):
-        hpt = Hyper_Parameter_Tuning(path_to_repository = path_to_repository, output_path = "ga.csv")
+        hpt = Hyper_Parameter_Tuning(path_to_repository = path_to_repository, output_path = "m_ga.csv")
 
 
         neighborhoods_round_robin = [Trip_2_Opt, Remove_Customer, Add_Customer, Remove_Hotel, Add_Hotel]
 
+        """
+                                                                  perc._repl                                                                 tournament_k
+        algorithm,Constant-Weights(Gamma-1:3;Gamma-2:3;Gamma-3:3),0.05,100,[trip_2_opt;remove_customer;add_customer;remove_hotel;add_hotel;],50,5,400,0.5,-1.0,-0.5,0.5,8,rand_test_14,20230103:08:09:55
+        algorithm,Constant-Weights(Gamma-1:3;Gamma-2:3;Gamma-3:3),0.05,100,[trip_2_opt;remove_customer;add_customer;remove_hotel;add_hotel;],81,5,400,0.5,-1.0,-0.5,0.5,8,rand_test_14,20230103:08:16:29
+        algorithm,Constant-Weights(Gamma-1:3;Gamma-2:3;Gamma-3:3),0.05,100,[trip_2_opt;remove_customer;add_customer;remove_hotel;add_hotel;],95,5,400,0.5,-1.0,-0.5,0.5,8,rand_test_14,20230103:08:23:03
+        algorithm,Constant-Weights(Gamma-1:3;Gamma-2:3;Gamma-3:3),0.1,100,[trip_2_opt;remove_customer;add_customer;remove_hotel;add_hotel;],27,5,400,0.5,-1.0,-0.5,0.5,8,rand_test_14,20230103:08:29:40
+        algorithm,Constant-Weights(Gamma-1:3;Gamma-2:3;Gamma-3:3),0.1,100,[trip_2_opt;remove_customer;add_customer;remove_hotel;add_hotel;],50,5,400,0.5,-1.0,-0.5,0.5,8,rand_test_14,20230103:08:36:07
+        algorithm,Constant-Weights(Gamma-1:3;Gamma-2:3;Gamma-3:3),0.1,100,[trip_2_opt;remove_customer;add_customer;remove_hotel;add_hotel;],81,5,400,0.5,-1.0,-0.5,0.5,8,rand_test_14,20230103:08:42:38
+        algorithm,Constant-Weights(Gamma-1:3;Gamma-2:3;Gamma-3:3),0.1,100,[trip_2_opt;remove_customer;add_customer;remove_hotel;add_hotel;],95,5,400,0.5,-1.0,-0.5,0.5,8,rand_test_14,20230103:08:49:09
+        algorithm,Constant-Weights(Gamma-1:3;Gamma-2:3;Gamma-3:3),0.2,100,[trip_2_opt;remove_customer;add_customer;remove_hotel;add_hotel;],27,5,400,0.5,-1.0,-0.5,0.5,8,rand_test_14,20230103:08:55:42
+        algorithm,Constant-Weights(Gamma-1:3;Gamma-2:3;Gamma-3:3),0.2,100,[trip_2_opt;remove_customer;add_customer;remove_hotel;add_hotel;],50,5,400,0.5,-1.0,-0.5,0.5,8,rand_test_14,20230103:09:02:16
+        algorithm,Constant-Weights(Gamma-1:3;Gamma-2:3;Gamma-3:3),0.2,100,[trip_2_opt;remove_customer;add_customer;remove_hotel;add_hotel;],81,5,400,0.5,-1.0,-0.5,0.5,8,rand_test_14,20230103:09:08:50
+        algorithm,Constant-Weights(Gamma-1:3;Gamma-2:3;Gamma-3:3),0.2,100,[trip_2_opt;remove_customer;add_customer;remove_hotel;add_hotel;],95,5,400,0.5,-1.0,-0.5,0.5,8,rand_test_14,20230103:09:15:30
+        algorithm,Constant-Weights(Gamma-1:3;Gamma-2:3;Gamma-3:3),0.4,100,[trip_2_opt;remove_customer;add_customer;remove_hotel;add_hotel;],50,5,400,0.5,-1.0,-0.5,0.5,8,rand_test_14,20230103:09:21:59
+        algorithm,Constant-Weights(Gamma-1:3;Gamma-2:3;Gamma-3:3),0.4,100,[trip_2_opt;remove_customer;add_customer;remove_hotel;add_hotel;],81,5,400,0.5,-1.0,-0.5,0.5,8,rand_test_14,20230103:09:28:32
+        algorithm,Constant-Weights(Gamma-1:3;Gamma-2:3;Gamma-3:3),0.4,100,[trip_2_opt;remove_customer;add_customer;remove_hotel;add_hotel;],95,5,400,0.5,-1.0,-0.5,0.5,8,rand_test_14,20230103:09:34:57
+        algorithm,Constant-Weights(Gamma-1:3;Gamma-2:3;Gamma-3:3),0.9,100,[trip_2_opt;remove_customer;add_customer;remove_hotel;add_hotel;],27,5,400,0.5,-1.0,-0.5,0.5,8,rand_test_14,20230103:09:41:29
+        algorithm,Constant-Weights(Gamma-1:3;Gamma-2:3;Gamma-3:3),0.9,100,[trip_2_opt;remove_customer;add_customer;remove_hotel;add_hotel;],50,5,400,0.5,-1.0,-0.5,0.5,8,rand_test_14,20230103:09:47:53
+        algorithm,Constant-Weights(Gamma-1:3;Gamma-2:3;Gamma-3:3),0.9,100,[trip_2_opt;remove_customer;add_customer;remove_hotel;add_hotel;],81,5,400,0.5,-1.0,-0.5,0.5,8,rand_test_14,20230103:09:54:27
+        algorithm,Constant-Weights(Gamma-1:3;Gamma-2:3;Gamma-3:3),0.9,100,[trip_2_opt;remove_customer;add_customer;remove_hotel;add_hotel;],95,5,400,0.5,-1.0,-0.5,0.5,8,rand_test_14,20230103:10:00:57
+        """
+
+
         arguments = {}
         arguments["type"] = ["algorithm"]
         arguments["saw_policy"] = [Constant_Weights(3,3,3)]
-        arguments["percentage_replaced"] = [0.1]
-        arguments["population_size"] = [2,100]
+        #arguments["percentage_replaced"] = [0.05,0.1,0.2,0.4,0.9]
+        arguments["percentage_replaced"] = [0.05,0.1,0.2,0.4,0.9]
+        arguments["population_size"] = [100]
         arguments["neighborhoods"] = [neighborhoods_round_robin]
-        arguments["tournament_k"] = [2]
+        #arguments["tournament_k"] = [3,9,27,50,81,95]
+        arguments["tournament_k"] = [27,50,81,95]
         arguments["random_k"] = [5]
-        arguments["termination_criterion"] = [1,200]
+        arguments["termination_criterion"] = [400]
+        arguments["alpha"] = [0.5]
+        arguments["beta"] = [-1.0]
+        arguments["gamma"] = [-0.5]
+        arguments["delta"] = [0.5]
         
 
 
         hpt.perform(Genetic_Algorithm, arguments)
+
+    def start_ga_test_statistical_difference(self, path_to_repository):
+        print("test-stat-diff")
+        print(path_to_repository)
 
 
     def start_aco_search(self, pre_load):
@@ -855,9 +900,36 @@ class Start_PCTSPHS:
         arguments["local_information"] = ["objective_value","distance"] # For different local information
 
         arguments["min_max_ant_system"] = [True]
-        arguments["termination_criterion"] = [400]
+        arguments["termination_criterion"] = [200]
         
         hpt.perform(Ant_Colony_Optimization, arguments)
+
+    def start_aco_test_statistical_difference(self, path_to_repository):
+        print("ACO test-stat-diff")
+        print(path_to_repository)
+
+        stat = Statistical_Test(path_to_repository, "aco_stat_test.csv")
+
+        arguments = {}
+        arguments["type"] = ["algorithm"]
+        arguments["saw_policy"] = [Constant_Weights(3,3,3)]
+        arguments["population_size"] = [50]
+        arguments["random_k"] = [5]
+        #arguments["alpha"] = [1,10,0.10,0.5,2]
+        arguments["alpha"] = [1]
+        #arguments["beta"] = [1,10,0.10,0.5,2]
+        arguments["beta"] = [1]
+        #arguments["rho"] = [0.02,0.07,0.20,0.50]
+        arguments["rho"] = [0.24]
+        #arguments["p"] = [0.5,0.75,0.25] # For min-max-ants
+        arguments["p"] = [0.25] # For min-max-ants
+
+        arguments["local_information"] = ["objective_value"] # For different local information
+
+        arguments["min_max_ant_system"] = [True]
+        arguments["termination_criterion"] = [400]
+        
+        stat.perform(Ant_Colony_Optimization, arguments)
 
     def pre_load_solution_from_path(self, instance, pre_load, instance_base_name, pre_load_files):
 

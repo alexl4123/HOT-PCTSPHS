@@ -125,17 +125,16 @@ class Hyper_Parameter_Tuning:
             for config_index in range(len(configurations)):
                 config = configurations[config_index]
 
-                csv_file = open(self.output_path, "a")
-                str_time = (datetime.now()).strftime("%Y%m%d:%H:%M:%S")
-                self.write_configuration_to_file(csv_file, config, iteration, instance, str_time)
-                csv_file.close()
-
-
                 config_results = []
 
 
                 with Pool(self.iterations_per_alg + 1) as p:
                     config_results = p.map(partial(self.pool_function, config = config, algorithm = algorithm, instance = instance), range(self.iterations_per_alg))
+
+                csv_file = open(self.output_path, "a")
+                str_time = (datetime.now()).strftime("%Y%m%d:%H:%M:%S")
+                self.write_configuration_to_file(csv_file, config, iteration, instance, str_time,config_results)
+                csv_file.close()
 
                 """
                 for j in range(self.iterations_per_alg):
@@ -143,6 +142,9 @@ class Hyper_Parameter_Tuning:
                 """
 
                 results.append(config_results)
+
+
+
  
             stats_result = stats.friedmanchisquare(*[r for r in results])
 
@@ -219,14 +221,21 @@ class Hyper_Parameter_Tuning:
 
             string = self.configuration_to_csv_row(configuration)
 
-            f.write(string + ',' + str(iteration) + ',' + str(instance.get_instance_name()) + ',' + str(time) + '\n')
+            f.write(string + ',' + str(iteration) + ',' + str(instance.get_instance_name()) + ',' + str(time) + ',' + str([0,0,0,0,0,0,0,0,0,0]) + '\n')
 
-    def write_configuration_to_file(self, f, configuration, iteration, instance, time):
+    def write_configuration_to_file(self, f, configuration, iteration, instance, time, results):
 
         string = self.configuration_to_csv_row(configuration)
 
-        f.write(string + ',' + str(iteration) + ',' + str(instance.get_instance_name()) + ',' + str(time) + '\n')
+        res_string = "["
+        for res_index in range(len(results)):
+            res_string += str(results[res_index])
 
+            if res_index < len(results) - 1:
+                res_string += ";"
+        res_string += "]"
+
+        f.write(string + ',' + str(iteration) + ',' + str(instance.get_instance_name()) + ',' + str(time) + ',' + res_string + '\n')
 
         
     def configuration_to_csv_row(self, configuration):
@@ -272,7 +281,21 @@ class Hyper_Parameter_Tuning:
                 del kwargs["neighborhoods"]
             if "type" in kwargs:
                 del kwargs["type"]
+            if "alpha" in kwargs:
+                alpha = kwargs["alpha"]
+                del kwargs["alpha"]
+            if "beta" in kwargs:
+                beta = kwargs["beta"]
+                del kwargs["beta"]
+            if "gamma" in kwargs:
+                gamma = kwargs["gamma"]
+                del kwargs["gamma"]
+            if "delta" in kwargs:
+                delta = kwargs["delta"]
+                del kwargs["delta"]
 
+            if hasattr(alg, "set_alpha_beta_gamma_delta"):
+                alg.set_alpha_beta_gamma_delta(alpha, beta, gamma, delta)
 
             result = alg.start_search(None, None, neighborhoods, 9000, output = False, **kwargs) 
             sol = result.get_best_solution()
