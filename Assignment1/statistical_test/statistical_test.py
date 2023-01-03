@@ -1,3 +1,25 @@
+import os
+import itertools
+import random
+import time
+
+from datetime import datetime
+
+from functools import partial
+from multiprocessing import Pool
+
+from scipy import stats
+import scikit_posthocs as sp
+import numpy as np
+
+from os.path import isfile, join
+from pathlib import Path
+
+
+from framework.input_file_parser import Input_File_Parser
+
+from search_algorithms.ga.ga_solution import GA_Solution
+
 
 
 class Statistical_Test:
@@ -15,10 +37,10 @@ class Statistical_Test:
 
         self.output_path = output_path
         self.alpha = 0.05
-        self.iterations_per_alg = 10
+        self.iterations_per_alg = 20
 
 
-        self.test_instances_path = path_to_repository + "tsp_instances/02_test_instances_after_"
+        self.test_instances_path = path_to_repository + "tsp_instances/02_test_instances_after_tuning/"
 
         self.instances = []
         for f in os.listdir(self.test_instances_path):
@@ -29,15 +51,15 @@ class Statistical_Test:
             instance = parser.load_and_parse_input_file()
             self.instances.append(instance)
 
-    def perform(self, algorithm, args):
+    def perform(self, algorithm, config):
         print("PERFORM")
-        print(args)
 
         csv_file = open(self.output_path, "w")
-        self.initialize_csv_file(csv_file, configurations)
+        self.initialize_csv_file(csv_file, config)
         csv_file.close()
 
 
+        iteration = 0
         for instance in self.instances:
             print(f">>>INSTANCE-NAME:{instance.get_instance_name()}")
             str_time = (datetime.now()).strftime("%Y%m%d:%H:%M:%S")
@@ -52,6 +74,101 @@ class Statistical_Test:
             self.write_configuration_to_file(csv_file, config, iteration, instance, str_time,results)
             csv_file.close()
 
+            iteration += 1
+
+    def initialize_csv_file(self, f, configuration):
+
+        keys = list(configuration.keys())
+
+        string = ""
+        for index in range(len(keys)):
+            key = keys[index]
+
+            string += str(key) + ","
+
+        string += "iteration,instance,starting-time\n"
+
+        f.write(string)
 
 
+    def write_configuration_to_file(self, f, configuration, iteration, instance, time, results):
+
+        string = self.configuration_to_csv_row(configuration)
+
+        res_string = "["
+        for res_index in range(len(results)):
+            res_string += str(results[res_index])
+
+            if res_index < len(results) - 1:
+                res_string += ";"
+        res_string += "]"
+
+        f.write(string + ',' + str(iteration) + ',' + str(instance.get_instance_name()) + ',' + str(time) + ',' + res_string + '\n')
+
+        
+    def configuration_to_csv_row(self, configuration):
+
+        string = ""
+
+        keys = list(configuration.keys())
+
+        for index in range(len(keys)):
+            key = keys[index]
+
+            if key == "saw_policy":
+                string += configuration[key].to_string() 
+            elif key == "neighborhoods":
+                string += "["
+                for neighborhood in configuration[key]:
+                    string += neighborhood.to_string() + ";"
+
+                string += "]"
+            else:
+                string += str(configuration[key])
+
+            if index < len(keys) - 1:
+                string += ","
+
+        return string
+
+
+    def pool_function(self, j, config = None, algorithm = None, instance = None):
+        
+        config_results = None
+
+        alg = algorithm(instance, config["random_k"])
+
+        neighborhoods = None
+
+        kwargs = config.copy()
+        if "random_k" in kwargs:
+            del kwargs["random_k"]
+        if "neighborhoods" in kwargs:
+            neighborhoods = kwargs["neighborhoods"]
+            del kwargs["neighborhoods"]
+        if "type" in kwargs:
+            del kwargs["type"]
+        if "alpha" in kwargs:
+            alpha = kwargs["alpha"]
+            del kwargs["alpha"]
+        if "beta" in kwargs:
+            beta = kwargs["beta"]
+            del kwargs["beta"]
+        if "gamma" in kwargs:
+            gamma = kwargs["gamma"]
+            del kwargs["gamma"]
+        if "delta" in kwargs:
+            delta = kwargs["delta"]
+            del kwargs["delta"]
+
+        if hasattr(alg, "set_alpha_beta_gamma_delta"):
+            alg.set_alpha_beta_gamma_delta(alpha, beta, gamma, delta)
+
+        result = alg.start_search(None, None, neighborhoods, 9000, output = False, **kwargs) 
+        sol = result.get_best_solution()
+
+        config_results = (result.get_best_solution().get_fitness_value())
+
+        return config_results
+ 
 

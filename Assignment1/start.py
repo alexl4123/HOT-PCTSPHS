@@ -911,23 +911,19 @@ class Start_PCTSPHS:
         stat = Statistical_Test(path_to_repository, "aco_stat_test.csv")
 
         arguments = {}
-        arguments["type"] = ["algorithm"]
-        arguments["saw_policy"] = [Constant_Weights(3,3,3)]
-        arguments["population_size"] = [50]
-        arguments["random_k"] = [5]
-        #arguments["alpha"] = [1,10,0.10,0.5,2]
-        arguments["alpha"] = [1]
-        #arguments["beta"] = [1,10,0.10,0.5,2]
-        arguments["beta"] = [1]
-        #arguments["rho"] = [0.02,0.07,0.20,0.50]
-        arguments["rho"] = [0.24]
-        #arguments["p"] = [0.5,0.75,0.25] # For min-max-ants
-        arguments["p"] = [0.25] # For min-max-ants
+        arguments["type"] = "algorithm"
+        arguments["saw_policy"] = Constant_Weights(3,3,3)
+        arguments["population_size"] = 50
+        arguments["random_k"] = 5
+        arguments["alpha"] = 1
+        arguments["beta"] = 1
+        arguments["rho"] = 0.24
+        arguments["p"] = 0.25 # For min-max-ants
 
-        arguments["local_information"] = ["objective_value"] # For different local information
+        arguments["local_information"] = "objective_value" # For different local information
 
-        arguments["min_max_ant_system"] = [True]
-        arguments["termination_criterion"] = [400]
+        arguments["min_max_ant_system"] = True
+        arguments["termination_criterion"] = 400
         
         stat.perform(Ant_Colony_Optimization, arguments)
 

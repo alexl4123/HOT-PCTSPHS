@@ -47,6 +47,17 @@ class Genetic_Algorithm(Algorithm):
 
         self._random_k = random_k
 
+        self._alpha = 1
+        self._beta = -0.5
+        self._gamma = -0.5
+        self._delta = 0.5
+
+    def set_alpha_beta_gamma_delta(self, alpha, beta, gamma, delta):
+        self._alpha = alpha
+        self._beta = beta
+        self._gamma = gamma
+        self._delta = delta
+
 
     def start_search(self, init_solution, step_function_type, neighborhoods, max_runtime, termination_criterion=3, starting_time = None, output = True, population_size = 10, tournament_k = 3, percentage_replaced = 0.5, saw_policy = Constant_Weights(1,1,1), compute_distance_analysis = False):
 
@@ -167,11 +178,13 @@ class Genetic_Algorithm(Algorithm):
         solution = cur_population[0]
 
 
+        """
         duration = time.time() - starting_time
         if duration > max_runtime:
             logger.info("Runtime limit reached, actual runtime: " + str(max_runtime))
 
             duration = max_runtime
+        """
 
         if compute_distance_analysis:
             print(dist_average_trace)
@@ -187,7 +200,7 @@ class Genetic_Algorithm(Algorithm):
         #randomized_procedure = Greedy_Nearest_Neighbor_Initialization(self._instance, fitness_function = fitness_function)
         #randomized_procedure = Combination_Of_Heuristics(self._instance)
 
-        randomized_procedure = Construction_Builder(self._instance, fitness_function = fitness_function)
+        randomized_procedure = Construction_Builder(self._instance, fitness_function = fitness_function, alpha = self._alpha, beta = self._beta, gamma = self._gamma, delta = self._delta)
 
         iteration = 0
         while len(initial_population) < population_size:
