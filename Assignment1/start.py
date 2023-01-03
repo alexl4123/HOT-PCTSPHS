@@ -90,14 +90,14 @@ class Start_PCTSPHS:
 
 
     def initialize_construction_parser(self, subparsers):
-        construction_0 = subparsers.add_parser("construction",help="construction-heuristic")
+        construction_0 = subparsers.add_parser("CONSTRUCTION",help="construction-heuristic")
         construction_1 = subparsers.add_parser("0",help="construction-heuristic")
 
         self.add_instance_arg(construction_0)
         self.add_instance_arg(construction_1)
 
     def initialize_random_construction_parser(self, subparsers):
-        random_construction_0 = subparsers.add_parser("rand-construction",help="randomized construction-heuristic")
+        random_construction_0 = subparsers.add_parser("RAND-CONSTRUCTION",help="randomized construction-heuristic")
         random_construction_1 = subparsers.add_parser("1",help="randomized construction-heuristic")
 
         self.add_instance_arg(random_construction_0)
@@ -109,7 +109,7 @@ class Start_PCTSPHS:
     
 
     def initialize_local_search_parser(self, subparsers):
-        local_search_0 = subparsers.add_parser("local-search",help="Start Local Search")
+        local_search_0 = subparsers.add_parser("LOCAL-SEARCH",help="Start Local Search")
         local_search_1 = subparsers.add_parser("2",help="Start Local Search")
 
         self.add_instance_arg(local_search_0)
@@ -124,7 +124,7 @@ class Start_PCTSPHS:
 
 
     def initialize_grasp_parser(self, subparsers):
-        grasp_0 = subparsers.add_parser("grasp",help="GRASP Search")
+        grasp_0 = subparsers.add_parser("GRASP",help="GRASP Search")
         grasp_1 = subparsers.add_parser("3",help="GRASP Search")
 
         self.add_instance_arg(grasp_0)
@@ -139,7 +139,7 @@ class Start_PCTSPHS:
 
 
     def initialize_vnd_parser(self, subparsers):
-        vnd_0 = subparsers.add_parser("vnd",help="VND Search")
+        vnd_0 = subparsers.add_parser("VND",help="VND Search")
         vnd_1 = subparsers.add_parser("4",help="VND Search")
 
         self.add_instance_arg(vnd_0)
@@ -150,7 +150,7 @@ class Start_PCTSPHS:
 
    
     def initialize_gvns_parser(self, subparsers):
-        gvns_0 = subparsers.add_parser("gvns",help="GVNS Search")
+        gvns_0 = subparsers.add_parser("GVNS",help="GVNS Search")
         gvns_1 = subparsers.add_parser("5",help="GVNS Search")
 
         self.add_instance_arg(gvns_0)
@@ -163,15 +163,15 @@ class Start_PCTSPHS:
 
 
     def initialize_ga_parser(self, subparsers):
-        ga_0 = subparsers.add_parser("ga",help="GA Search")
+        ga_0 = subparsers.add_parser("GA",help="GA Search")
         ga_1 = subparsers.add_parser("6",help="GA Search")
 
         self.add_instance_arg(ga_0)
         self.add_hpt_arg(ga_0)
         self.add_hpt_init_arg(ga_0)
         self.add_stat_diff_arg(ga_0)
+        self.add_benchmark_population_style(ga_0)
         self.add_path_to_repository(ga_0)
-
         self.add_preload_starting_solutions_from_file_arg(ga_0)
 
         self.add_instance_arg(ga_1)
@@ -179,22 +179,25 @@ class Start_PCTSPHS:
         self.add_hpt_init_arg(ga_1)
         self.add_path_to_repository(ga_1)
         self.add_stat_diff_arg(ga_1)
+        self.add_benchmark_population_style(ga_1)
         self.add_preload_starting_solutions_from_file_arg(ga_1)
 
     def initialize_aco_parser(self, subparsers):
-        aco_0 = subparsers.add_parser("aco",help="ACO Search")
+        aco_0 = subparsers.add_parser("ACO",help="ACO Search")
         aco_1 = subparsers.add_parser("7",help="ACO Search")
 
         self.add_instance_arg(aco_0)
         self.add_hpt_arg(aco_0)
         self.add_path_to_repository(aco_0)
         self.add_stat_diff_arg(aco_0)
+        self.add_benchmark_population_style(aco_0)
         self.add_preload_starting_solutions_from_file_arg(aco_0)
 
         self.add_instance_arg(aco_1)
         self.add_hpt_arg(aco_1)
         self.add_path_to_repository(aco_1)
         self.add_stat_diff_arg(aco_1)
+        self.add_benchmark_population_style(aco_1)
         self.add_preload_starting_solutions_from_file_arg(aco_1)
 
     def add_neighborhood_arg(self, parser):
@@ -223,6 +226,9 @@ class Start_PCTSPHS:
 
     def add_stat_diff_arg(self, parser):
         parser.add_argument('--perform-statistical-test', help='Do you want to run "generate data for statistical tests" on this algorithm?', action='store_true')
+
+    def add_benchmark_population_style(self, parser):
+        parser.add_argument('--perform-benchmark-population-style', help='Do you want to run the benchmark instances and report on the best found data?', action='store_true')
 
  
     def add_hpt_init_arg(self, parser):
@@ -274,13 +280,13 @@ class Start_PCTSPHS:
                     input_file_parser = Input_File_Parser(str_path)
                     self._instances.append(input_file_parser.load_and_parse_input_file())
 
-        if args.mode == '0' or args.mode == 'construction':
+        if args.mode == '0' or args.mode == 'CONSTRUCTION':
             self.start_construction_heuristics()
 
-        elif args.mode == '1' or args.mode == 'rand-construction':
+        elif args.mode == '1' or args.mode == 'RAND-CONSTRUCTION':
             self.start_random_construction_heuristics(args.randomization_factor, args.runs)
 
-        elif args.mode == '2' or args.mode == 'local-search':
+        elif args.mode == '2' or args.mode == 'LOCAL-SEARCH':
 
             if args.step_function == 'first':
                 step_function = Step_Function_Type.FIRST
@@ -314,23 +320,28 @@ class Start_PCTSPHS:
         elif args.mode == '5' or args.mode == 'GVNS':
             self.start_gvns_search(args.preload_starting_solutions_from_path, args.runs)
         elif args.mode == '6' or args.mode == 'GA':
+            if args.perform_benchmark_population_style:
+                self.start_ga_benchmark_population_style(args.path_to_repository)
             if args.perform_statistical_test:
                 self.start_ga_test_statistical_difference(args.path_to_repository)
-            elif args.perform_hyper_parameter_tuning_for_initialization_procedure:
+            if args.perform_hyper_parameter_tuning_for_initialization_procedure:
                 self.start_ga_init_hpt(args.path_to_repository)
-            elif not args.perform_hyper_parameter_tuning:
-                self.start_ga_search(args.preload_starting_solutions_from_path)
-            else:
+            if args.perform_hyper_parameter_tuning:
                 self.start_ga_hpt(args.path_to_repository)
+
+            if not args.perform_hyper_parameter_tuning and not args.perform_hyper_parameter_tuning_for_initialization_procedure and not args.perform_statistical_test and not args.perform_benchmark_population_style:
+                self.start_ga_search(args.preload_starting_solutions_from_path)
         elif args.mode == '7' or args.mode == 'ACO':
+            if args.perform_benchmark_population_style:
+                self.start_aco_benchmark_population_style(args.path_to_repository)
             if args.perform_statistical_test:
                 self.start_aco_test_statistical_difference(args.path_to_repository)
-            elif not args.perform_hyper_parameter_tuning:
-                self.start_aco_search(args.preload_starting_solutions_from_path)
-            else:
+            if args.perform_hyper_parameter_tuning:
                 self.start_aco_hpt(args.path_to_repository)
 
-
+            if not args.perform_hyper_parameter_tuning and not args.perform_statistical_test and not args.perform_benchmark_population_style:
+                self.start_aco_search(args.preload_starting_solutions_from_path)
+            
     def start_construction_heuristics(self):
         print("start-construction")
 
@@ -814,9 +825,12 @@ class Start_PCTSPHS:
         hpt.perform(Genetic_Algorithm, arguments)
 
     def start_ga_test_statistical_difference(self, path_to_repository):
-        print("test-stat-diff")
+        print("ga-test-stat-diff")
         print(path_to_repository)
 
+    def start_ga_benchmark_population_style(self, path_to_repository):
+        print("ga-benchmark-pop-style")
+        print(path_to_repository)
 
     def start_aco_search(self, pre_load):
 
@@ -938,6 +952,11 @@ class Start_PCTSPHS:
         arguments["termination_criterion"] = 400
         
         stat.perform(Ant_Colony_Optimization, arguments)
+
+    def start_aco_benchmark_population_style(self, path_to_repository):
+        print("aco-benchmark")
+        print(path_to_repository)
+
 
     def pre_load_solution_from_path(self, instance, pre_load, instance_base_name, pre_load_files):
 
