@@ -1,0 +1,19 @@
+Namespace(instance='/home1/hot11904657/HOTWS22/Assignment1/tsp_instances/00_batch_1_2/00_test.txt', instance_check_necessary_constraints=False, path_to_repository='/home1/hot11904657/HOTWS22/Assignment1/', perform_benchmark_population_style=False, perform_hyper_parameter_tuning=False, perform_hyper_parameter_tuning_for_initialization_procedure=False, perform_statistical_test=True, preload_starting_solutions_from_path=None, subparser_name='6')
+[INFO][2023-01-04 14:45:32,964] /home1/hot11904657/HOTWS22/Assignment1/tsp_instances/00_batch_1_2/00_test.txt
+ga-test-stat-diff
+/home1/hot11904657/HOTWS22/Assignment1/
+PERFORM
+>>>INSTANCE-NAME:test
+>>>CURRENT-TIME:20230104:14:45:33
+>>>INSTANCE-NAME:rc101_1
+>>>CURRENT-TIME:20230104:14:45:52
+>>>INSTANCE-NAME:pr8_1
+>>>CURRENT-TIME:20230104:14:46:21
+>>>INSTANCE-NAME:pr8_2
+>>>CURRENT-TIME:20230104:14:47:21
+>>>INSTANCE-NAME:berlin52_1
+>>>CURRENT-TIME:20230104:14:54:57
+>>>INSTANCE-NAME:rc101_2
+>>>CURRENT-TIME:20230104:14:56:40
+>>>INSTANCE-NAME:a280_1
+>>>CURRENT-TIME:20230104:15:01:23
