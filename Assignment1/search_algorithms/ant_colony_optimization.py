@@ -149,14 +149,21 @@ class Ant_Colony_Optimization(Algorithm):
 
 
         best_solution = None        
+
         
         #local_inf_mat_2 = np.sum(local_inf_mat)
         #print(local_inf_mat_2)
 
         tau = (np.ones(eta.shape)) + t_med
 
+        new_time = time.time()
+
         counter = 0
         while counter < termination_criterion:
+            print(f">>>COUNTER:{counter}/{termination_criterion}")
+            old_time = new_time
+            new_time = time.time()
+            print(f">>>Last-Iter-Time:{new_time - old_time}")
 
             table = np.ones((population_size, max_tour_length)).astype(np.int)  
             table = (-1) * table
@@ -168,10 +175,6 @@ class Ant_Colony_Optimization(Algorithm):
                 table[j, 0] = 0  #
                 allow_list = list(set(range(dimensions)))
                 for k in range(max_tour_length - 3):  # Construct a path
-                    #taboo_set = set(table[j, :k + 1])  
-                    #allow_list = list(set(range(dimensions)) - taboo_set)  
-
-                    # TODO -> Speedup this code?
 
                     g = table[j, k]
 
@@ -229,6 +232,7 @@ class Ant_Colony_Optimization(Algorithm):
             cur_best = None
             cur_best_j = 0
 
+
             counter_2 = 0
             for individual in population:
                 if not best_solution:
@@ -244,8 +248,12 @@ class Ant_Colony_Optimization(Algorithm):
                     cur_best_j = counter_2
 
                 counter_2 += 1
-
-        
+       
+            if counter % 15 == 0:
+                searched = self.subsequent_vnd([cur_best])
+                if len(searched) > 0 and (not best_solution or searched[0].get_fitness_value() > best_solution.get_fitness_value()):
+                    #print("SET VND BEST!")
+                    best_solution = searched[0].clone()
 
             trace.append(cur_best.get_fitness_value())
             counter += 1
@@ -286,9 +294,6 @@ class Ant_Colony_Optimization(Algorithm):
 
                 tau = (1 - rho) * tau + delta_tau
 
-
-
-
         """
         print("<<<<<<<<<<<<<<>>>>>>>>>>>>>>>")
         print("<<<<<<<<<<<<<<>>>>>>>>>>>>>>>")
@@ -307,6 +312,23 @@ class Ant_Colony_Optimization(Algorithm):
 
 
 
+    def subsequent_vnd(self, population):
+
+        new_pop = []
+
+        for aco_solution in population:
+
+            instance = aco_solution._instance
+
+
+            neighborhoods = [Interchange_Customers(instance),Insert_Customer(instance), Trip_2_Opt(instance), Swap_Served_Unserved_Customer(instance), Remove_Customer(instance), Add_Customer(instance), Exchange_Hotel(instance), Move_Hotel(instance), Add_Hotel(instance), Move_Hotel(instance), Remove_Hotel(instance)]
+
+            vnd = Vnd_GA(instance, 0)
+            result = vnd.start_search(aco_solution.clone(), Step_Function_Type.FIRST, neighborhoods, 90, output = False)
+
+            new_pop.append(result.get_best_solution())
+
+        return new_pop
         
 
 

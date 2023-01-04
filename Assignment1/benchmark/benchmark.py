@@ -37,7 +37,7 @@ class Benchmark:
 
         self.output_path = output_path
         self.alpha = 0.05
-        self.iterations_per_alg = 20
+        self.iterations_per_alg = 7
 
         # Two batches of instances are added below!
 
@@ -49,6 +49,8 @@ class Benchmark:
         for f in os.listdir(self.test_instances_path):
             path = Path(join(self.test_instances_path, f))
 
+            print(f)
+
 
             parser = Input_File_Parser(path)
             instance = parser.load_and_parse_input_file()
@@ -59,6 +61,8 @@ class Benchmark:
         # Add competition batch
         for f in os.listdir(self.test_instances_path):
             path = Path(join(self.test_instances_path, f))
+
+            print(f)
 
 
             parser = Input_File_Parser(path)
@@ -113,7 +117,7 @@ class Benchmark:
 
             string += str(key) + ","
 
-        string += "iteration,instance,starting-time\n"
+        string += "iteration,instance,starting-time,fitness\n"
 
         f.write(string)
 
