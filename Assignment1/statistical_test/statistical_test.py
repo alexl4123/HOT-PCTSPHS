@@ -86,7 +86,7 @@ class Statistical_Test:
 
             string += str(key) + ","
 
-        string += "iteration,instance,starting-time\n"
+        string += "iteration,instance,starting-time,fitness\n"
 
         f.write(string)
 

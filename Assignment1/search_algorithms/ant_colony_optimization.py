@@ -149,6 +149,7 @@ class Ant_Colony_Optimization(Algorithm):
 
 
         best_solution = None        
+        best_feasible_solution = None
 
         
         #local_inf_mat_2 = np.sum(local_inf_mat)
@@ -160,10 +161,10 @@ class Ant_Colony_Optimization(Algorithm):
 
         counter = 0
         while counter < termination_criterion:
-            print(f">>>COUNTER:{counter}/{termination_criterion}")
-            old_time = new_time
-            new_time = time.time()
-            print(f">>>Last-Iter-Time:{new_time - old_time}")
+            #print(f">>>COUNTER:{counter}/{termination_criterion}")
+            #old_time = new_time
+            #new_time = time.time()
+            #print(f">>>Last-Iter-Time:{new_time - old_time}")
 
             table = np.ones((population_size, max_tour_length)).astype(np.int)  
             table = (-1) * table
@@ -255,6 +256,11 @@ class Ant_Colony_Optimization(Algorithm):
                     #print("SET VND BEST!")
                     best_solution = searched[0].clone()
 
+
+                if len(searched) > 0 and (not best_feasible_solution or searched[0].get_fitness_value() < best_feasible_solution.get_objective_value()):
+                    if searched[0].is_c1_satisfied() and  searched[0].is_c2_satisfied() and  searched[0].is_c3_satisfied():
+                        best_feasible_solution = searched[0].clone()
+
             trace.append(cur_best.get_fitness_value())
             counter += 1
 
@@ -307,6 +313,20 @@ class Ant_Colony_Optimization(Algorithm):
         """
 
         duration = time.time() - start_time
+
+        print("<<>><<>>")
+        print("<<>><<>>")
+        print("<<>><<>>")
+        print("BEST-FEASIBLE-SOLUTiON:")
+        if best_feasible_solution:
+            print(best_feasible_solution.get_objective_value())
+            print(best_feasible_solution.get_fitness_value())
+        else:
+            print("NONE")
+        print("<<>><<>>")
+        print("<<>><<>>")
+        print("<<>><<>>")
+
 
         return Result(best_solution, trace, duration, additional_params = additional_params)
 

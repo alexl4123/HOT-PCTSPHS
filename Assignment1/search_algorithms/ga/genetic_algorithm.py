@@ -52,6 +52,8 @@ class Genetic_Algorithm(Algorithm):
         self._gamma = -0.5
         self._delta = 0.5
 
+        self.globally_best = None
+
     def set_alpha_beta_gamma_delta(self, alpha, beta, gamma, delta):
         self._alpha = alpha
         self._beta = beta
@@ -143,7 +145,7 @@ class Genetic_Algorithm(Algorithm):
 
 
             st_repl = time.time()
-            cur_population = self.replacement(cur_population, mut_population, mut_population_2, new_pop_size, percentage_replaced)
+            cur_population = self.replacement(cur_population, mut_population, mut_population_2, new_pop_size, percentage_replaced, counter)
             et_repl = time.time()
 
             if output:
@@ -175,7 +177,8 @@ class Genetic_Algorithm(Algorithm):
 
         if output:
             print(fitness_trace)
-        solution = cur_population[0]
+
+
 
 
         duration = time.time() - starting_time
@@ -186,11 +189,17 @@ class Genetic_Algorithm(Algorithm):
             duration = max_runtime
         """
 
+        found_solution = None
+        if self.globally_best:
+            found_solution = self.globally_best
+        else:
+            found_solution = population[0]
+
         if compute_distance_analysis:
             print(dist_average_trace)
             print(dist_median_trace)
 
-        return Result(solution, trace, duration, additional_params = additional_params)
+        return Result(found_solution, trace, duration, additional_params = additional_params)
 
     def initialize_population(self, population_size, fitness_function):
         initial_population = []
@@ -252,7 +261,7 @@ class Genetic_Algorithm(Algorithm):
                 solution.compute_fitness_value()
         return population
 
-    def replacement(self, cur_population, mut_population, mut_population_2, new_length, percentage_replaced):
+    def replacement(self, cur_population, mut_population, mut_population_2, new_length, percentage_replaced, counter):
         """
             percentage_replaced in [0,1]
         """
@@ -271,7 +280,18 @@ class Genetic_Algorithm(Algorithm):
         mut_population = sorted(mut_population, key=lambda individual : individual.get_fitness_value(), reverse = True)
         mut_population_2 = sorted(mut_population_2, key=lambda individual : individual.get_fitness_value(), reverse = True)
 
-        #mut_population[0] = (self.local_search_test([mut_population[0]]))[0]
+        locally_searched = None
+
+        if counter % 45 == 0:
+            locally_searched = self.subsequent_vnd([cur_population[0]])[0]
+        elif counter % 45 == 15:
+            locally_searched = self.subsequent_vnd([mut_population[0]])[0]
+        elif counter % 45 == 30:
+            locally_searched = self.subsequent_vnd([mut_population_2[0]])[0]
+
+        if locally_searched:
+            if not self.globally_best or locally_searched.get_fitness_value() > self.globally_best.get_fitness_value():
+                self.globally_best = locally_searched.clone()
 
         old_pop_size = int((1 - percentage_replaced) * new_length)
         new_pop_size = int(percentage_replaced * new_length / 2)
@@ -293,7 +313,7 @@ class Genetic_Algorithm(Algorithm):
         
         return new_population
 
-    def local_search_test(self, population):
+    def subsequent_vnd(self, population):
 
         new_pop = []
 
@@ -301,13 +321,7 @@ class Genetic_Algorithm(Algorithm):
 
             instance = ga_solution._instance
 
-            """
-            local_search = Local_Search_GA(instance, 0)
-            neighborhoods = [Trip_2_Opt(instance)]
-            local_search.start_search(ga_solution, Step_Function_Type.FIRST, neighborhoods, 90)
-            """
-
-            neighborhoods = [Interchange_Customers(instance),Insert_Customer(instance), Trip_2_Opt(instance), Swap_Served_Unserved_Customer(instance), Remove_Customer(instance), Add_Customer(instance), Exchange_Hotel(instance), Move_Hotel(instance), Remove_Hotel(instance), Add_Hotel(instance)]
+            neighborhoods = [Interchange_Customers(instance),Insert_Customer(instance), Trip_2_Opt(instance), Swap_Served_Unserved_Customer(instance), Remove_Customer(instance), Add_Customer(instance), Exchange_Hotel(instance), Move_Hotel(instance), Add_Hotel(instance), Move_Hotel(instance), Remove_Hotel(instance)]
 
             vnd = Vnd_GA(instance, 0)
             result = vnd.start_search(ga_solution, Step_Function_Type.FIRST, neighborhoods, 90, output = False)

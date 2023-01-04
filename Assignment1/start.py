@@ -829,9 +829,88 @@ class Start_PCTSPHS:
         print("ga-test-stat-diff")
         print(path_to_repository)
 
+        stat = Statistical_Test(path_to_repository, "stat_ga.csv")
+
+        """
+        arguments = {}
+        arguments["type"] = "algorithm"
+        arguments["saw_policy"] = Constant_Weights(3,3,3)
+        arguments["population_size"] = 50
+        arguments["random_k"] = 5
+        arguments["alpha"] = 1
+        arguments["beta"] = 1
+        arguments["rho"] = 0.24
+        arguments["p"] = 0.25 # For min-max-ants
+
+        arguments["local_information"] = "objective_value" # For different local information
+
+        arguments["min_max_ant_system"] = True
+        arguments["termination_criterion"] = 400
+        """
+        
+        neighborhoods_round_robin = [Trip_2_Opt, Remove_Customer, Add_Customer, Remove_Hotel, Add_Hotel]
+ 
+        arguments = {}
+        arguments["type"] = "algorithm"
+        arguments["saw_policy"] = Constant_Weights(3,3,3)
+        arguments["percentage_replaced"] = 0.2
+        arguments["population_size"] = 100
+        arguments["neighborhoods"] = neighborhoods_round_robin
+        arguments["tournament_k"] = 50
+        arguments["random_k"] = 5
+        arguments["termination_criterion"] = 400
+        arguments["alpha"] = 0.5
+        arguments["beta"] = -1.0
+        arguments["gamma"] = -0.5
+        arguments["delta"] = 0.5
+       
+        stat.perform(Genetic_Algorithm, arguments)
+
     def start_ga_benchmark_population_style(self, path_to_repository):
         print("ga-benchmark-pop-style")
         print(path_to_repository)
+
+        benchmark = Benchmark(path_to_repository, "ga_benchmark.csv")
+
+        """
+        arguments = {}
+        arguments["type"] = "algorithm"
+        arguments["saw_policy"] = Constant_Weights(3,3,3)
+        arguments["population_size"] = 50
+        arguments["random_k"] = 5
+        arguments["alpha"] = 1
+        arguments["beta"] = 1
+        arguments["rho"] = 0.24
+        arguments["p"] = 0.25 # For min-max-ants
+
+        arguments["local_information"] = "objective_value" # For different local information
+
+        arguments["min_max_ant_system"] = True
+        arguments["termination_criterion"] = 400
+        """
+        
+
+
+
+        neighborhoods_round_robin = [Trip_2_Opt, Remove_Customer, Add_Customer, Remove_Hotel, Add_Hotel]
+ 
+        arguments = {}
+        arguments["type"] = "algorithm"
+        arguments["saw_policy"] = Constant_Weights(3,3,3)
+        arguments["percentage_replaced"] = 0.2
+        arguments["population_size"] = 100
+        arguments["neighborhoods"] = neighborhoods_round_robin
+        arguments["tournament_k"] = 50
+        arguments["random_k"] = 5
+        arguments["termination_criterion"] = 400
+        arguments["alpha"] = 0.5
+        arguments["beta"] = -1.0
+        arguments["gamma"] = -0.5
+        arguments["delta"] = 0.5
+
+
+        benchmark.perform(Genetic_Algorithm, arguments, "ga")
+ 
 
     def start_aco_search(self, pre_load):
 
@@ -959,7 +1038,7 @@ class Start_PCTSPHS:
         print(path_to_repository)
 
 
-        benchmark = Benchmark(path_to_repository, "n_benchmark_aco.csv")
+        benchmark = Benchmark(path_to_repository, "n_aco_benchmark.csv")
 
         arguments = {}
         arguments["type"] = "algorithm"
