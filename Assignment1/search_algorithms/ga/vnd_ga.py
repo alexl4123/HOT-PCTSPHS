@@ -48,23 +48,24 @@ class Vnd_GA(Algorithm):
             else: 
                 neighborhood_number += 1
 
-            trace.append(result.get_best_solution().get_objective_value())
-
-
+            if result and result.get_best_solution():
+                trace.append(result.get_best_solution().get_objective_value())
 
             current_time = time.time()
             delta = current_time - starting_time
+            """
             if delta > max_runtime:
                 break
+            """
 
         duration = time.time() - starting_time
+        """ 
         if duration > max_runtime:
             logger.info("Runtime limit reached, actual runtime: " + str(max_runtime))
 
             duration = max_runtime
 
        
-        """ 
         checked_values = solution.slow_objective_values_calculation()
 
         if output:

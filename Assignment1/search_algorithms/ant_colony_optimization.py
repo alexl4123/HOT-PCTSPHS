@@ -149,7 +149,6 @@ class Ant_Colony_Optimization(Algorithm):
 
 
         best_solution = None        
-        best_feasible_solution = None
 
         
         #local_inf_mat_2 = np.sum(local_inf_mat)
@@ -252,14 +251,15 @@ class Ant_Colony_Optimization(Algorithm):
        
             if counter % 15 == 0:
                 searched = self.subsequent_vnd([cur_best])
-                if len(searched) > 0 and (not best_solution or searched[0].get_fitness_value() > best_solution.get_fitness_value()):
-                    #print("SET VND BEST!")
-                    best_solution = searched[0].clone()
 
+                if len(searched) > 0:
+                    searched[0].update_values_from_slow_calculation()
+                    searched[0].compute_fitness_value()
 
-                if len(searched) > 0 and (not best_feasible_solution or searched[0].get_fitness_value() < best_feasible_solution.get_objective_value()):
-                    if searched[0].is_c1_satisfied() and  searched[0].is_c2_satisfied() and  searched[0].is_c3_satisfied():
-                        best_feasible_solution = searched[0].clone()
+                    if not best_solution or searched[0].get_fitness_value() > best_solution.get_fitness_value():
+                        #print("SET VND BEST!")
+                        best_solution = searched[0].clone()
+
 
             trace.append(cur_best.get_fitness_value())
             counter += 1
@@ -313,21 +313,7 @@ class Ant_Colony_Optimization(Algorithm):
         """
 
         duration = time.time() - start_time
-
-        print("<<>><<>>")
-        print("<<>><<>>")
-        print("<<>><<>>")
-        print("BEST-FEASIBLE-SOLUTiON:")
-        if best_feasible_solution:
-            print(best_feasible_solution.get_objective_value())
-            print(best_feasible_solution.get_fitness_value())
-        else:
-            print("NONE")
-        print("<<>><<>>")
-        print("<<>><<>>")
-        print("<<>><<>>")
-
-
+        
         return Result(best_solution, trace, duration, additional_params = additional_params)
 
 
@@ -346,7 +332,8 @@ class Ant_Colony_Optimization(Algorithm):
             vnd = Vnd_GA(instance, 0)
             result = vnd.start_search(aco_solution.clone(), Step_Function_Type.FIRST, neighborhoods, 90, output = False)
 
-            new_pop.append(result.get_best_solution())
+            if result and result.get_best_solution():
+                new_pop.append(result.get_best_solution())
 
         return new_pop
         

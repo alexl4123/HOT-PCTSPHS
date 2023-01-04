@@ -90,7 +90,8 @@ class Benchmark:
 
             writeable_results = []
             for result in results:
-                writeable_results.append(result.get_fitness_value())
+                if result:
+                    writeable_results.append(result.get_fitness_value())
 
             csv_file = open(self.output_path, "a")
             str_time = (datetime.now()).strftime("%Y%m%d:%H:%M:%S")
