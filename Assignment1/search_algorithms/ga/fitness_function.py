@@ -130,7 +130,7 @@ class Fitness_Function:
         t0 = t0 * (self._max_dist * 2 + self._max_fee)
         t0 = t0 + self._sum_penalties
 
-        t1 = self.compute_psi_1(self._max_dist *  len(self._instance.get_list_of_customers()) + 1) * self._max_gamma_1
+        t1 = self.compute_psi_1(self._max_dist *  len(self._instance.get_list_of_customers()) + 1, t0) * self._max_gamma_1
 
         t2 = self.compute_psi_2(2 * self._instance.get_C2(), t0) * self._max_gamma_2
 
@@ -145,12 +145,12 @@ class Fitness_Function:
         return 0
 
 
-    def compute_psi_1(self, maximum_trip_length):
+    def compute_psi_1(self, maximum_trip_length, solution_obj_value):
 
         if maximum_trip_length <= self._instance.get_C1():
             return 0
 
-        t0 = (self._max_fee + 2 * self._max_dist) * (2 * maximum_trip_length / self._instance.get_C1())
+        t0 = 100 * (self._max_fee + 2 * self._max_dist + solution_obj_value) * (100 + (2 * maximum_trip_length / self._instance.get_C1()))
 
         return t0
 
@@ -173,7 +173,7 @@ class Fitness_Function:
         return t0
 
 
-    def compute_fitness(self, solution):
+    def compute_fitness(self, solution, output = False):
         """
             Given a solution it computes the fitness value, basically according to the following function:
             f(i) = g_{max} - [(g(i) + g_{min}) + \gamma_1 \Psi_1(i) + \gamma_2 \Psi_2(i) + \gamma_3 \Psi_3(i)]
@@ -192,7 +192,7 @@ class Fitness_Function:
             Fitness_Function.g_max = solution.get_objective_value()
 
         t0 = solution.get_objective_value() + Fitness_Function.g_min
-        t1 = self._gamma_1 * self.compute_psi_1(solution._max_trip_length)
+        t1 = self._gamma_1 * self.compute_psi_1(solution._max_trip_length, solution.get_objective_value())
         t2 = self._gamma_2 * self.compute_psi_2(solution._trips_size, solution.get_objective_value())
         t3 = self._gamma_3 * self.compute_psi_3(solution._prize)
 
@@ -201,13 +201,12 @@ class Fitness_Function:
 
         t4 = Fitness_Function.g_max - (t0 + t1 + t2 + t3)
 
-        """
-        print("T0::" + str(t0))
-        print("T1::" + str(t1))
-        print("T2::" + str(t2))
-        print("T3::" + str(t3))
-        print("T4::" + str(t4))
-        """
+        if output:
+            print("T0::" + str(t0))
+            print("T1::" + str(t1))
+            print("T2::" + str(t2))
+            print("T3::" + str(t3))
+            print("T4::" + str(t4))
 
 
         return t4
