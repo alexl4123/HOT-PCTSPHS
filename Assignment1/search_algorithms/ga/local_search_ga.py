@@ -41,13 +41,20 @@ class Local_Search_GA(Algorithm):
         if not starting_time:
             starting_time = time.time()
 
+        fitness_function = solution._fitness_function
+        best_fitness = 0
+
         while step < termination_criterion and (last_objective_value != current_objective_value or step_function_type == Step_Function_Type.RANDOM):
             new_worthiness = self._step_function(neighborhood, solution, step_function_type, allow_invalid_solutions = allow_invalid_solutions)
 
             last_objective_value = current_objective_value
             current_objective_value = new_worthiness.get_objective_value()
 
-            if new_worthiness.get_objective_value() < current_best_worthiness.get_objective_value():
+            new_fitness = fitness_function.compute_fitness_2(new_worthiness.get_objective_value()
+, new_worthiness.get_max_trip_duration(), new_worthiness.get_performed_trips(), new_worthiness.get_collected_prizes())
+
+            if new_fitness > best_fitness:
+                best_fitness = new_fitness
                 # If it is better, apply changes
                 solution.change_from_delta(new_worthiness.get_delta())
                 current_best_worthiness = new_worthiness

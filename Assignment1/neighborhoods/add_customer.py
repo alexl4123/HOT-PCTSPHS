@@ -128,7 +128,7 @@ class Add_Customer(Neighborhood):
 
         return worthiness
 
-    def add_customer(self, trip_index, trip_position_index, obj, correct_calculation = False):
+    def add_customer(self, trip_index, trip_position_index, obj, correct_calculation = True):
 
         # Compute necessary operations
         add = Add(obj, trip_index, trip_position_index)
