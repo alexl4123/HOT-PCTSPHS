@@ -1,0 +1,47 @@
+Namespace(instance='/home1/hot11904657/HOTWS22/Assignment1/tsp_instances/00_batch_1_2/00_test.txt', instance_check_necessary_constraints=False, path_to_repository='/home1/hot11904657/HOTWS22/Assignment1/', perform_benchmark_population_style=True, perform_hyper_parameter_tuning=False, perform_hyper_parameter_tuning_for_initialization_procedure=False, perform_statistical_test=False, preload_starting_solutions_from_path=None, subparser_name='6')
+[INFO][2023-01-04 18:52:02,649] /home1/hot11904657/HOTWS22/Assignment1/tsp_instances/00_batch_1_2/00_test.txt
+ga-benchmark-pop-style
+/home1/hot11904657/HOTWS22/Assignment1/
+00_test.txt
+01_rc101_1.txt
+02_pr8_1.txt
+03_eil51_1.txt
+04_berlin52_1.txt
+05_berlin52_2.txt
+06_berlin52_3.txt
+07_rc101_2.txt
+08_rc101_3.txt
+09_pr8_2.txt
+10_gil250_1.txt
+11_gil262_1.txt
+12_a280_1.txt
+00_rand_21.txt
+PERFORM BENCHMARK
+>>>INSTANCE-NAME:test
+>>>CURRENT-TIME:20230104:18:52:04
+>>>INSTANCE-NAME:rc101_1
+>>>CURRENT-TIME:20230104:18:52:19
+>>>INSTANCE-NAME:pr8_1
+>>>CURRENT-TIME:20230104:18:52:35
+>>>INSTANCE-NAME:eil51_1
+>>>CURRENT-TIME:20230104:18:53:07
+>>>INSTANCE-NAME:berlin52_1
+>>>CURRENT-TIME:20230104:18:54:01
+>>>INSTANCE-NAME:berlin52_2
+>>>CURRENT-TIME:20230104:18:55:15
+>>>INSTANCE-NAME:berlin52_3
+>>>CURRENT-TIME:20230104:18:56:36
+>>>INSTANCE-NAME:rc101_2
+>>>CURRENT-TIME:20230104:18:57:47
+>>>INSTANCE-NAME:rc101_3
+>>>CURRENT-TIME:20230104:19:00:59
+>>>INSTANCE-NAME:pr8_2
+>>>CURRENT-TIME:20230104:19:05:18
+>>>INSTANCE-NAME:gil250_1
+>>>CURRENT-TIME:20230104:19:16:00
+>>>INSTANCE-NAME:gil262_1
+>>>CURRENT-TIME:20230104:19:43:33
+>>>INSTANCE-NAME:a280_1
+>>>CURRENT-TIME:20230104:20:49:28
+>>>INSTANCE-NAME:rand_21
+>>>CURRENT-TIME:20230104:22:04:20

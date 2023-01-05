@@ -76,7 +76,7 @@ class Start_PCTSPHS:
         self.initialize_gvns_parser(subparsers)
         self.initialize_ga_parser(subparsers)
         self.initialize_aco_parser(subparsers)
-
+        self.initialize_evaluate_solution_parser(subparsers)
         
         args = parser.parse_args()
 
@@ -201,6 +201,18 @@ class Start_PCTSPHS:
         self.add_benchmark_population_style(aco_1)
         self.add_preload_starting_solutions_from_file_arg(aco_1)
 
+    def initialize_evaluate_solution_parser(self, subparsers):
+        eval_0 = subparsers.add_parser("EVAL", help="Evaluate Solution")
+
+        self.add_must_specify_instance_path(eval_0)
+        self.add_must_specify_starting_solutions(eval_0)
+
+    def add_must_specify_starting_solutions(self, parser):
+        parser.add_argument('solutions', help='Specify a path, where the files are (file name(s) must be exactly as in the instance files!).')
+
+    def add_must_specify_instance_path(self, parser):
+        parser.add_argument('instance',type=str, help='Either choose \'benchmark\' to run all instances or specify the file path for the instance', default=self._default_instance)
+
     def add_neighborhood_arg(self, parser):
         parser.add_argument('--neighborhood-structure',choices=['remove_customer','add_customer','insert_customer','swap_served_unserved_customer','interchange_customers','trip_2_opt','remove_hotel','add_hotel','exchange_hotel','move_hotel'], help='Choose a neighborhood structure for local search.', default='trip_2_opt')
 
@@ -247,7 +259,7 @@ class Start_PCTSPHS:
         args.mode = args.subparser_name
 
 
-        if args.instance != "benchmark":
+        if not args.mode == 'EVAL' and args.instance != "benchmark":
             logger.info(args.instance)
             path = Path(args.instance)
             if not path.is_file():
@@ -265,7 +277,7 @@ class Start_PCTSPHS:
             input_file_parser = Input_File_Parser(args.instance)
             self._instances = [input_file_parser.load_and_parse_input_file()]
 
-        else:
+        elif not args.mode == 'EVAL':
             logger.info("BENCHMARKING")
             benchmark_files = []
             for f in os.listdir(self._benchmark_instances_path):
@@ -280,6 +292,22 @@ class Start_PCTSPHS:
                     str_path = self._benchmark_instances_path + f
                     input_file_parser = Input_File_Parser(str_path)
                     self._instances.append(input_file_parser.load_and_parse_input_file())
+        else:
+            benchmark_files = []
+            instances = args.instance
+            for f in os.listdir(instances):
+                benchmark_files.append(f)
+
+            benchmark_files.sort()
+
+            for f in benchmark_files:
+                path = Path(join(instances, f))
+
+                if path.is_file():
+                    str_path = instances + f
+                    input_file_parser = Input_File_Parser(str_path)
+                    self._instances.append(input_file_parser.load_and_parse_input_file())
+
 
         if args.mode == '0' or args.mode == 'CONSTRUCTION':
             self.start_construction_heuristics()
@@ -342,6 +370,35 @@ class Start_PCTSPHS:
 
             if not args.perform_hyper_parameter_tuning and not args.perform_statistical_test and not args.perform_benchmark_population_style:
                 self.start_aco_search(args.preload_starting_solutions_from_path)
+        elif args.mode == 'EVAL':
+            print('EVALUATE SOLUTION')
+            print(args)
+            self.start_evaluate_solution(args.solutions)
+
+    def start_evaluate_solution(self, pre_load):
+        print("START EVAL")
+
+        pre_load_files = {}
+        for f in os.listdir(pre_load):
+            basename_stem = Path(pre_load + f).stem
+            pre_load_files[basename_stem] = f
+
+        for instance in self._instances:
+
+            instance_base_name = instance.get_basename()
+
+            solution = self.pre_load_solution_from_path(instance, pre_load, instance_base_name, pre_load_files)
+
+
+            print("<<<<<<>>>>>>>")
+            print(instance.get_instance_name())
+            print(solution.get_objective_value())
+            print(solution.is_c1_satisfied())
+            print(solution.is_c2_satisfied())
+            print(solution.is_c3_satisfied())
+            print(solution.to_string())
+            
+ 
             
     def start_construction_heuristics(self):
         print("start-construction")
@@ -599,7 +656,7 @@ class Start_PCTSPHS:
                 solution = initialization_procedure.create_solution().get_best_solution()
 
             #neighborhoods = [Interchange_Customers(instance),Insert_Customer(instance), Trip_2_Opt(instance), Swap_Served_Unserved_Customer(instance), Remove_Customer(instance), Add_Customer(instance), Remove_Hotel(instance), Add_Hotel(instance),Exchange_Hotel(instance), Move_Hotel(instance)]
-            neighborhoods = [Interchange_Customers(instance),Insert_Customer(instance), Trip_2_Opt(instance), Swap_Served_Unserved_Customer(instance), Remove_Customer(instance), Add_Customer(instance),Exchange_Hotel(instance), Move_Hotel(instance), Remove_Hotel(instance), Add_Hotel(instance)]
+            neighborhoods = [Interchange_Customers(instance),Insert_Customer(instance), Trip_2_Opt(instance), Swap_Served_Unserved_Customer(instance), Remove_Customer(instance), Add_Customer(instance),Exchange_Hotel(instance), Move_Hotel(instance), Add_Hotel(instance), Remove_Hotel(instance)]
             
             vnd = Vnd(instance, 0)
             #vnd = Local_Search(instance, 0)
@@ -1074,11 +1131,8 @@ class Start_PCTSPHS:
 
         solution = Solution(instance)
         solution.parse_from_str(solution_str)
-        print("LOADED SOLUTION for: " + str(instance_base_name))
-        print(solution.to_string())
 
         return solution
-
 
     def compute_related_statistics(self, instance, solution):
 
