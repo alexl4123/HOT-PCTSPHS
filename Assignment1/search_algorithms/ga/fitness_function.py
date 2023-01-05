@@ -172,6 +172,37 @@ class Fitness_Function:
 
         return t0
 
+    def compute_fitness_2(self, objective_value, max_trip_length, trips_size, collected_prize, output = False):
+
+        if objective_value < 0:
+            print("<<<<<!!!!!SET-NEW-MIN-VALUE-FOR-FITNESS-FUNCTION!!!!!!>>>>>>>>")
+            Fitness_Function.g_min = objective_value
+
+        if objective_value > Fitness_Function.g_max:
+            print("<<<<<!!!!!SET-NEW-MAX-VALUE-FOR-FITNESS-FUNCTION!!!!!!>>>>>>>>")
+            Fitness_Function.g_max = objective_value
+
+        t0 = objective_value + Fitness_Function.g_min
+        t1 = self._gamma_1 * self.compute_psi_1(max_trip_length, objective_value)
+        t2 = self._gamma_2 * self.compute_psi_2(trips_size, objective_value)
+        t3 = self._gamma_3 * self.compute_psi_3(collected_prize)
+
+        if (t0 + t1 + t2 + t3) > Fitness_Function.g_max:
+            Fitness_Function.g_max = (t0 + t1 + t2 + t3)
+
+        t4 = Fitness_Function.g_max - (t0 + t1 + t2 + t3)
+
+        if output:
+            print("T0::" + str(t0))
+            print("T1::" + str(t1))
+            print("T2::" + str(t2))
+            print("T3::" + str(t3))
+            print("T4::" + str(t4))
+
+
+        return t4
+
+
 
     def compute_fitness(self, solution, output = False):
         """

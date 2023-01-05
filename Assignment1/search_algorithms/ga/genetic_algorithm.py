@@ -288,7 +288,7 @@ class Genetic_Algorithm(Algorithm):
 
         if locally_searched:
             locally_searched.update_values_from_slow_calculation()
-            locally_searched.compute_fitness_value(output=True)
+            locally_searched.compute_fitness_value(output=False)
             if not self.globally_best or locally_searched.get_fitness_value() > self.globally_best.get_fitness_value():
                 self.globally_best = locally_searched.clone()
 
