@@ -175,9 +175,6 @@ class Genetic_Algorithm(Algorithm):
         print(">>>>>>>>>>>")
         """
 
-        if output:
-            print(fitness_trace)
-
 
 
 
@@ -199,7 +196,7 @@ class Genetic_Algorithm(Algorithm):
             print(dist_average_trace)
             print(dist_median_trace)
 
-        return Result(found_solution, trace, duration, additional_params = additional_params)
+        return Result(found_solution, fitness_trace, duration, additional_params = additional_params)
 
     def initialize_population(self, population_size, fitness_function):
         initial_population = []
