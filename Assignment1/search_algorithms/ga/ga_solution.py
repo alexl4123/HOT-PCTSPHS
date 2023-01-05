@@ -48,8 +48,8 @@ class GA_Solution(Solution):
         return ga_solution
 
 
-    def compute_fitness_value(self):
-        self._fitness_value = self._fitness_function.compute_fitness(self)
+    def compute_fitness_value(self, output = False):
+        self._fitness_value = self._fitness_function.compute_fitness(self, output = output)
         return self._fitness_value
         
 

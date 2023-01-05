@@ -1095,7 +1095,7 @@ class Start_PCTSPHS:
         print(path_to_repository)
 
 
-        benchmark = Benchmark(path_to_repository, "n_aco_benchmark.csv")
+        benchmark = Benchmark(path_to_repository, "z_aco_benchmark.csv")
 
         arguments = {}
         arguments["type"] = "algorithm"
@@ -1112,7 +1112,7 @@ class Start_PCTSPHS:
         arguments["min_max_ant_system"] = True
         arguments["termination_criterion"] = 400
         
-        benchmark.perform(Ant_Colony_Optimization, arguments, "n_aco")
+        benchmark.perform(Ant_Colony_Optimization, arguments, "z_aco")
 
 
 

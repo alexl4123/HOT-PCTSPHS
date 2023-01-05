@@ -26,25 +26,24 @@ class Benchmark:
 
     def __init__(self, path_to_repository = "./", output_path = "benchmark.csv"):
 
-        
-        """
-        self.test_instances_path = path_to_repository + "tsp_instances/00_batch_1_2/00_test.txt"
-        path = Path(self.test_instances_path)
-        parser = Input_File_Parser(path)
-        instance = parser.load_and_parse_input_file()
-        self.instances = [instance]
-        """
-
         self.output_path = output_path
         self.alpha = 0.05
         self.iterations_per_alg = 7
 
         # Two batches of instances are added below!
 
-        self.instances = []
+        self.test_instances_path = path_to_repository + "tsp_instances/00_batch_1_2/00_test.txt"
+        path = Path(self.test_instances_path)
+        print(path)
+        parser = Input_File_Parser(path)
+        instance = parser.load_and_parse_input_file()
+        self.instances = [instance]
 
+
+        self.instances = []
         # Add default batch
-        self.test_instances_path = path_to_repository + "tsp_instances/00_batch_1_2/"
+        #self.test_instances_path = path_to_repository + "tsp_instances/00_batch_1_2/"
+        self.test_instances_path = path_to_repository + "tsp_instances/05_failed/"
 
         for f in os.listdir(self.test_instances_path):
             path = Path(join(self.test_instances_path, f))
@@ -56,6 +55,7 @@ class Benchmark:
             instance = parser.load_and_parse_input_file()
             self.instances.append(instance)
 
+
         self.test_instances_path = path_to_repository + "tsp_instances/03_competition_instance/"
 
         # Add competition batch
@@ -63,7 +63,6 @@ class Benchmark:
             path = Path(join(self.test_instances_path, f))
 
             print(f)
-
 
             parser = Input_File_Parser(path)
             instance = parser.load_and_parse_input_file()

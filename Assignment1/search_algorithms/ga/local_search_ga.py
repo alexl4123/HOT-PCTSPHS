@@ -75,13 +75,13 @@ class Local_Search_GA(Algorithm):
 
 
 
-        """
         checked_values = solution.slow_objective_values_calculation()
         if output:
             logger.info("Local search found solution with objective value: " + str(solution.get_objective_value()))
             logger.info("Local search solution verfification with slow calculation: " + str(checked_values))
             logger.info("Trace:" + str(trace))
             logger.info("Trace-2:" + str(trace_2))
+            print(neighborhoods)
 
         if checked_values[0] != solution.get_objective_value():
             logger.error("Local Search: Likely error in delta-evaluation!")
@@ -89,8 +89,8 @@ class Local_Search_GA(Algorithm):
             quit()
         if checked_values[0] != trace[len(trace) - 1] and not allow_invalid_solutions:
             logger.error("Local Search: Likely error in neighborhood-evaluation!")
+            print(neighborhoods)
             quit()
-        """
 
 
         return Result(solution, trace, duration)
