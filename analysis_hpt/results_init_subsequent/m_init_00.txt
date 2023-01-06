@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "/home1/hot11904657/HOTWS22/Assignment1/start.py", line 961, in <module>
+    main.start()
+  File "/home1/hot11904657/HOTWS22/Assignment1/start.py", line 87, in start
+    self.algorithm_selector(args)
+  File "/home1/hot11904657/HOTWS22/Assignment1/start.py", line 320, in algorithm_selector
+    self.start_ga_init_hpt(args.path_to_repository)
+  File "/home1/hot11904657/HOTWS22/Assignment1/start.py", line 765, in start_ga_init_hpt
+    hpt.perform(Construction_Builder, arguments)
+  File "/home1/hot11904657/HOTWS22/Assignment1/hyper_parameter_tuning/hyper_parameter_tuning.py", line 134, in perform
+    config_results = p.map(partial(self.pool_function, config = config, algorithm = algorithm, instance = instance), range(self.iterations_per_alg))
+TypeError: 'bool' object is not callable

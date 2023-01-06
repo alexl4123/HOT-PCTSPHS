@@ -1,0 +1,17 @@
+hot11904657@eowyn:~$ qstat
+job-ID  prior   name       user         state submit/start at     queue                          slots ja-task-ID 
+-----------------------------------------------------------------------------------------------------------------
+1987269 0.07136 m-init-hpt hot11904657  r     12/31/2022 11:56:50 all.q@b410.ac.tuwien.ac.at        11        
+1987271 0.07136 aco-hpt    hot11904657  r     12/31/2022 12:17:10 all.q@b416.ac.tuwien.ac.at        11  
+
+job-ID  prior   name       user         state submit/start at     queue                          slots ja-task-ID 
+-----------------------------------------------------------------------------------------------------------------
+1987946 0.07373 ga-hpt     hot11904657  r     01/02/2023 14:27:10 all.q@b401.ac.tuwien.ac.at        11 
+
+job-ID  prior   name       user         state submit/start at     queue                          slots ja-task-ID 
+-----------------------------------------------------------------------------------------------------------------
+1987946 0.06846 ga-hpt     hot11904657  r     01/02/2023 14:27:10 all.q@b401.ac.tuwien.ac.at        11        
+1988892 0.06846 m-ga-hpt   hot11904657  r     01/03/2023 13:00:20 all.q@b501.ac.tuwien.ac.at        11        
+1988895 0.06846 aco-hpt    hot11904657  r     01/03/2023 13:53:00 all.q@b416.ac.tuwien.ac.at        11        
+1988898 0.06179 aco-benchm hot11904657  r     01/03/2023 18:26:30 all.q@b501.ac.tuwien.ac.at        10        
+1988900 0.04846 m-aco-benc hot11904657  r     01/03/2023 20:36:50 all.q@b415.ac.tuwien.ac.at         8 
