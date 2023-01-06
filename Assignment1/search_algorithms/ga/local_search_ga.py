@@ -82,6 +82,7 @@ class Local_Search_GA(Algorithm):
 
 
 
+        """
         checked_values = solution.slow_objective_values_calculation()
         if output:
             logger.info("Local search found solution with objective value: " + str(solution.get_objective_value()))
@@ -98,6 +99,7 @@ class Local_Search_GA(Algorithm):
             logger.error("Local Search: Likely error in neighborhood-evaluation!")
             print(neighborhoods)
             quit()
+        """
 
 
         return Result(solution, trace, duration)

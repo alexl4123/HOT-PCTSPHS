@@ -159,7 +159,7 @@ class Fitness_Function:
         if number_of_trips <= self._instance.get_C2():
             return 0
 
-        t0 = (self._max_fee + 2 * self._max_dist + solution_obj_value) * (2 * number_of_trips - self._instance.get_C2())
+        t0 = (self._max_fee + 2 * self._max_dist + solution_obj_value) * (100 + (2 * number_of_trips - self._instance.get_C2()))
 
         return t0
 
@@ -168,7 +168,7 @@ class Fitness_Function:
         if collected_prize >= self._instance.get_C3():
             return 0
         
-        t0 = ((self._instance.get_C3() - collected_prize) / self._min_prize) * (self._max_dist * self._max_fee)
+        t0 = ((self._instance.get_C3() - collected_prize) / self._min_prize) * (100 * (self._max_dist * self._max_fee))
 
         return t0
 

@@ -30,6 +30,7 @@ class Benchmark:
         self.alpha = 0.05
         self.iterations_per_alg = 7
 
+        """
         # Two batches of instances are added below!
 
         self.test_instances_path = path_to_repository + "tsp_instances/00_batch_1_2/00_test.txt"
@@ -37,24 +38,23 @@ class Benchmark:
         print(path)
         parser = Input_File_Parser(path)
         instance = parser.load_and_parse_input_file()
-        self.instances = [instance]
 
+        self.instances = [instance]
+        """
 
         self.instances = []
         # Add default batch
-        #self.test_instances_path = path_to_repository + "tsp_instances/00_batch_1_2/"
-        self.test_instances_path = path_to_repository + "tsp_instances/05_failed/"
+        self.test_instances_path = path_to_repository + "tsp_instances/00_batch_1_2/"
+        #self.test_instances_path = path_to_repository + "tsp_instances/05_failed/"
 
         for f in os.listdir(self.test_instances_path):
             path = Path(join(self.test_instances_path, f))
 
             print(f)
 
-
             parser = Input_File_Parser(path)
             instance = parser.load_and_parse_input_file()
             self.instances.append(instance)
-
 
         self.test_instances_path = path_to_repository + "tsp_instances/03_competition_instance/"
 

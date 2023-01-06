@@ -762,7 +762,7 @@ class Start_PCTSPHS:
         neighborhoods_round_robin = [Trip_2_Opt, Remove_Customer, Add_Customer, Remove_Hotel, Add_Hotel]
         alpha = 0.5
         beta = -1
-        gamma = -1
+        gamma = -0.5
         delta = 0.5
 
         #saw_policy = Linear_Sequence_Weights(1.5,1.5,1.5,0.1,0.1,0.1,300)
@@ -785,7 +785,7 @@ class Start_PCTSPHS:
 
             ga = Genetic_Algorithm(instance, random_k)
             ga.set_alpha_beta_gamma_delta(alpha, beta, gamma, delta)
-            result = ga.start_search(solution, None, neighborhoods_round_robin, 10, population_size = population_size, tournament_k = tournament_k, percentage_replaced = percentage_replaced, saw_policy = saw_policy, termination_criterion = iterations, compute_distance_analysis = True)
+            result = ga.start_search(solution, None, neighborhoods_round_robin, 10, population_size = population_size, tournament_k = tournament_k, percentage_replaced = percentage_replaced, saw_policy = saw_policy, termination_criterion = iterations, compute_distance_analysis = False)
             
             print("<<<<<<<<<<<Best for INSTANCE: " + str(instance_base_name) + ">>>>>>>>>>>>>>>")
             print(result.get_best_solution().get_objective_value())
@@ -1094,7 +1094,7 @@ class Start_PCTSPHS:
         print(path_to_repository)
 
 
-        benchmark = Benchmark(path_to_repository, "z_aco_benchmark.csv")
+        benchmark = Benchmark(path_to_repository, "n_aco_benchmark.csv")
 
         arguments = {}
         arguments["type"] = "algorithm"
@@ -1111,7 +1111,7 @@ class Start_PCTSPHS:
         arguments["min_max_ant_system"] = True
         arguments["termination_criterion"] = 400
         
-        benchmark.perform(Ant_Colony_Optimization, arguments, "z_aco")
+        benchmark.perform(Ant_Colony_Optimization, arguments, "n_aco")
 
 
 

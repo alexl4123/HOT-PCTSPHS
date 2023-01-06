@@ -2,6 +2,7 @@
 import logging
 import time
 import random
+import math
 
 import numpy as np
 
@@ -107,11 +108,18 @@ class Ant_Colony_Optimization(Algorithm):
                     obj_0 = total_list[index_0]
                     obj_1 = total_list[index_1]
 
-                    dist = self._instance.get_distance(obj_0, obj_1)
+                    # Weighted as in Init-GA
+                    weight_alpha = 0.5
+                    weight_beta = -1.0
+                    weight_gamma = -0.5
+                    weight_delta = 0.5
+
+                    dist = (weight_alpha) * float(self._instance.get_distance(obj_0, obj_1))
                     if self._instance.obj_is_hotel(obj_1):
-                        _p = obj_1.get_fee()
+                        # Additionally add logarithm to fee, as this could be very, very high (log > 1)
+                        _p = (weight_delta) * math.log(obj_1.get_fee() + 10, 10)
                     else:
-                        _p = (-1) * obj_1.get_penalty()
+                        _p = (weight_beta) * float(obj_1.get_prize()) + (weight_gamma) * float(obj_1.get_penalty())
 
                     nested_distance_array[index_0].append(dist + _p)
 
@@ -119,12 +127,12 @@ class Ant_Colony_Optimization(Algorithm):
 
             min_val = np.amin(np_distance_array)
 
-
             if min_val < 0:
                 np_distance_array = np_distance_array - min_val + 1
 
 
             np.fill_diagonal(np_distance_array, 0)
+
             
         else:
             print("local_information " + str(local_information) + " not supported by ACO-algorithm!")
@@ -136,7 +144,7 @@ class Ant_Colony_Optimization(Algorithm):
 
         np_distance_array[np_distance_array == 0] = -1
         eta = (1 / np_distance_array)
-        eta[eta == -1] = 0
+        np.fill_diagonal(eta, 0)
 
         fitness_function = saw_policy.create_appropriate_fitness_function(self._instance, termination_criterion)
 

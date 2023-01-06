@@ -166,7 +166,7 @@ class Add_Customer(Neighborhood):
                 # Correct recalculation of max trip length, but at reduced speed
                 # Get new max trip length
                 new_max_trip_length = new_cur_trip_length
-                for trip_length_index in range(self._solution._trip_lengths):
+                for trip_length_index in range(len(self._solution._trip_lengths)):
                     if trip_length_index == trip_index:
                         continue
                     elif self._solution._trip_lengths[trip_length_index] > new_max_trip_length:
