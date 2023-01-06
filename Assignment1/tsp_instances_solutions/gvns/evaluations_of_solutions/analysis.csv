@@ -1,3 +1,0 @@
-Instance_Name,Number_Of_Customers,Number_Of_Hotels,Objective_Value,Sum_of_Trips,Penalties,Hotel_Fees,Max_Trip_Length,Number_Of_Trips,Prize,Time,Trace
-test,3,2,1280,480,800,0,480,1,1000,0.06984186172485352,[1280, 1280, 1280, 1280, 1280, 2900, 4040, 6410, 9520, 11700, 14270, 16750]
-test,3,2,1280,480,800,0,480,1,1000,0.07359671592712402,[1280, 1280, 1960, 2640, 3580, 4720, 6500, 7640, 9820, 13580, 15460, 17540]
