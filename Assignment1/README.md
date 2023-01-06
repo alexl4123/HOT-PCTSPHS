@@ -12,7 +12,7 @@ Note that you HAVE TO BE in the top lvl. directory to execute it, otherwise it w
 
 By typing `python start.py --help` you can access the help page, although it is noted, that in the current version (hand-in 1) not all possible commands are shown, but generally the following options exist:
 
-- Mode: Specifies which experiment/algorithm to run (e.g. --mode 5 for GVNS)
+- Specifies which experiment/algorithm to run (e.g. start.py 5 for GVNS)
 
 - Instance: To specify which instance shall be executed (instances are located in `tsp_instances/`), (e.g. `--instance tsp_instances/00_test.txt`  OR `--instance benchmark` to run all instances)
 
@@ -20,7 +20,7 @@ By typing `python start.py --help` you can access the help page, although it is 
 
 ## Where are the files necessary for the hand in?
 
-Inside the `hand_in` folder one can find the best solutions for each instance and each experiment/algorithm and further the data-analysis (Jupyter-Notebooks).
+Inside the `hand_in*` and `analysis*` folders, one can find most of the data, that was generated for the report. 
 
 ## Other general structure of the source files:
 
@@ -55,6 +55,20 @@ After execution the results are printed to this folder.
 ### hand_in
 
 Hand in folder and experiment analysis.
+
+### hyper_parameter_tuning
+
+Contains class for HPT
+
+### statistical test
+
+For the statistical tests
+
+### benchmark
+
+Contains class for final experiments
+
+### 
 
 # Requirements
 
